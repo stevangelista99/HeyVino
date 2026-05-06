@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeyVino — Wine Deals, Curated</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wine: #6B1E2A; --wine-deep: #3D0D14; --wine-light: #9B3A4A;
+    --gold: #C9A84C; --gold-light: #E8D5A0; --cream: #FAF6EF;
+    --stone: #E8E0D4; --ink: #1A0A0E; --muted: #7A6E64; --white: #fff;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: var(--wine-deep); border-bottom: 1px solid rgba(201,168,76,0.25); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+  .nav-logo small { font-style: italic; color: rgba(201,168,76,0.55); font-size: 0.78rem; font-weight: 400; }
+  .nav-links { display: flex; gap: 1.75rem; list-style: none; align-items: center; }
+  .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta { background: var(--gold); color: var(--wine-deep); padding: 7px 18px; border-radius: 2px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: none; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--wine-deep) 0%, var(--wine) 55%, #8B2535 100%); padding: 64px 2rem 72px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-eyebrow { font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.85rem; position: relative; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem,5vw,3.8rem); color: #fff; line-height: 1.1; margin-bottom: 1.1rem; position: relative; }
+  .hero h1 em { color: var(--gold-light); }
+  .hero p { color: rgba(255,255,255,0.68); font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; line-height: 1.7; position: relative; }
+  .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; position: relative; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--gold); display: block; }
+  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* AD BANNER */
+  .ad-banner { background: var(--ink); border-top: 2px solid var(--gold); border-bottom: 2px solid var(--gold); padding: 13px 2rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .ad-label { font-size: 0.63rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; }
+  .ad-content { color: rgba(255,255,255,0.82); font-size: 0.86rem; text-align: center; }
+  .ad-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border-radius: 2px; }
+  .ad-btn:hover { background: var(--gold); color: var(--ink); }
+
+  /* FILTERS */
+  .filter-bar { padding: 1.5rem 2rem 1rem; background: var(--cream); border-bottom: 1px solid var(--stone); }
+  .filter-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .filter-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .chip { padding: 5px 13px; border-radius: 100px; font-size: 0.78rem; cursor: pointer; border: 1.5px solid var(--stone); background: var(--white); color: var(--muted); transition: all 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+  .chip:hover, .chip.active { background: var(--wine); border-color: var(--wine); color: var(--white); }
+  .search-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--stone); border-radius: 4px; padding: 6px 12px; }
+  .search-wrap input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; color: var(--ink); width: 200px; background: transparent; }
+
+  /* TABS */
+  .tabs { display: flex; border-bottom: 2px solid var(--stone); margin-bottom: 1.75rem; overflow-x: auto; }
+  .tab { padding: 11px 18px; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: none; border-bottom: 2.5px solid transparent; margin-bottom: -2px; background: transparent; color: var(--muted); transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .tab:hover { color: var(--wine); }
+  .tab.active { color: var(--wine); border-bottom-color: var(--wine); font-weight: 600; }
+
+  /* LAYOUT */
+  .main { max-width: 1400px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 1fr 270px; gap: 2.5rem; }
+  .section-header { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--stone); }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--wine-deep); }
+  .section-count { font-size: 0.78rem; color: var(--muted); }
+  .section-flag { margin-left: auto; font-size: 1.1rem; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 1.1rem; margin-bottom: 2.5rem; }
+
+  /* CARD */
+  .card { background: var(--white); border: 1px solid var(--stone); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; animation: fadeUp 0.4s ease both; }
+  .card:hover { box-shadow: 0 8px 28px rgba(107,30,42,0.1); transform: translateY(-2px); }
+  .card.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .card-accent { height: 3px; }
+  .accent-red { background: linear-gradient(90deg, var(--wine), var(--wine-light)); }
+  .accent-white { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .accent-rose { background: linear-gradient(90deg, #E8739A, #F4A8C0); }
+  .accent-sparkling { background: linear-gradient(90deg, #3C64A0, #6A8EC8); }
+  .featured-tag { position: absolute; top: 10px; right: 12px; font-size: 0.63rem; color: var(--gold); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .card-body { padding: 1.1rem 1.25rem; }
+  .card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0.7rem; }
+  .winery-avatar { width: 44px; height: 44px; border-radius: 5px; border: 1px solid var(--stone); background: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--wine); font-weight: 700; flex-shrink: 0; }
+  .winery-name { font-weight: 600; font-size: 0.88rem; color: var(--ink); line-height: 1.3; }
+  .winery-region { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.7rem; }
+  .badge-red { background: rgba(107,30,42,0.1); color: var(--wine); }
+  .badge-white { background: rgba(201,168,76,0.15); color: #8B6914; }
+  .badge-rose { background: rgba(232,115,154,0.12); color: #B5476F; }
+  .badge-sparkling { background: rgba(60,100,160,0.1); color: #3C64A0; }
+  .code-block { background: var(--cream); border: 1.5px dashed var(--stone); border-radius: 5px; padding: 9px 13px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+  .code-text { font-family: 'Courier New', monospace; font-size: 0.92rem; font-weight: 700; color: var(--wine); letter-spacing: 0.1em; }
+  .copy-btn { background: var(--wine); color: var(--white); border: none; padding: 5px 12px; border-radius: 3px; font-size: 0.7rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; }
+  .copy-btn:hover { background: var(--wine-light); }
+  .copy-btn.copied { background: #2D7A4F; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .expiry { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: #2D7A4F; } .dot-amber { background: #D4831A; } .dot-red { background: #C0392B; }
+  .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; }
+  .discount { font-weight: 700; color: var(--wine); font-size: 0.88rem; }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+  .widget { background: var(--white); border: 1px solid var(--stone); border-radius: 6px; overflow: hidden; }
+  .widget-head { background: var(--wine-deep); padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .widget-title { font-family: 'Playfair Display', serif; color: var(--gold-light); font-size: 0.88rem; }
+  .widget-body { padding: 0.85rem; }
+  .ad-widget { background: var(--ink); border: 1px solid var(--gold); border-radius: 6px; padding: 1.25rem 1rem; text-align: center; }
+  .ad-widget-label { font-size: 0.63rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; display: block; margin-bottom: 8px; }
+  .ad-widget-emoji { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+  .ad-widget-name { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1rem; display: block; margin-bottom: 4px; }
+  .ad-widget-sub { color: rgba(255,255,255,0.45); font-size: 0.74rem; display: block; margin-bottom: 12px; line-height: 1.5; }
+  .ad-widget-btn { background: var(--gold); color: var(--ink); border: none; padding: 8px 20px; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
+  .region-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 3px; cursor: pointer; transition: background 0.15s; font-size: 0.83rem; }
+  .region-item:hover { background: var(--cream); }
+  .region-count { font-size: 0.7rem; color: var(--muted); background: var(--cream); padding: 2px 8px; border-radius: 100px; }
+  .expiring-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--stone); }
+  .expiring-item:last-child { border-bottom: none; }
+  .expiring-code { font-size: 0.78rem; font-weight: 600; font-family: monospace; color: var(--wine); letter-spacing: 0.05em; }
+  .expiring-winery { font-size: 0.68rem; color: var(--muted); }
+  .expiring-days { font-size: 0.7rem; font-weight: 700; }
+
+  /* FOOTER */
+  footer { background: var(--wine-deep); padding: 2.5rem 2rem 1.5rem; margin-top: 2rem; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
+  .footer-brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); margin-bottom: 0.5rem; }
+  .footer-tagline { color: rgba(255,255,255,0.38); font-size: 0.83rem; line-height: 1.7; }
+  .footer-heading { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 0.85rem; font-weight: 600; }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .footer-links a { color: rgba(255,255,255,0.42); font-size: 0.82rem; text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--gold-light); }
+  .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
+  .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .card:nth-child(1){animation-delay:0.04s} .card:nth-child(2){animation-delay:0.08s} .card:nth-child(3){animation-delay:0.12s}
+  .card:nth-child(4){animation-delay:0.16s} .card:nth-child(5){animation-delay:0.20s} .card:nth-child(6){animation-delay:0.24s}
+
+  @media (max-width:900px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar, .footer-grid { display: none; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">👋🍷 HeyVino <small>Wine deals, curated</small></div>
+  <ul class="nav-links">
+    <li><a href="#">Red Wines</a></li>
+    <li><a href="#">White Wines</a></li>
+    <li><a href="#">Regions</a></li>
+    <li><a href="#">Advertise</a></li>
+  </ul>
+  <button class="nav-cta">Get Alerts</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">🌍 Sourced from 40+ wine regions worldwide</div>
+  <h1>Every Promo. Every <em>Vineyard</em>.<br>One Place.</h1>
+  <p>We parse winery newsletters so you don't have to. Updated daily across Napa, Burgundy, Tuscany, New Zealand and more.</p>
+  <div class="hero-stats">
+    <div><span class="stat-num">248</span><span class="stat-label">Active Codes</span></div>
+    <div><span class="stat-num">89</span><span class="stat-label">Vineyards</span></div>
+    <div><span class="stat-num">23</span><span class="stat-label">Countries</span></div>
+    <div><span class="stat-num">↻ 6h</span><span class="stat-label">Update Cycle</span></div>
+  </div>
+</div>
+
+<!-- AD BANNER -->
+<div class="ad-banner">
+  <span class="ad-label">Sponsored</span>
+  <div class="ad-content"><strong style="color:var(--gold)">Wine.com</strong> — America's largest wine retailer. Use code <strong style="color:var(--gold)">HEYVINO15</strong> for 15% off your first order of $75+</div>
+  <button class="ad-btn">Shop Now</button>
+  <span class="ad-label">Advertisement</span>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-bar">
+  <div class="filter-row">
+    <span class="filter-label">Varietal:</span>
+    <div class="chips" id="varietalChips">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="red">🍷 Red</button>
+      <button class="chip" data-filter="white">🥂 White</button>
+      <button class="chip" data-filter="rose">🌹 Rosé</button>
+      <button class="chip" data-filter="sparkling">✨ Sparkling</button>
+    </div>
+    <div class="search-wrap">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search vineyard, code, region…" oninput="filterCards()">
+    </div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">Region:</span>
+    <div class="chips" id="regionChips">
+      <button class="chip active" data-region="all">🌍 All</button>
+      <button class="chip" data-region="USA">🇺🇸 USA</button>
+      <button class="chip" data-region="France">🇫🇷 France</button>
+      <button class="chip" data-region="Italy">🇮🇹 Italy</button>
+      <button class="chip" data-region="Australia">🇦🇺 Australia</button>
+      <button class="chip" data-region="New Zealand">🇳🇿 NZ</button>
+      <button class="chip" data-region="Germany">🇩🇪 Germany</button>
+      <button class="chip" data-region="Argentina">🇦🇷 Argentina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div id="content">
+
+    <!-- TABS -->
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="all">🍇 All Wines</button>
+      <button class="tab" data-tab="red">🍷 Red</button>
+      <button class="tab" data-tab="white">🥂 White</button>
+      <button class="tab" data-tab="rose">🌹 Rosé</button>
+      <button class="tab" data-tab="sparkling">✨ Sparkling</button>
+      <button class="tab" data-tab="featured">⭐ Featured</button>
+    </div>
+
+    <div id="cardGroups"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="ad-widget">
+      <span class="ad-widget-label">Advertisement</span>
+      <span class="ad-widget-emoji">🏆</span>
+      <span class="ad-widget-name">Vivino Premium</span>
+      <span class="ad-widget-sub">Find any wine. Track your cellar. Save on every bottle.</span>
+      <button class="ad-widget-btn">Try Free →</button>
+    </div>
+
+    <div class="widget">
+      <div class="widget-head"><span>🗺️</span><span class="widget-title">Browse by Region</span></div>
+      <div class="widget-body">
+        <div class="region-item"><span>🇺🇸 California</span><span class="region-count">34</span></div>
+        <div class="region-item"><span>🇫🇷 France</span><span class="region-count">28</span></div>
+        <div class="region-item"><span>🇮🇹 Italy</span><span class="region-count">22</span></div>
+        <div class="region-item"><span>🇦🇺 Australia</span><span class="region-count">18</span></div>
+        <div class="region-item"><span>🇦🇷 Argentina</span><span class="region-count">14</span></div>
+        <div class="region-item"><span>🇳🇿 New Zealand</span><span class="region-count">11</span></div>
+        <div class="region-item"><span>🇪🇸 Spain</span><span class="region-count">9</span></div>
+        <div class="region-item"><span>🇩🇪 Germany</span><span class="region-count">7</span></div>
+      </div>
+    </div>
+
+    <div class="ad-widget">
+      <span class="ad-widget-label">Sponsored Partner</span>
+      <span class="ad-widget-emoji">🚚</span>
+      <span class="ad-widget-name">Drizly Delivery</span>
+      <span class="ad-widget-sub">Wine delivered in under 60 minutes. 10,000+ selections.</span>
+      <button class="ad-widget-btn">Order Now →</button>
+    </div>
+
+    <div class="widget">
+      <div class="widget-head"><span>⏰</span><span class="widget-title">Expiring Soon</span></div>
+      <div class="widget-body" id="expiringSoon"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">👋🍷 HeyVino</div>
+      <p class="footer-tagline">The world's most comprehensive wine promotion aggregator. Updated every 6 hours from 200+ winery newsletters across 23 countries.</p>
+    </div>
+    <div>
+      <div class="footer-heading">Browse</div>
+      <ul class="footer-links">
+        <li><a href="#">Red Wines</a></li><li><a href="#">White Wines</a></li>
+        <li><a href="#">Rosé & Sparkling</a></li><li><a href="#">By Region</a></li>
+        <li><a href="#">Expiring Soon</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Business</div>
+      <ul class="footer-links">
+        <li><a href="#">Advertise With Us</a></li><li><a href="#">Partner Vineyards</a></li>
+        <li><a href="#">Media Kit</a></li><li><a href="#">Distributor Program</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li><li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li><li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 HeyVino LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
+    <button class="advertise-cta">Advertise Here →</button>
+  </div>
+</footer>
+
+<script>
+const CODES = [
+  { id:1,  winery:"Stag's Leap Wine Cellars", code:"STAGSCAB20",  discount:"20% Off",        type:"red",      varietal:"Cabernet Sauvignon", region:"Napa Valley",    country:"USA",         expiry:"2026-06-15", featured:true  },
+  { id:2,  winery:"Far Niente Winery",         code:"FNCHARD15",   discount:"15% Off",        type:"white",    varietal:"Chardonnay",         region:"Napa Valley",    country:"USA",         expiry:"2026-09-01", featured:false },
+  { id:3,  winery:"Cakebread Cellars",          code:"FRESHSAUV",   discount:"Free Shipping",  type:"white",    varietal:"Sauvignon Blanc",    region:"Napa Valley",    country:"USA",         expiry:"2026-05-31", featured:false },
+  { id:4,  winery:"Joseph Drouhin",             code:"DROUHIN12",   discount:"12% Off",        type:"red",      varietal:"Pinot Noir",         region:"Burgundy",       country:"France",      expiry:"2026-12-31", featured:false },
+  { id:5,  winery:"Domaine Dujac",              code:"DUJAC25VIP",  discount:"25% Off",        type:"red",      varietal:"Pinot Noir",         region:"Burgundy",       country:"France",      expiry:"2026-05-31", featured:true  },
+  { id:6,  winery:"Louis Jadot",                code:"JADOT10",     discount:"10% Off",        type:"red",      varietal:"Pinot Noir",         region:"Burgundy",       country:"France",      expiry:"2026-10-15", featured:false },
+  { id:7,  winery:"Antinori Marchesi",          code:"TIGNA18",     discount:"18% Off",        type:"red",      varietal:"Sangiovese",         region:"Tuscany",        country:"Italy",       expiry:"2026-11-30", featured:false },
+  { id:8,  winery:"Santa Margherita",           code:"SMARG20IT",   discount:"20% Off",        type:"white",    varietal:"Pinot Grigio",       region:"Alto Adige",     country:"Italy",       expiry:"2026-07-15", featured:false },
+  { id:9,  winery:"Castello Banfi",             code:"BANFI15",     discount:"15% Off",        type:"red",      varietal:"Brunello di Montalcino","region":"Montalcino",country:"Italy",       expiry:"2026-09-30", featured:false },
+  { id:10, winery:"Cloudy Bay",                 code:"CLOUDYNZ15",  discount:"15% Off",        type:"white",    varietal:"Sauvignon Blanc",    region:"Marlborough",    country:"New Zealand", expiry:"2026-08-31", featured:false },
+  { id:11, winery:"Penfolds",                   code:"PENFOLDS10",  discount:"10% Off",        type:"red",      varietal:"Shiraz",             region:"Barossa Valley", country:"Australia",   expiry:"2026-09-30", featured:true  },
+  { id:12, winery:"Dr. Loosen",                 code:"LOOSEN15",    discount:"15% Off",        type:"white",    varietal:"Riesling",           region:"Mosel",          country:"Germany",     expiry:"2026-12-31", featured:false },
+  { id:13, winery:"Catena Zapata",              code:"CATENAFEST",  discount:"15% Off",        type:"red",      varietal:"Malbec",             region:"Mendoza",        country:"Argentina",   expiry:"2026-10-31", featured:false },
+  { id:14, winery:"Chateau Ste. Michelle",      code:"STMLOVE20",   discount:"20% Off",        type:"white",    varietal:"Riesling",           region:"Columbia Valley",country:"USA",         expiry:"2026-07-04", featured:false },
+  { id:15, winery:"Felton Road",                code:"FELTON12",    discount:"12% Off",        type:"red",      varietal:"Pinot Noir",         region:"Central Otago",  country:"New Zealand", expiry:"2026-11-30", featured:false },
+];
+
+const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
+const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
+
+let activeTab = "all", activeVarietal = "all", activeRegion = "all", searchQ = "";
+
+function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
+
+function expiryHTML(expiry) {
+  const d = daysUntil(expiry);
+  if (d < 0) return `<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>`;
+  if (d <= 21) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">⚠️ ${d}d left</span></span>`;
+  const fmt = new Date(expiry).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${fmt}</span></span>`;
+}
+
+function accentClass(type) {
+  return { red:"accent-red", white:"accent-white", rose:"accent-rose", sparkling:"accent-sparkling" }[type] || "accent-red";
+}
+
+function badgeClass(type) {
+  return { red:"badge-red", white:"badge-white", rose:"badge-rose", sparkling:"badge-sparkling" }[type] || "badge-red";
+}
+
+function cardHTML(c) {
+  const initials = c.winery.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const flag = FLAGS[c.country] || "🌍";
+  return `
+    <div class="card${c.featured?" featured":""}" data-type="${c.type}" data-country="${c.country}" data-winery="${c.winery.toLowerCase()}" data-code="${c.code.toLowerCase()}" data-varietal="${c.varietal.toLowerCase()}" data-region="${c.region.toLowerCase()}">
+      <div class="card-accent ${accentClass(c.type)}"></div>
+      ${c.featured?'<div class="featured-tag">⭐ Featured</div>':""}
+      <div class="card-body">
+        <div class="card-head">
+          <div class="winery-avatar">${initials}</div>
+          <div>
+            <div class="winery-name">${c.winery}</div>
+            <div class="winery-region">${flag} ${c.region}, ${c.country}</div>
+          </div>
+        </div>
+        <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
+        <div class="code-block">
+          <span class="code-text">${c.code}</span>
+          <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
+        </div>
+        <div class="card-footer">
+          ${expiryHTML(c.expiry)}
+          <span class="discount">${c.discount}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function render() {
+  const filtered = CODES.filter(c => {
+    const matchTab = activeTab === "all" || c.type === activeTab || (activeTab === "featured" && c.featured);
+    const matchV = activeVarietal === "all" || c.type === activeVarietal;
+    const matchR = activeRegion === "all" || c.country === activeRegion;
+    const q = searchQ.toLowerCase();
+    const matchQ = !q || c.winery.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) || c.varietal.toLowerCase().includes(q) || c.region.toLowerCase().includes(q);
+    return matchTab && matchV && matchR && matchQ;
+  });
+
+  const grouped = {};
+  filtered.forEach(c => { if (!grouped[c.country]) grouped[c.country] = []; grouped[c.country].push(c); });
+  const sorted = Object.keys(grouped).sort((a,b) => { const ai=COUNTRY_ORDER.indexOf(a),bi=COUNTRY_ORDER.indexOf(b); if(ai<0&&bi<0)return a.localeCompare(b); if(ai<0)return 1; if(bi<0)return -1; return ai-bi; });
+
+  if (filtered.length === 0) {
+    document.getElementById("cardGroups").innerHTML = `<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div><div style="font-size:0.85rem;margin-top:8px">Try adjusting your filters</div></div>`;
+    return;
+  }
+
+  document.getElementById("cardGroups").innerHTML = sorted.map(country => `
+    <div>
+      <div class="section-header">
+        <h2 class="section-title">${country}</h2>
+        <span class="section-count">${grouped[country].length} code${grouped[country].length!==1?"s":""}</span>
+        <span class="section-flag">${FLAGS[country]||"🌍"}</span>
+      </div>
+      <div class="cards-grid">${grouped[country].map(cardHTML).join("")}</div>
+    </div>`).join("");
+}
+
+function renderExpiring() {
+  const soon = CODES.filter(c => { const d=daysUntil(c.expiry); return d>0&&d<=45; }).sort((a,b)=>daysUntil(a.expiry)-daysUntil(b.expiry)).slice(0,4);
+  document.getElementById("expiringSoon").innerHTML = soon.length
+    ? soon.map(c=>`<div class="expiring-item"><div><div class="expiring-code">${c.code}</div><div class="expiring-winery">${c.winery}</div></div><div class="expiring-days" style="color:${daysUntil(c.expiry)<=14?"#C0392B":"#D4831A"}">${daysUntil(c.expiry)}d</div></div>`).join("")
+    : `<div style="font-size:0.82rem;color:var(--muted);text-align:center;padding:1rem 0">No codes expiring soon</div>`;
+}
+
+function copyCode(btn, code) {
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = "✓ Copied!"; btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
+  });
+}
+
+function filterCards() { searchQ = document.getElementById("searchInput").value; render(); }
+
+// Tab clicks
+document.getElementById("tabs").addEventListener("click", e => {
+  if (e.target.classList.contains("tab")) {
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    e.target.classList.add("active");
+    activeTab = e.target.dataset.tab;
+    render();
+  }
+});
+
+// Varietal chips
+document.getElementById("varietalChips").addEventListener("click", e => {
+  if (e.target.classList.contains("chip")) {
+    document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));
+    e.target.classList.add("active");
+    activeVarietal = e.target.dataset.filter;
+    render();
+  }
+});
+
+// Region chips
+document.getElementById("regionChips").addEventListener("click", e => {
+  if (e.target.classList.contains("chip")) {
+    document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));
+    e.target.classList.add("active");
+    activeRegion = e.target.dataset.region;
+    render();
+  }
+});
+
+render();
+renderExpiring();
+</script>
+</body>
+</html>
