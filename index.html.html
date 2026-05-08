@@ -146,6 +146,11 @@
   .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
 
+  .featured-section { margin-bottom: 2.5rem; }
+  .featured-section-header { background: var(--wine-deep); border-radius: 6px 6px 0 0; padding: 0.75rem 1rem; border-bottom: 2px solid var(--gold); }
+  .featured-section-header .section-title { color: var(--gold-light); }
+  .featured-section-header .section-count { color: rgba(255,255,255,0.55); }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   .card:nth-child(1){animation-delay:0.04s} .card:nth-child(2){animation-delay:0.08s} .card:nth-child(3){animation-delay:0.12s}
   .card:nth-child(4){animation-delay:0.16s} .card:nth-child(5){animation-delay:0.20s} .card:nth-child(6){animation-delay:0.24s}
@@ -177,8 +182,8 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-eyebrow">🌍 Sourced from 40+ wine regions worldwide</div>
-  <h1>Every Promo. Every <em>Vineyard</em>.<br>One Place.</h1>
-  <p>We parse winery newsletters so you don't have to. Updated daily across Napa, Burgundy, Tuscany, New Zealand and more.</p>
+  <h1>Napa Valley Cabernet Deals, <em>Curated Daily</em></h1>
+  <p>The best promo codes from Napa Valley's top Cabernet Sauvignon producers — plus Burgundy, Tuscany, New Zealand and more. Updated daily.</p>
   <div class="hero-stats">
     <div><span class="stat-num">248</span><span class="stat-label">Active Codes</span></div>
     <div><span class="stat-num">89</span><span class="stat-label">Vineyards</span></div>
@@ -380,11 +385,15 @@ function render() {
     const mQ=!q||c.winery.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.varietal.toLowerCase().includes(q)||c.region.toLowerCase().includes(q);
     return mT&&mV&&mR&&mQ;
   });
-  const grouped={};
-  filtered.forEach(c=>{if(!grouped[c.country])grouped[c.country]=[];grouped[c.country].push(c);});
-  const sorted=Object.keys(grouped).sort((a,b)=>{const ai=COUNTRY_ORDER.indexOf(a),bi=COUNTRY_ORDER.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return -1;return ai-bi;});
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
-  document.getElementById("cardGroups").innerHTML=sorted.map(country=>`
+  const napaCAbs=filtered.filter(c=>c.varietal.includes("Cabernet Sauvignon")&&c.country==="USA");
+  const napaCabIds=new Set(napaCAbs.map(c=>c.id));
+  const remaining=filtered.filter(c=>!napaCabIds.has(c.id));
+  const grouped={};
+  remaining.forEach(c=>{if(!grouped[c.country])grouped[c.country]=[];grouped[c.country].push(c);});
+  const sorted=Object.keys(grouped).sort((a,b)=>{const ai=COUNTRY_ORDER.indexOf(a),bi=COUNTRY_ORDER.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return -1;return ai-bi;});
+  const napaSection=napaCAbs.length?`<div class="featured-section"><div class="section-header featured-section-header"><h2 class="section-title">🍷 Napa Cabernet — Featured Deals</h2><span class="section-count">${napaCAbs.length} code${napaCAbs.length!==1?"s":""}</span></div><div class="cards-grid">${napaCAbs.map(c=>cardHTML({...c,featured:true})).join("")}</div></div>`:"";
+  document.getElementById("cardGroups").innerHTML=napaSection+sorted.map(country=>`
     <div>
       <div class="section-header">
         <h2 class="section-title">${country}</h2>
