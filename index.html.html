@@ -48,12 +48,43 @@
   .stat-num { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--gold); display: block; }
   .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.1em; }
 
-  /* AD BANNER */
-  .ad-banner { background: var(--ink); border-top: 2px solid var(--gold); border-bottom: 2px solid var(--gold); padding: 13px 2rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
-  .ad-label { font-size: 0.63rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; }
-  .ad-content { color: rgba(255,255,255,0.82); font-size: 0.86rem; text-align: center; }
-  .ad-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border-radius: 2px; }
-  .ad-btn:hover { background: var(--gold); color: var(--ink); }
+  /* AD PLACEHOLDERS */
+  .ad-placeholder-banner {
+    position: relative; overflow: hidden; min-height: 100px; padding: 1.75rem 2rem;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #b8d8ea 0%, #e8c97a 40%, #5a8a3a 40%, #2d5a3d 100%);
+  }
+  .ad-placeholder-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 100' preserveAspectRatio='none'%3E%3Cpath d='M0,40 Q300,10 600,35 Q900,60 1200,30 L1200,100 L0,100Z' fill='%234a7c59' opacity='0.9'/%3E%3Cpath d='M0,65 Q200,45 500,58 Q800,72 1200,52 L1200,100 L0,100Z' fill='%232d5a3d'/%3E%3C/svg%3E") center/cover no-repeat;
+  }
+  .ad-placeholder-sign {
+    position: relative; z-index: 1; text-align: center;
+    background: linear-gradient(145deg, #f8edd8, #f0e0c0, #f8edd8);
+    border: 3px solid #8b6914; border-radius: 3px; padding: 0.9rem 2.5rem;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    max-width: 500px;
+  }
+  .ad-placeholder-widget {
+    position: relative; overflow: hidden; border-radius: 6px; min-height: 140px;
+    display: flex; align-items: center; justify-content: center; padding: 1.25rem 1rem;
+    background: linear-gradient(180deg, #b8d8ea 0%, #e8c97a 40%, #5a8a3a 40%, #2d5a3d 100%);
+  }
+  .ad-placeholder-widget::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 150' preserveAspectRatio='none'%3E%3Cpath d='M0,55 Q75,25 150,50 Q225,75 300,40 L300,150 L0,150Z' fill='%234a7c59' opacity='0.9'/%3E%3Cpath d='M0,85 Q60,65 150,78 Q240,92 300,72 L300,150 L0,150Z' fill='%232d5a3d'/%3E%3C/svg%3E") center/cover no-repeat;
+  }
+  .ad-placeholder-widget-sign {
+    position: relative; z-index: 1; text-align: center; width: 100%;
+    background: linear-gradient(145deg, #f8edd8, #f0e0c0, #f8edd8);
+    border: 2px solid #8b6914; border-radius: 3px; padding: 0.85rem 0.75rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  .ad-placeholder-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em; color: #8b6914; opacity: 0.7; display: block; margin-bottom: 5px; }
+  .ad-placeholder-heading { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #3d1a08; font-weight: 700; margin-bottom: 4px; }
+  .ad-placeholder-sub { font-size: 0.72rem; color: #7a5a2a; margin-bottom: 0.65rem; line-height: 1.4; }
+  .ad-placeholder-cta { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #5c3a1a; border: 1.5px solid #8b6914; padding: 5px 14px; border-radius: 2px; text-decoration: none; transition: all 0.15s; }
+  .ad-placeholder-cta:hover { background: #8b6914; color: #fff; }
 
   /* FILTERS */
   .filter-bar { padding: 1.5rem 2rem 1rem; background: var(--cream); border-bottom: 1px solid var(--stone); }
@@ -119,12 +150,6 @@
   .widget-head { background: var(--wine-deep); padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
   .widget-title { font-family: 'Playfair Display', serif; color: var(--gold-light); font-size: 0.88rem; }
   .widget-body { padding: 0.85rem; }
-  .ad-widget { background: var(--ink); border: 1px solid var(--gold); border-radius: 6px; padding: 1.25rem 1rem; text-align: center; }
-  .ad-widget-label { font-size: 0.63rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; display: block; margin-bottom: 8px; }
-  .ad-widget-emoji { font-size: 2.2rem; display: block; margin-bottom: 6px; }
-  .ad-widget-name { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1rem; display: block; margin-bottom: 4px; }
-  .ad-widget-sub { color: rgba(255,255,255,0.45); font-size: 0.74rem; display: block; margin-bottom: 12px; line-height: 1.5; }
-  .ad-widget-btn { background: var(--gold); color: var(--ink); border: none; padding: 8px 20px; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
   .region-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 3px; cursor: pointer; transition: background 0.15s; font-size: 0.83rem; }
   .region-item:hover { background: var(--cream); }
   .region-count { font-size: 0.7rem; color: var(--muted); background: var(--cream); padding: 2px 8px; border-radius: 100px; }
@@ -192,12 +217,14 @@
   </div>
 </div>
 
-<!-- AD BANNER -->
-<div class="ad-banner">
-  <span class="ad-label">Sponsored</span>
-  <div class="ad-content"><strong style="color:var(--gold)">Wine.com</strong> — America's largest wine retailer. Use code <strong style="color:var(--gold)">HEYVINO15</strong> for 15% off your first order of $75+</div>
-  <button class="ad-btn">Shop Now</button>
-  <span class="ad-label">Advertisement</span>
+<!-- AD PLACEHOLDER BANNER -->
+<div class="ad-placeholder-banner">
+  <div class="ad-placeholder-sign">
+    <span class="ad-placeholder-label">Advertisement</span>
+    <div class="ad-placeholder-heading">Place Your Advertisement Here</div>
+    <div class="ad-placeholder-sub">Reach thousands of wine enthusiasts every day</div>
+    <a class="ad-placeholder-cta" href="mailto:advertise@heyvinowine.com">Get in touch →</a>
+  </div>
 </div>
 
 <!-- FILTERS -->
@@ -246,12 +273,13 @@
   </div>
 
   <aside class="sidebar">
-    <div class="ad-widget">
-      <span class="ad-widget-label">Advertisement</span>
-      <span class="ad-widget-emoji">🏆</span>
-      <span class="ad-widget-name">Vivino Premium</span>
-      <span class="ad-widget-sub">Find any wine. Track your cellar. Save on every bottle.</span>
-      <button class="ad-widget-btn">Try Free →</button>
+    <div class="ad-placeholder-widget">
+      <div class="ad-placeholder-widget-sign">
+        <span class="ad-placeholder-label">Advertisement</span>
+        <div class="ad-placeholder-heading" style="font-size:0.88rem">Place Your Ad Here</div>
+        <div class="ad-placeholder-sub">Advertise with HeyVino</div>
+        <a class="ad-placeholder-cta" href="mailto:advertise@heyvinowine.com">Contact us →</a>
+      </div>
     </div>
     <div class="widget">
       <div class="widget-head"><span>🗺️</span><span class="widget-title">Browse by Region</span></div>
@@ -266,12 +294,13 @@
         <div class="region-item"><span>🇩🇪 Germany</span><span class="region-count">7</span></div>
       </div>
     </div>
-    <div class="ad-widget">
-      <span class="ad-widget-label">Sponsored Partner</span>
-      <span class="ad-widget-emoji">🚚</span>
-      <span class="ad-widget-name">Drizly Delivery</span>
-      <span class="ad-widget-sub">Wine delivered in under 60 minutes. 10,000+ selections.</span>
-      <button class="ad-widget-btn">Order Now →</button>
+    <div class="ad-placeholder-widget">
+      <div class="ad-placeholder-widget-sign">
+        <span class="ad-placeholder-label">Advertisement</span>
+        <div class="ad-placeholder-heading" style="font-size:0.88rem">Place Your Ad Here</div>
+        <div class="ad-placeholder-sub">Advertise with HeyVino</div>
+        <a class="ad-placeholder-cta" href="mailto:advertise@heyvinowine.com">Contact us →</a>
+      </div>
     </div>
     <div class="widget">
       <div class="widget-head"><span>⏰</span><span class="widget-title">Expiring Soon</span></div>
