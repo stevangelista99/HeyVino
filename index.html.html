@@ -23,8 +23,8 @@
     --gold: #C9A84C; --gold-light: #E8D5A0; --cream: #FAF6EF;
     --stone: #E8E0D4; --ink: #1A0A0E; --muted: #7A6E64; --white: #fff;
   }
-  html { scroll-behavior: smooth; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+  html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow-x: hidden; max-width: 100%; }
   ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
 
   /* NAV */
@@ -198,6 +198,10 @@
     .filter-row { flex-wrap: wrap; }
     .card-body { padding: 0.75rem; }
     .main { grid-template-columns: 1fr; }
+    .ad-placeholder-banner { padding: 13px 1rem; }
+    .ad-placeholder-sub { font-size: 0.8rem; }
+    .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .nav-logo small { display: none; }
   }
 </style>
 </head>
