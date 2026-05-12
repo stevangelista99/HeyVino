@@ -143,6 +143,7 @@
   .dot-green { background: #2D7A4F; } .dot-amber { background: #D4831A; } .dot-red { background: #C0392B; }
   .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; }
   .discount { font-weight: 700; color: var(--wine); font-size: 0.88rem; }
+  .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
 
   /* SIDEBAR */
   .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
@@ -385,20 +386,30 @@ async function loadCodes() {
   }
 
   CODES = data.map(row => ({
-    id:       row.id,
-    winery:   row.winery_name   || row.winery   || '',
-    code:     row.code          || '',
-    discount: row.discount_amount || row.discount || '',
-    type:     row.varietal_type || row.type      || 'red',
-    varietal: row.varietal      || '',
-    region:   row.region        || '',
-    country:  row.country       || '',
-    expiry:   row.expiry_date   || row.expiry    || '',
-    featured: row.is_featured   || row.featured  || false,
-    website:  row.website       || ''
+    id:         row.id,
+    winery:     row.winery_name      || row.winery   || '',
+    code:       row.code             || '',
+    discount:   row.discount_amount  || row.discount  || '',
+    conditions: row.conditions       || row.minimum_spend || row.spend_requirement || row.terms || '',
+    type:       row.varietal_type    || row.type      || 'red',
+    varietal:   row.varietal         || '',
+    region:     row.region           || '',
+    country:    row.country          || '',
+    expiry:     row.expiry_date      || row.expiry    || '',
+    featured:   row.is_featured      || row.featured  || false,
+    website:    row.website          || ''
   }));
 
-  console.log('[HeyVino] 4. CODES mapped — count:', CODES.length, '| First card:', CODES[0]);
+  // Remove duplicates — same promo code from the same winery
+  const seen = new Set();
+  CODES = CODES.filter(c => {
+    const key = c.winery.toLowerCase() + '|' + c.code.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  console.log('[HeyVino] 4. CODES mapped & deduped — count:', CODES.length, '| First card:', CODES[0]);
 
   try {
     render();
@@ -443,7 +454,7 @@ function cardHTML(c) {
         <span class="code-text">${c.code}</span>
         <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
       </div>
-      <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${c.discount}</span></div>
+      <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${c.discount}${c.conditions?`<span class="conditions"> · ${c.conditions}</span>`:''}</span></div>
     </div>
   </div>`;
 }
