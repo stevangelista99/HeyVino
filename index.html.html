@@ -320,23 +320,42 @@
 </footer>
 
 <script>
-const CODES = [
-  { id:1,  winery:"Stag's Leap Wine Cellars", code:"STAGSCAB20",  discount:"20% Off",       type:"red",   varietal:"Cabernet Sauvignon",    region:"Napa Valley",    country:"USA",         expiry:"2026-06-15", featured:true,  website:"https://www.stagsleapwinecellars.com" },
-  { id:2,  winery:"Far Niente Winery",        code:"FNCHARD15",   discount:"15% Off",       type:"white", varietal:"Chardonnay",            region:"Napa Valley",    country:"USA",         expiry:"2026-09-01", featured:false, website:"https://www.farniente.com" },
-  { id:3,  winery:"Cakebread Cellars",        code:"FRESHSAUV",   discount:"Free Shipping", type:"white", varietal:"Sauvignon Blanc",       region:"Napa Valley",    country:"USA",         expiry:"2026-05-31", featured:false, website:"https://www.cakebread.com" },
-  { id:4,  winery:"Joseph Drouhin",           code:"DROUHIN12",   discount:"12% Off",       type:"red",   varietal:"Pinot Noir",            region:"Burgundy",       country:"France",      expiry:"2026-12-31", featured:false, website:"https://www.drouhin.com" },
-  { id:5,  winery:"Domaine Dujac",            code:"DUJAC25VIP",  discount:"25% Off",       type:"red",   varietal:"Pinot Noir",            region:"Burgundy",       country:"France",      expiry:"2026-05-31", featured:true,  website:"https://www.dujac.com" },
-  { id:6,  winery:"Louis Jadot",              code:"JADOT10",     discount:"10% Off",       type:"red",   varietal:"Pinot Noir",            region:"Burgundy",       country:"France",      expiry:"2026-10-15", featured:false, website:"https://www.louisjadot.com" },
-  { id:7,  winery:"Antinori Marchesi",        code:"TIGNA18",     discount:"18% Off",       type:"red",   varietal:"Sangiovese",            region:"Tuscany",        country:"Italy",       expiry:"2026-11-30", featured:false, website:"https://www.antinori.it" },
-  { id:8,  winery:"Santa Margherita",         code:"SMARG20IT",   discount:"20% Off",       type:"white", varietal:"Pinot Grigio",          region:"Alto Adige",     country:"Italy",       expiry:"2026-07-15", featured:false, website:"https://www.santamargherita.com" },
-  { id:9,  winery:"Castello Banfi",           code:"BANFI15",     discount:"15% Off",       type:"red",   varietal:"Brunello di Montalcino",region:"Montalcino",     country:"Italy",       expiry:"2026-09-30", featured:false, website:"https://www.castellobanfi.com" },
-  { id:10, winery:"Cloudy Bay",               code:"CLOUDYNZ15",  discount:"15% Off",       type:"white", varietal:"Sauvignon Blanc",       region:"Marlborough",    country:"New Zealand", expiry:"2026-08-31", featured:false, website:"https://www.cloudybay.com" },
-  { id:11, winery:"Penfolds",                 code:"PENFOLDS10",  discount:"10% Off",       type:"red",   varietal:"Shiraz",                region:"Barossa Valley", country:"Australia",   expiry:"2026-09-30", featured:true,  website:"https://www.penfolds.com" },
-  { id:12, winery:"Dr. Loosen",               code:"LOOSEN15",    discount:"15% Off",       type:"white", varietal:"Riesling",              region:"Mosel",          country:"Germany",     expiry:"2026-12-31", featured:false, website:"https://www.drloosen.com" },
-  { id:13, winery:"Catena Zapata",            code:"CATENAFEST",  discount:"15% Off",       type:"red",   varietal:"Malbec",                region:"Mendoza",        country:"Argentina",   expiry:"2026-10-31", featured:false, website:"https://www.catenawines.com" },
-  { id:14, winery:"Chateau Ste. Michelle",    code:"STMLOVE20",   discount:"20% Off",       type:"white", varietal:"Riesling",              region:"Columbia Valley",country:"USA",         expiry:"2026-07-04", featured:false, website:"https://www.ste-michelle.com" },
-  { id:15, winery:"Felton Road",              code:"FELTON12",    discount:"12% Off",       type:"red",   varietal:"Pinot Noir",            region:"Central Otago",  country:"New Zealand", expiry:"2026-11-30", featured:false, website:"https://www.feltonroad.com" },
-];
+const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
+
+let CODES = [];
+
+async function loadCodes() {
+  document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:1rem">Loading deals…</div></div>';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    CODES = data.map(row => ({
+      id: row.id,
+      winery: row.winery,
+      code: row.code,
+      discount: row.discount,
+      type: row.type,
+      varietal: row.varietal,
+      region: row.region,
+      country: row.country,
+      expiry: row.expiry,
+      featured: row.featured,
+      website: row.website
+    }));
+  } catch (err) {
+    document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><div style="font-size:1rem;font-weight:600">Failed to load deals. Please refresh.</div></div>';
+    return;
+  }
+  render();
+  renderExpiring();
+}
 
 const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
@@ -418,8 +437,7 @@ document.getElementById("tabs").addEventListener("click",e=>{if(e.target.classLi
 document.getElementById("varietalChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeVarietal=e.target.dataset.filter;render();}});
 document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;render();}});
 
-render();
-renderExpiring();
+loadCodes();
 </script>
 </body>
 </html>
