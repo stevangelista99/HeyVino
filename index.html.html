@@ -326,7 +326,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let CODES = [];
 
 async function loadCodes() {
-  document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:1rem">Loading deals…</div></div>';
+  console.log('[HeyVino] 1. Fetch starting…');
+  document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:1.5rem;margin-bottom:0.5rem">🍷</div><div style="font-size:1rem">Loading deals…</div></div>';
+
+  let data;
   try {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc`,
@@ -337,33 +340,45 @@ async function loadCodes() {
         }
       }
     );
+    console.log('[HeyVino] 2. Response received — status:', res.status, res.ok ? 'OK' : 'ERROR');
     if (!res.ok) {
       const body = await res.text();
-      console.error(`Supabase error ${res.status}:`, body);
+      console.error('[HeyVino] Response body:', body);
       throw new Error(`HTTP ${res.status}`);
     }
-    const data = await res.json();
-    console.log(`Loaded ${data.length} promo codes from Supabase`);
-    CODES = data.map(row => ({
-      id: row.id,
-      winery: row.winery_name,
-      code: row.code,
-      discount: row.discount_amount,
-      type: row.varietal_type,
-      varietal: row.varietal,
-      region: row.region,
-      country: row.country,
-      expiry: row.expiry_date,
-      featured: row.is_featured,
-      website: row.website
-    }));
+    data = await res.json();
+    console.log('[HeyVino] 3. Parsed data — row count:', data.length);
+    if (data.length > 0) console.log('[HeyVino] 3a. First row keys:', Object.keys(data[0]), '| First row:', data[0]);
   } catch (err) {
-    console.error('Failed to load promo codes:', err);
+    console.error('[HeyVino] Fetch failed:', err);
     document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><div style="font-size:1rem;font-weight:600">Failed to load deals. Please refresh.</div></div>';
     return;
   }
-  render();
-  renderExpiring();
+
+  CODES = data.map(row => ({
+    id:       row.id,
+    winery:   row.winery_name   || row.winery   || '',
+    code:     row.code          || '',
+    discount: row.discount_amount || row.discount || '',
+    type:     row.varietal_type || row.type      || 'red',
+    varietal: row.varietal      || '',
+    region:   row.region        || '',
+    country:  row.country       || '',
+    expiry:   row.expiry_date   || row.expiry    || '',
+    featured: row.is_featured   || row.featured  || false,
+    website:  row.website       || ''
+  }));
+
+  console.log('[HeyVino] 4. CODES mapped — count:', CODES.length, '| First card:', CODES[0]);
+
+  try {
+    render();
+    renderExpiring();
+    console.log('[HeyVino] 5. Render complete');
+  } catch (err) {
+    console.error('[HeyVino] Render failed:', err);
+    document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><div style="font-size:1rem;font-weight:600">Error rendering cards — check console.</div></div>';
+  }
 }
 
 const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
@@ -384,7 +399,7 @@ function accentClass(t){return{red:"accent-red",white:"accent-white",rose:"accen
 function badgeClass(t){return{red:"badge-red",white:"badge-white",rose:"badge-rose",sparkling:"badge-sparkling"}[t]||"badge-red";}
 
 function cardHTML(c) {
-  const initials=c.winery.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const initials=(c.winery||'??').split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
   const flag=FLAGS[c.country]||"🌍";
   return `<div class="card${c.featured?" featured":""}">
     <div class="card-accent ${accentClass(c.type)}"></div>
@@ -410,11 +425,11 @@ function render() {
     const mV=activeVarietal==="all"||c.type===activeVarietal;
     const mR=activeRegion==="all"||c.country===activeRegion;
     const q=searchQ.toLowerCase();
-    const mQ=!q||c.winery.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.varietal.toLowerCase().includes(q)||c.region.toLowerCase().includes(q);
+    const mQ=!q||(c.winery||'').toLowerCase().includes(q)||(c.code||'').toLowerCase().includes(q)||(c.varietal||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q);
     return mT&&mV&&mR&&mQ;
   });
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
-  const napaCAbs=filtered.filter(c=>c.varietal.includes("Cabernet Sauvignon")&&c.country==="USA");
+  const napaCAbs=filtered.filter(c=>(c.varietal||'').includes("Cabernet Sauvignon")&&c.country==="USA");
   const napaCabIds=new Set(napaCAbs.map(c=>c.id));
   const remaining=filtered.filter(c=>!napaCabIds.has(c.id));
   const grouped={};
