@@ -177,6 +177,23 @@
   .featured-section-header .section-title { color: var(--gold-light); }
   .featured-section-header .section-count { color: rgba(255,255,255,0.55); }
 
+  /* CONTACT MODAL */
+  .contact-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:500; align-items:center; justify-content:center; }
+  .contact-overlay.open { display:flex; }
+  .contact-modal { background:var(--white); border-radius:8px; padding:2rem 2rem 1.5rem; max-width:380px; width:90%; text-align:center; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+  .contact-modal-close { position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--muted); line-height:1; }
+  .contact-modal-close:hover { color:var(--ink); }
+  .contact-modal-icon { font-size:2rem; margin-bottom:0.5rem; }
+  .contact-modal-title { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--wine-deep); margin-bottom:0.35rem; }
+  .contact-modal-sub { font-size:0.78rem; color:var(--muted); margin-bottom:1.25rem; line-height:1.5; }
+  .contact-email-box { background:var(--cream); border:1.5px dashed var(--stone); border-radius:5px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:1rem; }
+  .contact-email-text { font-family:'Courier New',monospace; font-size:0.85rem; font-weight:700; color:var(--wine); letter-spacing:0.04em; word-break:break-all; text-align:left; }
+  .contact-copy-btn { background:var(--wine); color:var(--white); border:none; padding:6px 13px; border-radius:3px; font-size:0.7rem; cursor:pointer; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; transition:background 0.15s; flex-shrink:0; }
+  .contact-copy-btn:hover { background:var(--wine-light); }
+  .contact-copy-btn.copied { background:#2D7A4F; }
+  .contact-mailto-btn { display:block; width:100%; background:var(--cream); border:1.5px solid var(--stone); color:var(--muted); padding:9px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:600; text-decoration:none; transition:all 0.15s; }
+  .contact-mailto-btn:hover { border-color:var(--wine); color:var(--wine); }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   .card:nth-child(1){animation-delay:0.04s} .card:nth-child(2){animation-delay:0.08s} .card:nth-child(3){animation-delay:0.12s}
   .card:nth-child(4){animation-delay:0.16s} .card:nth-child(5){animation-delay:0.20s} .card:nth-child(6){animation-delay:0.24s}
@@ -224,7 +241,7 @@
     <span class="ad-placeholder-label">Advertisement</span>
     <div class="ad-placeholder-heading">Place Your Advertisement Here</div>
     <div class="ad-placeholder-sub">Reach thousands of wine enthusiasts every day</div>
-    <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20%E2%80%94%20HeyVino">Get in touch →</a>
+    <button class="ad-placeholder-cta">Get in touch →</button>
   </div>
 </div>
 
@@ -279,7 +296,7 @@
         <span class="ad-placeholder-label">Advertisement</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Place Your Ad Here</div>
         <div class="ad-placeholder-sub">Advertise with HeyVino</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20%E2%80%94%20HeyVino">Contact us →</a>
+        <button class="ad-placeholder-cta">Contact us →</button>
       </div>
     </div>
     <div class="widget">
@@ -300,7 +317,7 @@
         <span class="ad-placeholder-label">Advertisement</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Place Your Ad Here</div>
         <div class="ad-placeholder-sub">Advertise with HeyVino</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20%E2%80%94%20HeyVino">Contact us →</a>
+        <button class="ad-placeholder-cta">Contact us →</button>
       </div>
     </div>
     <div class="widget">
@@ -502,6 +519,37 @@ document.getElementById("varietalChips").addEventListener("click",e=>{if(e.targe
 document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;render();}});
 
 loadCodes();
+
+// Contact modal
+const AD_EMAIL = 'HeyVinoMarketing@gmail.com';
+const overlay = document.getElementById('contactOverlay');
+document.querySelectorAll('.ad-placeholder-cta').forEach(btn => {
+  btn.addEventListener('click', e => { e.preventDefault(); overlay.classList.add('open'); });
+});
+document.getElementById('contactClose').addEventListener('click', () => overlay.classList.remove('open'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+document.getElementById('contactCopy').addEventListener('click', function() {
+  navigator.clipboard.writeText(AD_EMAIL).then(() => {
+    this.textContent = '✓ Copied!';
+    this.classList.add('copied');
+    setTimeout(() => { this.textContent = 'Copy'; this.classList.remove('copied'); }, 2000);
+  });
+});
 </script>
+
+<!-- CONTACT MODAL -->
+<div class="contact-overlay" id="contactOverlay">
+  <div class="contact-modal">
+    <button class="contact-modal-close" id="contactClose">✕</button>
+    <div class="contact-modal-icon">🍷</div>
+    <div class="contact-modal-title">Advertise on HeyVino</div>
+    <div class="contact-modal-sub">Reach thousands of wine enthusiasts daily. Send us an email to get started.</div>
+    <div class="contact-email-box">
+      <span class="contact-email-text">HeyVinoMarketing@gmail.com</span>
+      <button class="contact-copy-btn" id="contactCopy">Copy</button>
+    </div>
+    <a class="contact-mailto-btn" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20%E2%80%94%20HeyVino">Open in email app →</a>
+  </div>
+</div>
 </body>
 </html>
