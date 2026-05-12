@@ -145,6 +145,8 @@
   .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; }
   .discount { font-weight: 700; color: var(--wine); font-size: 0.88rem; }
   .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
+  .visit-site-link { display: inline-block; margin-top: 0.55rem; font-size: 0.72rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
+  .visit-site-link:hover { color: var(--gold-light); text-decoration: underline; }
 
   /* SIDEBAR */
   .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
@@ -402,7 +404,7 @@ async function loadCodes() {
     country:    row.country          || '',
     expiry:     row.expiry_date      || row.expiry    || '',
     featured:   row.is_featured      || row.featured  || false,
-    website:    row.website          || ''
+    website_url: row.website_url || row.website || ''
   }));
 
   // Remove duplicates — same promo code from the same winery
@@ -452,7 +454,7 @@ function cardHTML(c) {
     <div class="card-body">
       <div class="card-head">
         <div class="winery-avatar">${initials}</div>
-        <div><div class="winery-name">${c.winery}</div><div class="winery-region">${flag} ${c.region}, ${c.country}</div>${c.website?`<a class="winery-link" href="${c.website}" target="_blank" rel="noopener">Visit site →</a>`:""}</div>
+        <div><div class="winery-name">${c.winery}</div><div class="winery-region">${flag} ${c.region}, ${c.country}</div></div>
       </div>
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
       <div class="code-block">
@@ -460,6 +462,7 @@ function cardHTML(c) {
         <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
       </div>
       <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${c.discount}${c.conditions?`<span class="conditions"> · ${c.conditions}</span>`:''}</span></div>
+      ${c.website_url?`<a class="visit-site-link" href="${c.website_url}" target="_blank" rel="noopener">Visit Site →</a>`:''}
     </div>
   </div>`;
 }
