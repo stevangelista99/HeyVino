@@ -328,28 +328,37 @@ let CODES = [];
 async function loadCodes() {
   document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:1rem">Loading deals…</div></div>';
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=*`, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
       }
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    );
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Supabase error ${res.status}:`, body);
+      throw new Error(`HTTP ${res.status}`);
+    }
     const data = await res.json();
+    console.log(`Loaded ${data.length} promo codes from Supabase`);
     CODES = data.map(row => ({
       id: row.id,
-      winery: row.winery,
+      winery: row.winery_name,
       code: row.code,
-      discount: row.discount,
-      type: row.type,
+      discount: row.discount_amount,
+      type: row.varietal_type,
       varietal: row.varietal,
       region: row.region,
       country: row.country,
-      expiry: row.expiry,
-      featured: row.featured,
+      expiry: row.expiry_date,
+      featured: row.is_featured,
       website: row.website
     }));
   } catch (err) {
+    console.error('Failed to load promo codes:', err);
     document.getElementById("cardGroups").innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><div style="font-size:1rem;font-weight:600">Failed to load deals. Please refresh.</div></div>';
     return;
   }
