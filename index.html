@@ -471,9 +471,9 @@ let activeTab="all", activeVarietal="all", activeRegion="all", searchQ="";
 function daysUntil(d) { return Math.ceil((new Date(d)-new Date())/86400000); }
 
 function expiryHTML(expiry) {
-  if(!expiry) return `<span class="expiry"><span class="expiry-text-na">N/A</span></span>`;
+  if(!expiry) return `<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>`;
   const date=new Date(expiry);
-  if(isNaN(date.getTime())) return `<span class="expiry"><span class="expiry-text-na">N/A</span></span>`;
+  if(isNaN(date.getTime())) return `<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>`;
   const d=daysUntil(expiry);
   if(d<0) return `<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>`;
   if(d<=21) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">⚠️ ${d}d left</span></span>`;
