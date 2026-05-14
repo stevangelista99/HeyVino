@@ -73,13 +73,6 @@
   .search-wrap { width: 100%; display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--stone); border-radius: 4px; padding: 6px 12px; }
   .search-wrap input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; color: var(--ink); width: 100%; background: transparent; }
 
-  /* ── TABS (scrollable, no scrollbar) ── */
-  .tabs { display: flex; border-bottom: 2px solid var(--stone); margin-bottom: 1.75rem; overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { padding: 11px 18px; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: none; border-bottom: 2.5px solid transparent; margin-bottom: -2px; background: transparent; color: var(--muted); transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-  .tab:hover { color: var(--wine); }
-  .tab.active { color: var(--wine); border-bottom-color: var(--wine); font-weight: 600; }
-
   /* ── LAYOUT (mobile-first: single column, 1rem padding) ── */
   .main { max-width: 1400px; margin: 0 auto; padding: 1rem; display: grid; grid-template-columns: 1fr; gap: 2.5rem; }
   .sidebar { display: none; flex-direction: column; gap: 1.5rem; }
@@ -281,6 +274,7 @@
       <button class="chip" data-filter="white">🥂 White</button>
       <button class="chip" data-filter="rose">🌹 Rosé</button>
       <button class="chip" data-filter="sparkling">✨ Sparkling</button>
+      <button class="chip" data-filter="featured">⭐ Featured</button>
     </div>
     <div class="search-wrap">
       <span>🔍</span>
@@ -305,14 +299,6 @@
 <!-- MAIN -->
 <div class="main">
   <div id="content">
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-tab="all">🍇 All Wines</button>
-      <button class="tab" data-tab="featured">⭐ Featured</button>
-      <button class="tab" data-tab="red">🍷 Red</button>
-      <button class="tab" data-tab="white">🥂 White</button>
-      <button class="tab" data-tab="rose">🌹 Rosé</button>
-      <button class="tab" data-tab="sparkling">✨ Sparkling</button>
-    </div>
     <div id="cardGroups"></div>
   </div>
 
@@ -466,7 +452,7 @@ async function loadCodes() {
 
 const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
-let activeTab="all", activeVarietal="all", activeRegion="all", searchQ="";
+let activeVarietal="all", activeRegion="all", searchQ="";
 
 function daysUntil(d) { return Math.ceil((new Date(d)-new Date())/86400000); }
 
@@ -508,12 +494,11 @@ function cardHTML(c) {
 
 function render() {
   const filtered=CODES.filter(c=>{
-    const mT=activeTab==="all"||c.type===activeTab||(activeTab==="featured"&&c.featured);
-    const mV=activeVarietal==="all"||c.type===activeVarietal;
+    const mV=activeVarietal==="all"||c.type===activeVarietal||(activeVarietal==="featured"&&c.featured);
     const mR=activeRegion==="all"||c.country===activeRegion;
     const q=searchQ.toLowerCase();
     const mQ=!q||(c.winery||'').toLowerCase().includes(q)||(c.code||'').toLowerCase().includes(q)||(c.varietal||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q);
-    return mT&&mV&&mR&&mQ;
+    return mV&&mR&&mQ;
   });
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
   const napaCAbs=filtered.filter(c=>(c.varietal||'').includes("Cabernet Sauvignon")&&c.country==="USA");
@@ -544,7 +529,6 @@ function renderExpiring() {
 function copyCode(btn,code){navigator.clipboard.writeText(code).then(()=>{btn.textContent="✓ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("copied");},2000);});}
 function filterCards(){searchQ=document.getElementById("searchInput").value;render();}
 
-document.getElementById("tabs").addEventListener("click",e=>{if(e.target.classList.contains("tab")){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));e.target.classList.add("active");activeTab=e.target.dataset.tab;render();}});
 document.getElementById("varietalChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeVarietal=e.target.dataset.filter;render();}});
 document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;render();}});
 
