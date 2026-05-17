@@ -152,6 +152,17 @@ function extractPromoCode(subject, body, from) {
   };
 }
 
+function extractForwardedBody(body) {
+  const fwdIndex = body.indexOf('---------- Forwarded message');
+  if (fwdIndex === -1) return body;
+  return body.slice(fwdIndex);
+}
+
+function extractOriginalSender(body) {
+  const fwdMatch = body.match(/From:\s+.+<([^>]+)>/);
+  return fwdMatch ? fwdMatch[1] : null;
+}
+
 function cleanBody(raw) {
   if (!raw) return '';
   return raw
@@ -172,8 +183,10 @@ module.exports = async function handler(req, res) {
 
   try {
     const { subject = '', from = '', body = '', text = '', html = '' } = req.body;
-    const cleanedBody = cleanBody(text || body || html);
-    const result = extractPromoCode(subject, cleanedBody, from);
+    const rawBody = extractForwardedBody(text || body || html);
+    const cleanedBody = cleanBody(rawBody);
+    const effectiveFrom = extractOriginalSender(rawBody) || from;
+    const result = extractPromoCode(subject, cleanedBody, effectiveFrom);
 
     if (!result || !result.code) return res.status(200).json({ message: 'No promo code found' });
 
