@@ -152,12 +152,28 @@ function extractPromoCode(subject, body, from) {
   };
 }
 
+function cleanBody(raw) {
+  if (!raw) return '';
+  return raw
+    .replace(/<[^>]+>/g, ' ')          // strip HTML tags
+    .replace(/&nbsp;/g, ' ')           // decode &nbsp;
+    .replace(/&amp;/g, '&')            // decode &amp;
+    .replace(/&lt;/g, '<')             // decode &lt;
+    .replace(/&gt;/g, '>')             // decode &gt;
+    .replace(/&quot;/g, '"')           // decode &quot;
+    .replace(/&#39;/g, "'")            // decode &#39;
+    .replace(/https?:\/\/\S+/g, ' ')  // remove URLs
+    .replace(/\s+/g, ' ')             // collapse whitespace
+    .trim();
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { subject = '', from = '', body = '' } = req.body;
-    const result = extractPromoCode(subject, body, from);
+    const { subject = '', from = '', body = '', text = '', html = '' } = req.body;
+    const cleanedBody = cleanBody(text || body || html);
+    const result = extractPromoCode(subject, cleanedBody, from);
 
     if (!result || !result.code) return res.status(200).json({ message: 'No promo code found' });
 
