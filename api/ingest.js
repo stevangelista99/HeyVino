@@ -184,7 +184,11 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { subject = '', from = '', body = '', text = '', html = '' } = req.body;
+    // Log full payload structure to diagnose Pipedream field names
+    console.log('FULL BODY KEYS:', JSON.stringify(Object.keys(req.body || {})));
+    console.log('FULL BODY SAMPLE:', JSON.stringify(req.body).slice(0, 500));
+
+    const { subject = '', from = '', body = '', text = '', html = '' } = req.body || {};
     const rawBody = extractForwardedBody(text || body || html);
     const cleanedBody = cleanBody(rawBody);
     const effectiveFrom = extractOriginalSender(rawBody) || from;
