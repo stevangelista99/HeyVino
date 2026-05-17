@@ -1,13 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+module.exports.config = { api: { bodyParser: { sizeLimit: '1mb' } } };
+
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 function extractPromoCode(subject, body, from) {
   // Normalize text — remove asterisks, replace smart quotes with straight quotes
   const normalize = (text) => text
-    .replace(/\*/g, '')
-    .replace(/[“”]/g, '”')
-    .replace(/['']/g, “'”)
+    .replace(/[*]/g, '')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
@@ -150,7 +152,7 @@ function extractPromoCode(subject, body, from) {
   };
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
