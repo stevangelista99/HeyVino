@@ -7,6 +7,10 @@ function extractPromoCode(subject, body, from) {
 
   // Match promo codes — uppercase words 4-20 chars, often near keywords
   const codePatterns = [
+    /["“”]([A-Z0-9]{4,20})["“”]/g,
+    /promo\s+code\s+["“”]?([A-Z0-9]{4,20})["“”]?/gi,
+    /code\s+["“”]([A-Z0-9]{4,20})["“”]/gi,
+    /["“”]([A-Z0-9]{4,20})["“”]\s+at\s+checkout/gi,
     /(?:code|promo|coupon|use|enter|apply)[:\s]+([A-Z0-9]{4,20})/gi,
     /([A-Z0-9]{4,20})\s+(?:for|to get|to save|off)/gi,
     /\b([A-Z]{2,}[0-9]{1,4}|[A-Z0-9]{5,15})\b/g
