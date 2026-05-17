@@ -7,12 +7,14 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 function extractPromoCode(subject, body, from) {
   // Normalize text — remove asterisks, replace smart quotes with straight quotes
   const normalize = (text) => text
-    .replace(/[*]/g, '')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+    .replace(/\*/g, '')
+    .replace(/\u201c|\u201d/g, '"')
+    .replace(/\u2018|\u2019/g, "'")
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"');
 
   const rawText = `${subject} ${body}`;
   const text = normalize(rawText);
@@ -186,6 +188,7 @@ module.exports = async function handler(req, res) {
     const rawBody = extractForwardedBody(text || body || html);
     const cleanedBody = cleanBody(rawBody);
     const effectiveFrom = extractOriginalSender(rawBody) || from;
+    console.log('NORMALIZED SAMPLE:', cleanedBody.slice(0, 500));
     const result = extractPromoCode(subject, cleanedBody, effectiveFrom);
 
     if (!result || !result.code) return res.status(200).json({ message: 'No promo code found' });
