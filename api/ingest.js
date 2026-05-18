@@ -18,6 +18,7 @@ function extractPromoCode(subject, body, from) {
 
   const rawText = `${subject} ${body}`;
   const text = normalize(rawText);
+  console.log('LOOKING FOR CODE IN:', text.slice(0, 800));
 
   // Common words to exclude from code detection
   const EXCLUDE = new Set(['HTTP', 'HTML', 'VIEW', 'SHOP', 'WINE', 'YOUR', 'FREE', 'THIS', 'THAT', 'WITH', 'FROM', 'HAVE', 'MORE', 'WILL', 'ALSO', 'BEEN', 'WERE', 'THEY', 'WHEN', 'WHAT', 'HERE', 'DEAR', 'JUST', 'OVER', 'ONLY', 'PLUS', 'SAVE', 'SALE', 'LAST', 'BEST', 'WINE', 'WINES', 'WINERY', 'CLICK', 'SHOP', 'ENJOY', 'MISS', 'DAYS', 'TAKE', 'MAKE', 'NEED', 'KNOW', 'COME', 'LOOK', 'GOOD', 'BACK', 'NEXT', 'CASE', 'EACH', 'BOTH', 'MANY', 'MOST', 'SOME', 'SUCH', 'THAN', 'THEN', 'THEM', 'WELL', 'BEEN', 'MUCH', 'EVEN', 'ALSO', 'AWAY', 'INTO', 'DOES', 'MADE', 'SAID', 'USED']);
