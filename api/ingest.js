@@ -42,6 +42,12 @@ module.exports = async function handler(req, res) {
     const EXCLUDE = new Set(['WINE','WINES','WINERY','SHOP','SALE','DEAL','DEALS','FREE','THIS','THAT','WITH','FROM','HAVE','MORE','WILL','ALSO','BEEN','WERE','THEY','WHEN','WHAT','HERE','DEAR','JUST','OVER','ONLY','PLUS','SAVE','LAST','BEST','CLICK','ENJOY','MISS','DAYS','TAKE','MAKE','NEED','KNOW','COME','LOOK','GOOD','BACK','NEXT','EACH','MANY','MOST','SOME','THAN','THEN','THEM','WELL','MUCH','EVEN','AWAY','INTO','YOUR','VIEW','BOTTLE','BOTTLES','HOURS','PRICE','PRICES','RESET','FINAL','EXTRA','CASE','SAVINGS','TODAY','ORDER','ORDERS','CART','CHECKOUT','EMAIL','TERMS','STORE','SHIPPING','DELIVERY','MEMBER','MEMBERS','JOIN','SIGN','LEARN','GIFT','GIFTS','SETS','OFFER','OFFERS','ONLINE','STANDARD','GROUND','ABOUT','CONTACT','PRIVACY','UNSUBSCRIBE','LOGIN','ACCOUNT','CART','SHOP']);
 
     const patterns = [
+      /use\s+promo\s+code\s+([A-Z0-9]{4,20})/gi,
+      /enter\s+code\s+([A-Z0-9]{4,20})/gi,
+      /apply\s+code\s+([A-Z0-9]{4,20})/gi,
+      /use\s+([A-Z0-9]{4,20})\s+at\s+checkout/gi,
+      /code\s+([A-Z0-9]{4,20})\s+at\s+checkout/gi,
+      /discount\s+code[:\s]+([A-Z0-9]{4,20})/gi,
       /promo(?:tion)?\s+code\s*[:\s]*["']?([A-Z0-9]{4,20})["']?/gi,
       /use\s+code\s*[:\s]*["']?([A-Z0-9]{4,20})["']?/gi,
       /discount\s+code\s*[:\s]*["']?([A-Z0-9]{4,20})["']?/gi,
