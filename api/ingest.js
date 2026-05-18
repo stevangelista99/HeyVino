@@ -28,18 +28,36 @@ module.exports = async function handler(req, res) {
 
   try {
     if (subject === 'undefined') subject = '';
-    const effectiveFrom = (from === 'undefined' || !from) ? '' : from;
+    if (from === 'undefined') from = '';
 
-    // Step 1: Extract original sender from forwarded email
-    const originalFromMatch = rawBody.match(/From:\s+[^\n]*<([^>]+@[^>]+)>/);
-    const senderEmail = (originalFromMatch && !originalFromMatch[1].includes('gmail.com'))
-      ? originalFromMatch[1]
-      : effectiveFrom;
+    // Step 1 & 2: Determine winery name from multiple sources
+    let winery_name = 'Unknown';
+    let domain = 'unknown';
 
-    // Step 2: Get domain for winery name
-    const domainMatch = senderEmail.match(/@([^.>]+)/);
-    const domain = domainMatch ? domainMatch[1] : 'unknown';
-    const winery_name = domain.charAt(0).toUpperCase() + domain.slice(1);
+    // 1. Try original sender from forwarded email
+    const originalFromMatch = rawBody.match(/From:\s+[^\n<]*<([^>]+@[^>]+)>/);
+    if (originalFromMatch && !originalFromMatch[1].includes('gmail.com')) {
+      const d = originalFromMatch[1].match(/@([^.>]+)/);
+      if (d) { domain = d[1]; winery_name = d[1].charAt(0).toUpperCase() + d[1].slice(1); }
+    }
+
+    // 2. Try from field if not undefined
+    if (winery_name === 'Unknown' && from) {
+      const d = from.match(/@([^.>]+)/);
+      if (d) { domain = d[1]; winery_name = d[1].charAt(0).toUpperCase() + d[1].slice(1); }
+    }
+
+    // 3. Try to extract winery name from email signature patterns
+    if (winery_name === 'Unknown') {
+      const signatureMatch = rawBody.match(/(?:regards|sincerely|cheers|team)[,\s]+\n?([A-Z][a-zA-Z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i);
+      if (signatureMatch) winery_name = signatureMatch[1].trim();
+    }
+
+    // 4. Try subject line for winery name
+    if (winery_name === 'Unknown' && subject) {
+      const subjectMatch = subject.match(/(?:from|welcome to|exclusive offer from)\s+([A-Z][a-zA-Z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i);
+      if (subjectMatch) winery_name = subjectMatch[1].trim();
+    }
 
     // Step 3: Normalize text
     // Extract text after last forwarded message header block
