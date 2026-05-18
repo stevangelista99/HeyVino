@@ -21,11 +21,16 @@ module.exports = async function handler(req, res) {
     const winery_name = domain.charAt(0).toUpperCase() + domain.slice(1);
 
     // Step 3: Normalize text
-    const text = rawBody
+    // Extract text after last forwarded message header block
+    const lastFwdIndex = rawBody.lastIndexOf('---------- Forwarded message');
+    const bodyToProcess = lastFwdIndex !== -1 ? rawBody.slice(lastFwdIndex) : rawBody;
+
+    const text = bodyToProcess
       .replace(/\*/g, '')
-      .replace(/“|”/g, '"')
-      .replace(/‘|’/g, "'")
-      .replace(/https?:\/\/\S+/g, ' ')
+      .replace(/"|"/g, '"')
+      .replace(/'|'/g, "'")
+      .replace(/<https?:\/\/[^>]+>/g, ' ')
+      .replace(/\bhttps?:\/\/[^\s<>"{}|\\^`[\]]+/g, ' ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&[a-z]+;/g, ' ')
       .replace(/\s+/g, ' ')
