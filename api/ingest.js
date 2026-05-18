@@ -1,6 +1,41 @@
-// v2
+// v3
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+function extractWineryName(rawBody, fromEmail) {
+  // 1. Try "From:" line inside forwarded email first
+  const fwdFromMatch = rawBody.match(/From:\s+([^<\n]+?)\s*</);
+  if (fwdFromMatch) {
+    const name = fwdFromMatch[1].trim();
+    if (name && !name.toLowerCase().includes('gmail') && !name.toLowerCase().includes('stephen')) {
+      return name;
+    }
+  }
+
+  // 2. Try email signature — "Warm regards, Winery Name" or "The Winery Name Team"
+  const signatureMatch = rawBody.match(/(?:regards|sincerely|cheers|warmly|thank you)[,\.\s\n]+([A-Z][A-Za-z\s&'.]{3,50}?)(?:\n|Team|Winery|Cellars|Vineyards|Estate)/i);
+  if (signatureMatch) return signatureMatch[1].trim();
+
+  // 3. Try "Welcome to X" or "Thank you for joining X"
+  const welcomeMatch = rawBody.match(/(?:welcome to|thank you for joining|joining the)\s+([A-Z][A-Za-z\s&'.]{3,50}?)(?:\s+(?:family|mailing|community|newsletter|list)|[!\.,])/i);
+  if (welcomeMatch) return welcomeMatch[1].trim();
+
+  // 4. Try "from X" in subject context
+  const fromMatch = rawBody.match(/(?:exclusive offer|gift|message|update)\s+from\s+([A-Z][A-Za-z\s&'.]{3,50}?)(?:[!\.,\n])/i);
+  if (fromMatch) return fromMatch[1].trim();
+
+  // 5. Fall back to domain with proper formatting
+  const domainMatch = (fromEmail || '').match(/@([^.]+)/);
+  if (domainMatch) {
+    return domainMatch[1]
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .split(/(?=[A-Z])/).join(' ')
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .trim();
+  }
+
+  return 'Unknown Winery';
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -30,46 +65,16 @@ module.exports = async function handler(req, res) {
     if (subject === 'undefined') subject = '';
     if (from === 'undefined') from = '';
 
-    // Step 1 & 2: Determine winery name from multiple sources
-    let winery_name = 'Unknown';
-    let domain = 'unknown';
-
-    // 1. Try original sender from forwarded email
+    // Step 1 & 2: Determine winery name and domain
     const originalFromMatch = rawBody.match(/From:\s+[^\n<]*<([^>]+@[^>]+)>/);
-    if (originalFromMatch && !originalFromMatch[1].includes('gmail.com')) {
-      const d = originalFromMatch[1].match(/@([^.>]+)/);
-      if (d) { domain = d[1]; winery_name = d[1].charAt(0).toUpperCase() + d[1].slice(1); }
-    }
+    const senderEmail = (originalFromMatch && !originalFromMatch[1].includes('gmail.com'))
+      ? originalFromMatch[1]
+      : from;
 
-    // 2. Try from field if not undefined
-    if (winery_name === 'Unknown' && from) {
-      const d = from.match(/@([^.>]+)/);
-      if (d) { domain = d[1]; winery_name = d[1].charAt(0).toUpperCase() + d[1].slice(1); }
-    }
+    const domainMatch = (senderEmail || from || '').match(/@([^.>]+)/);
+    const domain = domainMatch ? domainMatch[1] : 'unknown';
 
-    // 3. Try subject line for winery name
-    if (winery_name === 'Unknown' && subject) {
-      const subjectMatch = subject.match(/(?:from|welcome to|exclusive offer from)\s+([A-Z][a-zA-Z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i);
-      if (subjectMatch) winery_name = subjectMatch[1].trim();
-    }
-
-    // 4. Try winery name patterns in email body
-    if (winery_name === 'Unknown') {
-      const signaturePatterns = [
-        /(?:regards|sincerely|cheers|thank you)[,\s\n]+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards|Team))/i,
-        /([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))\s+Team/i,
-        /welcome to\s+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
-        /from\s+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
-        /([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
-      ];
-      for (const pattern of signaturePatterns) {
-        const match = rawBody.match(pattern);
-        if (match) {
-          winery_name = match[1].trim().replace(/\s+Team$/, '');
-          break;
-        }
-      }
-    }
+    const winery_name = extractWineryName(rawBody, senderEmail || from);
 
     // Step 3: Normalize text
     // Extract text after last forwarded message header block
