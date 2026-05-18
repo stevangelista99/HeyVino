@@ -47,16 +47,28 @@ module.exports = async function handler(req, res) {
       if (d) { domain = d[1]; winery_name = d[1].charAt(0).toUpperCase() + d[1].slice(1); }
     }
 
-    // 3. Try to extract winery name from email signature patterns
-    if (winery_name === 'Unknown') {
-      const signatureMatch = rawBody.match(/(?:regards|sincerely|cheers|team)[,\s]+\n?([A-Z][a-zA-Z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i);
-      if (signatureMatch) winery_name = signatureMatch[1].trim();
-    }
-
-    // 4. Try subject line for winery name
+    // 3. Try subject line for winery name
     if (winery_name === 'Unknown' && subject) {
       const subjectMatch = subject.match(/(?:from|welcome to|exclusive offer from)\s+([A-Z][a-zA-Z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i);
       if (subjectMatch) winery_name = subjectMatch[1].trim();
+    }
+
+    // 4. Try winery name patterns in email body
+    if (winery_name === 'Unknown') {
+      const signaturePatterns = [
+        /(?:regards|sincerely|cheers|thank you)[,\s\n]+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards|Team))/i,
+        /([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))\s+Team/i,
+        /welcome to\s+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
+        /from\s+([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
+        /([A-Z][A-Za-z\s]+(?:Winery|Vineyard|Cellars|Estate|Wines|Vineyards))/i,
+      ];
+      for (const pattern of signaturePatterns) {
+        const match = rawBody.match(pattern);
+        if (match) {
+          winery_name = match[1].trim().replace(/\s+Team$/, '');
+          break;
+        }
+      }
     }
 
     // Step 3: Normalize text
