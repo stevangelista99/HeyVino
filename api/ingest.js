@@ -7,17 +7,18 @@ module.exports = async function handler(req, res) {
 
   try {
     const rawBody = req.body?.body || req.body?.text || req.body?.html || req.body?.decodedContent || '';
-    const subject = req.body?.subject || '';
-    const from = req.body?.from || '';
+    const subject = (req.body?.subject === 'undefined' || !req.body?.subject) ? '' : req.body.subject;
+    const rawFrom = req.body?.from || '';
+    const effectiveFrom = (rawFrom === 'undefined' || !rawFrom) ? '' : rawFrom;
 
     // Step 1: Extract original sender from forwarded email
     const originalFromMatch = rawBody.match(/From:\s+[^\n]*<([^>]+@[^>]+)>/);
-    const effectiveFrom = (originalFromMatch && !originalFromMatch[1].includes('gmail.com'))
+    const senderEmail = (originalFromMatch && !originalFromMatch[1].includes('gmail.com'))
       ? originalFromMatch[1]
-      : from;
+      : effectiveFrom;
 
     // Step 2: Get domain for winery name
-    const domainMatch = effectiveFrom.match(/@([^.>]+)/);
+    const domainMatch = senderEmail.match(/@([^.>]+)/);
     const domain = domainMatch ? domainMatch[1] : 'unknown';
     const winery_name = domain.charAt(0).toUpperCase() + domain.slice(1);
 
