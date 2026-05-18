@@ -124,13 +124,20 @@ module.exports = async function handler(req, res) {
     else if (/burgundy/i.test(text)) { region = 'Burgundy'; country = 'France'; }
 
     // Step 8: Save
-    await supabase.from('promo_codes').insert({
-      winery_name, code, discount_amount, discount_type, varietal_type,
-      region, country, description: subject.slice(0, 200) || text.slice(0, 200),
-      website_url: `https://www.${domain}.com`,
-      source_email_date: new Date().toISOString().split('T')[0],
-      is_active: true, is_featured: false
-    });
+    console.log('ATTEMPTING SAVE:', JSON.stringify({winery_name, code, discount_amount, varietal_type, region, country}));
+    try {
+      const insertResult = await supabase.from('promo_codes').insert({
+        winery_name, code, discount_amount, discount_type, varietal_type,
+        region, country, description: subject.slice(0, 200) || text.slice(0, 200),
+        website_url: `https://www.${domain}.com`,
+        source_email_date: new Date().toISOString().split('T')[0],
+        is_active: true, is_featured: false
+      });
+      console.log('INSERT RESULT:', JSON.stringify(insertResult));
+    } catch(insertError) {
+      console.log('INSERT ERROR:', insertError.message);
+      return res.status(500).json({ error: insertError.message });
+    }
 
     return res.status(200).json({ message: 'Saved', code, winery: winery_name });
 
