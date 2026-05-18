@@ -5,11 +5,30 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  let rawBody = '';
+  let subject = '';
+  let from = '';
+
   try {
-    const rawBody = req.body?.body || req.body?.text || req.body?.html || req.body?.decodedContent || '';
-    const subject = (req.body?.subject === 'undefined' || !req.body?.subject) ? '' : req.body.subject;
-    const rawFrom = req.body?.from || '';
-    const effectiveFrom = (rawFrom === 'undefined' || !rawFrom) ? '' : rawFrom;
+    rawBody = req.body?.body || req.body?.text || req.body?.html || req.body?.decodedContent || '';
+    subject = req.body?.subject || '';
+    from = req.body?.from || '';
+
+    // If rawBody is undefined or the string "undefined", try parsing req.body as raw string
+    if (!rawBody || rawBody === 'undefined') {
+      const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      rawBody = bodyStr;
+    }
+  } catch(e) {
+    rawBody = '';
+  }
+
+  console.log('RAW BODY LENGTH:', rawBody.length);
+  console.log('RAW BODY START:', rawBody.slice(0, 100));
+
+  try {
+    if (subject === 'undefined') subject = '';
+    const effectiveFrom = (from === 'undefined' || !from) ? '' : from;
 
     // Step 1: Extract original sender from forwarded email
     const originalFromMatch = rawBody.match(/From:\s+[^\n]*<([^>]+@[^>]+)>/);
