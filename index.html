@@ -235,7 +235,7 @@
     <li><a href="#">Red Wines</a></li>
     <li><a href="#">White Wines</a></li>
     <li><a href="#">Regions</a></li>
-    <li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise</a></li>
+    <li><a href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise</a></li>
   </ul>
   <button class="nav-cta">Get Alerts</button>
 </nav>
@@ -266,7 +266,7 @@
   <div class="ad-placeholder-sign">
     <span class="ad-placeholder-label">Advertisement</span>
     <div class="ad-placeholder-heading">🍷 Work With HeyVino — reach thousands of active wine buyers through advertising or an exclusive promotional partnership. Email HeyVinoMarketing@gmail.com</div>
-    <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Get In Touch →</a>
+    <a class="ad-placeholder-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Get In Touch →</a>
   </div>
 </div>
 
@@ -314,7 +314,7 @@
         <span class="ad-placeholder-label">Advertise With Us</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Advertise With Us</div>
         <div class="ad-placeholder-sub">Place your brand in front of thousands of engaged wine lovers. Banner ads and featured placements available.</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Inquire Now →</a>
+        <a class="ad-placeholder-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Inquire Now →</a>
       </div>
     </div>
     <div class="widget">
@@ -335,7 +335,7 @@
         <span class="ad-placeholder-label">Exclusive Promo Partnerships</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Exclusive Promo Partnerships</div>
         <div class="ad-placeholder-sub">Interested in creating an exclusive HeyVino promo code for your winery or brand? We'd love to work with you.</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Let's Talk →</a>
+        <a class="ad-placeholder-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Let's Talk →</a>
       </div>
     </div>
     <div class="widget">
@@ -366,7 +366,7 @@
     <div>
       <div class="footer-heading">Business</div>
       <ul class="footer-links">
-        <li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise With Us</a></li><li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Partner Vineyards</a></li>
+        <li><a href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise With Us</a></li><li><a href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Partner Vineyards</a></li>
         <li><a href="#">Media Kit</a></li><li><a href="#">Distributor Program</a></li>
       </ul>
     </div>
@@ -380,7 +380,7 @@
   </div>
   <div class="footer-bottom">
     <span class="footer-copy">© 2026 HeyVino LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
-    <a class="advertise-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise Here →</a>
+    <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise Here →</a>
   </div>
 </footer>
 
@@ -544,6 +544,29 @@ document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.
 
 loadCodes();
 
+function openAdvertiseModal() { document.getElementById('advertiseModal').style.display='flex'; }
+function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display='none'; }
+function copyAdvertiseEmail() {
+  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
+  document.getElementById('copyEmailBtn').textContent='Copied!';
+  setTimeout(() => document.getElementById('copyEmailBtn').textContent='Copy', 2000);
+}
+document.getElementById('advertiseModal').addEventListener('click', function(e) { if(e.target===this) closeAdvertiseModal(); });
+
 </script>
+
+<div id="advertiseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--cream);border-radius:8px;padding:2.5rem;max-width:420px;width:90%;text-align:center;position:relative;">
+    <button onclick="closeAdvertiseModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">×</button>
+    <div style="font-size:2.5rem;margin-bottom:1rem;">🍷</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
+    <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
+      <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
+    </div>
+    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App →</a>
+  </div>
+</div>
 </body>
 </html>
