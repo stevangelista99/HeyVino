@@ -178,24 +178,37 @@ module.exports = async function handler(req, res) {
     if (fixed) { discount_amount = `$${fixed[1]} Off`; discount_type = 'fixed'; }
     if (/free\s*shipping/i.test(text)) { discount_amount = discount_amount || 'Free Shipping'; discount_type = discount_type === 'other' ? 'free_shipping' : discount_type; }
 
-    // Step 6b: Extract conditions
+    // Step 6b: Extract expiry date
+    let expiry_date = null;
+    const expiryPatterns = [
+      /(?:expires?|valid\s+(?:through|until)|ends?|offer\s+ends?|savings?\s+end|use\s+by|through)\s+([A-Za-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /(?:expires?|valid\s+(?:through|until)|ends?|offer\s+ends?|savings?\s+end|use\s+by)\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /(?:expires?|valid\s+(?:through|until)|ends?)\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/i,
+    ];
+    for (const pattern of expiryPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const parsed = new Date(match[1]);
+        if (!isNaN(parsed)) {
+          expiry_date = parsed.toISOString().split('T')[0];
+          break;
+        }
+      }
+    }
+
+    // Step 6c: Extract conditions
     const conditionsPatterns = [
       /(?:minimum|min\.?)\s+(?:order|purchase|spend)?\s*(?:of\s*)?\$?[\d,]+\+?[^.]{0,50}/gi,
       /(?:orders?|purchases?)\s+(?:over|of|above)\s+\$?[\d,]+[^.]{0,50}/gi,
       /\d+\+?\s+bottles?\s+[^.]{0,60}/gi,
-      /(?:on|for)\s+(?:orders? of\s*)?\d+\s+(?:or more\s+)?bottles?[^.]{0,60}/gi,
       /(?:one|1|limit\s+one)\s+(?:use|per|time)[^.]{0,60}/gi,
       /(?:first|new)\s+(?:order|purchase|customers?|time)[^.]{0,60}/gi,
       /one\s+per\s+(?:customer|household|person|account)[^.]{0,60}/gi,
       /(?:cannot|can't|not)\s+(?:be\s+)?combined[^.]{0,80}/gi,
-      /(?:excludes?|exclusions?|does\s+not\s+apply)[^.]{0,80}/gi,
-      /(?:valid\s+on|applies?\s+to)\s+(?:select|eligible|participating)[^.]{0,60}/gi,
-      /(?:online\s+only|in.store\s+only|website\s+only)[^.]{0,40}/gi,
-      /(?:members?|club\s+members?|wine\s+club)[^.]{0,60}/gi,
-      /(?:valid\s+(?:through|until)|ends?|expires?|offer\s+ends?)\s+[A-Za-z0-9\s,]+/gi,
+      /(?:excludes?|exclusions?)\s+[^.]{0,80}/gi,
+      /(?:online\s+only|in.store\s+only)[^.]{0,40}/gi,
       /while\s+supplies\s+last[^.]{0,40}/gi,
     ];
-
     const conditionMatches = [];
     const seen = new Set();
     for (const pattern of conditionsPatterns) {
@@ -232,7 +245,7 @@ module.exports = async function handler(req, res) {
     try {
       const insertResult = await supabase.from('promo_codes').insert({
         winery_name, code, discount_amount, discount_type, varietal_type,
-        region, country, conditions, description: subject.slice(0, 200) || text.slice(0, 200),
+        region, country, conditions, expiry_date, description: subject.slice(0, 200) || text.slice(0, 200),
         website_url: `https://www.${domain}.com`,
         source_email_date: new Date().toISOString().split('T')[0],
         is_active: true, is_featured: false
