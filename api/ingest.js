@@ -18,7 +18,29 @@ const DOMAIN_CORRECTIONS = {
   'farniente': 'Far Niente Winery',
   'silveroak': 'Silver Oak Cellars',
   'casaemma': 'Casa Emma',
-  'baracchiwinery': 'Baracchi Winery'
+  'baracchiwinery': 'Baracchi Winery',
+  'penfolds': 'Penfolds',
+  'rsvp': null
+};
+
+const DOMAIN_COUNTRIES = {
+  'penfolds': { country: 'Australia', region: 'Barossa Valley' },
+  'wolfblass': { country: 'Australia', region: 'Barossa Valley' },
+  'jacobscreek': { country: 'Australia', region: 'South Australia' },
+  'yellownz': { country: 'New Zealand', region: 'Marlborough' },
+  'cloudbay': { country: 'New Zealand', region: 'Marlborough' },
+  'torbreck': { country: 'Australia', region: 'Barossa Valley' },
+  'catena': { country: 'Argentina', region: 'Mendoza' },
+  'achaval': { country: 'Argentina', region: 'Mendoza' },
+  'drloosen': { country: 'Germany', region: 'Mosel' },
+  'chapoutier': { country: 'France', region: 'Rhone Valley' },
+  'jadot': { country: 'France', region: 'Burgundy' },
+  'drouhin': { country: 'France', region: 'Burgundy' },
+  'antinori': { country: 'Italy', region: 'Tuscany' },
+  'sassicaia': { country: 'Italy', region: 'Tuscany' },
+  'baracchi': { country: 'Italy', region: 'Tuscany' },
+  'casaemma': { country: 'Italy', region: 'Tuscany' },
+  'millesima': { country: 'France', region: 'Bordeaux' },
 };
 
 function extractWineryName(rawBody, fromEmail) {
@@ -234,19 +256,36 @@ module.exports = async function handler(req, res) {
     else if (/sparkling|champagne|prosecco|cava|metodo\s*classico/i.test(text)) varietal_type = 'sparkling';
 
     let region = null, country = 'USA';
-    if (/napa/i.test(text)) { region = 'Napa Valley'; }
-    else if (/sonoma/i.test(text)) { region = 'Sonoma'; }
-    else if (/willamette/i.test(text)) { region = 'Willamette Valley'; }
-    else if (/tuscany|toscana|cortona/i.test(text)) { region = 'Tuscany'; country = 'Italy'; }
-    else if (/burgundy/i.test(text)) { region = 'Burgundy'; country = 'France'; }
+    const domainCountry = DOMAIN_COUNTRIES[domain.toLowerCase()];
+    if (domainCountry) {
+      country = domainCountry.country;
+      region = domainCountry.region;
+    } else {
+      if (/napa/i.test(text)) { region = 'Napa Valley'; }
+      else if (/sonoma/i.test(text)) { region = 'Sonoma'; }
+      else if (/willamette/i.test(text)) { region = 'Willamette Valley'; }
+      else if (/tuscany|toscana|cortona/i.test(text)) { region = 'Tuscany'; country = 'Italy'; }
+      else if (/burgundy/i.test(text)) { region = 'Burgundy'; country = 'France'; }
+    }
+
+    // Step 7b: Build description
+    const description = (() => {
+      const subj = (subject && subject !== 'undefined') ? subject : '';
+      const offerLine = text.match(/(?:enjoy|receive|get|save|use)[^.!?]{10,120}[.!?]/i);
+      if (offerLine) return offerLine[0].trim().slice(0, 200);
+      return subj.slice(0, 200) || text.slice(0, 200);
+    })();
+
+    // Step 7c: Build website URL
+    const website_url = domain ? `https://www.${domain}.com` : null;
 
     // Step 8: Save
     console.log('ATTEMPTING SAVE:', JSON.stringify({winery_name, code, discount_amount, varietal_type, region, country}));
     try {
       const insertResult = await supabase.from('promo_codes').insert({
         winery_name, code, discount_amount, discount_type, varietal_type,
-        region, country, conditions, expiry_date, description: subject.slice(0, 200) || text.slice(0, 200),
-        website_url: `https://www.${domain}.com`,
+        region, country, conditions, expiry_date, description,
+        website_url,
         source_email_date: new Date().toISOString().split('T')[0],
         is_active: true, is_featured: false
       });
