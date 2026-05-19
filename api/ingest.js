@@ -261,19 +261,23 @@ module.exports = async function handler(req, res) {
       country = domainCountry.country;
       region = domainCountry.region;
     } else {
-      if (/napa/i.test(text)) { region = 'Napa Valley'; }
-      else if (/sonoma/i.test(text)) { region = 'Sonoma'; }
-      else if (/willamette/i.test(text)) { region = 'Willamette Valley'; }
-      else if (/tuscany|toscana|cortona/i.test(text)) { region = 'Tuscany'; country = 'Italy'; }
-      else if (/burgundy/i.test(text)) { region = 'Burgundy'; country = 'France'; }
+      // Only scan first 60% of text for region to avoid footer addresses
+      const bodyForRegion = text.slice(0, Math.floor(text.length * 0.6));
+      if (/napa/i.test(bodyForRegion)) { region = 'Napa Valley'; }
+      else if (/sonoma/i.test(bodyForRegion)) { region = 'Sonoma'; }
+      else if (/willamette/i.test(bodyForRegion)) { region = 'Willamette Valley'; }
+      else if (/tuscany|toscana|cortona/i.test(bodyForRegion)) { region = 'Tuscany'; country = 'Italy'; }
+      else if (/burgundy/i.test(bodyForRegion)) { region = 'Burgundy'; country = 'France'; }
     }
 
     // Step 7b: Build description
     const description = (() => {
-      const subj = (subject && subject !== 'undefined') ? subject : '';
-      const offerLine = text.match(/(?:enjoy|receive|get|save|use)[^.!?]{10,120}[.!?]/i);
-      if (offerLine) return offerLine[0].trim().slice(0, 200);
-      return subj.slice(0, 200) || text.slice(0, 200);
+      const codeRef = new RegExp(`(?:use|enter|apply)\\s+(?:code\\s+)?${code}[^.]{0,100}`, 'i');
+      const codeMatch = text.match(codeRef);
+      if (codeMatch) return codeMatch[0].trim().slice(0, 200);
+      const discountMatch = text.match(/(?:enjoy|receive|get|save)\s+[^.]{10,120}\./i);
+      if (discountMatch) return discountMatch[0].trim().slice(0, 200);
+      return (subject && subject !== 'undefined') ? subject.slice(0, 200) : '';
     })();
 
     // Step 7c: Build website URL
