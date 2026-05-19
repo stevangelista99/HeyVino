@@ -179,8 +179,39 @@ module.exports = async function handler(req, res) {
     if (/free\s*shipping/i.test(text)) { discount_amount = discount_amount || 'Free Shipping'; discount_type = discount_type === 'other' ? 'free_shipping' : discount_type; }
 
     // Step 6b: Extract conditions
-    const conditionsMatch = text.match(/(?:minimum|min\.?|spend|purchase|per order|limit|excludes?|not valid|applies? to|bottles?|first order|one.time|cannot combine|free shipping on)[^.]{0,120}/gi);
-    const conditions = conditionsMatch ? conditionsMatch.slice(0, 2).join('. ').trim().slice(0, 200) : null;
+    const conditionsPatterns = [
+      /(?:minimum|min\.?)\s+(?:order|purchase|spend)?\s*(?:of\s*)?\$?[\d,]+\+?[^.]{0,50}/gi,
+      /(?:orders?|purchases?)\s+(?:over|of|above)\s+\$?[\d,]+[^.]{0,50}/gi,
+      /\d+\+?\s+bottles?\s+[^.]{0,60}/gi,
+      /(?:on|for)\s+(?:orders? of\s*)?\d+\s+(?:or more\s+)?bottles?[^.]{0,60}/gi,
+      /(?:one|1|limit\s+one)\s+(?:use|per|time)[^.]{0,60}/gi,
+      /(?:first|new)\s+(?:order|purchase|customers?|time)[^.]{0,60}/gi,
+      /one\s+per\s+(?:customer|household|person|account)[^.]{0,60}/gi,
+      /(?:cannot|can't|not)\s+(?:be\s+)?combined[^.]{0,80}/gi,
+      /(?:excludes?|exclusions?|does\s+not\s+apply)[^.]{0,80}/gi,
+      /(?:valid\s+on|applies?\s+to)\s+(?:select|eligible|participating)[^.]{0,60}/gi,
+      /(?:online\s+only|in.store\s+only|website\s+only)[^.]{0,40}/gi,
+      /(?:members?|club\s+members?|wine\s+club)[^.]{0,60}/gi,
+      /(?:valid\s+(?:through|until)|ends?|expires?|offer\s+ends?)\s+[A-Za-z0-9\s,]+/gi,
+      /while\s+supplies\s+last[^.]{0,40}/gi,
+    ];
+
+    const conditionMatches = [];
+    const seen = new Set();
+    for (const pattern of conditionsPatterns) {
+      pattern.lastIndex = 0;
+      const matches = [...text.matchAll(pattern)];
+      for (const match of matches) {
+        const clean = match[0].trim().replace(/\s+/g, ' ');
+        if (clean.length > 10 && !seen.has(clean.toLowerCase().slice(0, 30))) {
+          seen.add(clean.toLowerCase().slice(0, 30));
+          conditionMatches.push(clean);
+        }
+      }
+    }
+    const conditions = conditionMatches.length > 0
+      ? conditionMatches.slice(0, 3).join('. ').slice(0, 250)
+      : null;
 
     // Step 7: Detect varietal and region
     let varietal_type = null;
