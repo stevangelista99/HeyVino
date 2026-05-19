@@ -459,6 +459,8 @@ async function loadCodes() {
 }
 
 const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
+const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
+function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", searchQ="";
 
@@ -480,14 +482,16 @@ function badgeClass(t){return{red:"badge-red",white:"badge-white",rose:"badge-ro
 
 function cardHTML(c) {
   const initials=(c.winery||'??').split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
-  const flag=FLAGS[c.country]||"🌍";
+  const country=normalizeCountry(c.country);
+  const flag=FLAGS[country]||"🌍";
+  const regionStr=c.region?`${c.region}, ${country}`:country;
   return `<div class="card${c.featured?" featured":""}">
     <div class="card-accent ${accentClass(c.type)}"></div>
     ${c.featured?'<div class="featured-tag">⭐ Featured</div>':""}
     <div class="card-body">
       <div class="card-head">
         <div class="winery-avatar">${initials}</div>
-        <div><div class="winery-name">${c.winery}</div><div class="winery-region">${flag} ${c.region}, ${c.country}</div></div>
+        <div><div class="winery-name">${c.winery}</div><div class="winery-region">${flag} ${regionStr}</div></div>
       </div>
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
       <div class="code-block">
