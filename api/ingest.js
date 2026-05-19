@@ -178,6 +178,10 @@ module.exports = async function handler(req, res) {
     if (fixed) { discount_amount = `$${fixed[1]} Off`; discount_type = 'fixed'; }
     if (/free\s*shipping/i.test(text)) { discount_amount = discount_amount || 'Free Shipping'; discount_type = discount_type === 'other' ? 'free_shipping' : discount_type; }
 
+    // Step 6b: Extract conditions
+    const conditionsMatch = text.match(/(?:minimum|min\.?|spend|purchase|per order|limit|excludes?|not valid|applies? to|bottles?|first order|one.time|cannot combine|free shipping on)[^.]{0,120}/gi);
+    const conditions = conditionsMatch ? conditionsMatch.slice(0, 2).join('. ').trim().slice(0, 200) : null;
+
     // Step 7: Detect varietal and region
     let varietal_type = null;
     if (/cabernet|merlot|pinot\s*noir|syrah|shiraz|malbec|sangiovese|brunello|chianti|zinfandel/i.test(text)) varietal_type = 'red';
@@ -197,7 +201,7 @@ module.exports = async function handler(req, res) {
     try {
       const insertResult = await supabase.from('promo_codes').insert({
         winery_name, code, discount_amount, discount_type, varietal_type,
-        region, country, description: subject.slice(0, 200) || text.slice(0, 200),
+        region, country, conditions, description: subject.slice(0, 200) || text.slice(0, 200),
         website_url: `https://www.${domain}.com`,
         source_email_date: new Date().toISOString().split('T')[0],
         is_active: true, is_featured: false
