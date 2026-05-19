@@ -458,7 +458,7 @@ async function loadCodes() {
   }
 }
 
-const FLAGS = { USA:"🇺🇸", France:"🇫🇷", Italy:"🇮🇹", Spain:"🇪🇸", Australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", Germany:"🇩🇪" };
+const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫🇷", Italy:"🇮🇹", italy:"🇮🇹", Spain:"🇪🇸", spain:"🇪🇸", Australia:"🇦🇺", australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", argentina:"🇦🇷", Germany:"🇩🇪", germany:"🇩🇪" };
 const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
