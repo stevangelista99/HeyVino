@@ -2,8 +2,40 @@
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+const DOMAIN_CORRECTIONS = {
+  'wineinsiders': 'Wine Insiders',
+  'wineaccess': 'Wine Access',
+  'wineenthusiast': 'Wine Enthusiast',
+  'nakedwines': 'Naked Wines',
+  'lastbottle': 'Last Bottle Wines',
+  'klwines': 'K&L Wine Merchants',
+  'robertmondavi': 'Robert Mondavi Winery',
+  'ste-michelle': 'Chateau Ste. Michelle',
+  'ponzivineyards': 'Ponzi Vineyards',
+  'argylewinery': 'Argyle Winery',
+  'heitzcellar': 'Heitz Cellar',
+  'cakebread': 'Cakebread Cellars',
+  'farniente': 'Far Niente Winery',
+  'silveroak': 'Silver Oak Cellars',
+  'casaemma': 'Casa Emma',
+  'baracchiwinery': 'Baracchi Winery'
+};
+
 function extractWineryName(rawBody, fromEmail) {
-  // 1. Try "From:" line inside forwarded email first
+  // 1. Check sender email domain directly
+  const directDomainMatch = (fromEmail || '').match(/@([^.>]+)\./);
+  if (directDomainMatch) {
+    const domain = directDomainMatch[1].toLowerCase();
+    const displayName = domain
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .trim();
+    if (displayName && !['Gmail', 'Yahoo', 'Hotmail', 'Outlook', 'Icloud'].includes(displayName)) {
+      return DOMAIN_CORRECTIONS[domain] || displayName;
+    }
+  }
+
+  // 2. Try "From:" line inside forwarded email
   const fwdFromMatch = rawBody.match(/From:\s+([^<\n]+?)\s*</);
   if (fwdFromMatch) {
     const name = fwdFromMatch[1].trim();
@@ -12,26 +44,28 @@ function extractWineryName(rawBody, fromEmail) {
     }
   }
 
-  // 2. Try email signature — "Warm regards, Winery Name" or "The Winery Name Team"
+  // 3. Try email signature — "Warm regards, Winery Name" or "The Winery Name Team"
   const signatureMatch = rawBody.match(/(?:regards|sincerely|cheers|warmly|thank you)[,\.\s\n]+([A-Z][A-Za-z\s&'.]{3,50}?)(?:\n|Team|Winery|Cellars|Vineyards|Estate)/i);
   if (signatureMatch) return signatureMatch[1].trim();
 
-  // 3. Try "Welcome to X" or "Thank you for joining X"
+  // 4. Try "Welcome to X" or "Thank you for joining X"
   const welcomeMatch = rawBody.match(/(?:welcome to|thank you for joining|joining the)\s+([A-Z][A-Za-z\s&'.]{3,50}?)(?:\s+(?:family|mailing|community|newsletter|list)|[!\.,])/i);
   if (welcomeMatch) return welcomeMatch[1].trim();
 
-  // 4. Try "from X" in subject context
+  // 5. Try "from X" in subject context
   const fromMatch = rawBody.match(/(?:exclusive offer|gift|message|update)\s+from\s+([A-Z][A-Za-z\s&'.]{3,50}?)(?:[!\.,\n])/i);
   if (fromMatch) return fromMatch[1].trim();
 
-  // 5. Fall back to domain with proper formatting
+  // 6. Fall back to domain with proper formatting
   const domainMatch = (fromEmail || '').match(/@([^.]+)/);
   if (domainMatch) {
-    return domainMatch[1]
+    const domain = domainMatch[1].toLowerCase();
+    const displayName = domain
       .replace(/([a-z])([A-Z])/g, '$1 $2')
       .split(/(?=[A-Z])/).join(' ')
       .replace(/\b\w/g, c => c.toUpperCase())
       .trim();
+    return DOMAIN_CORRECTIONS[domain] || displayName;
   }
 
   return 'Unknown Winery';
