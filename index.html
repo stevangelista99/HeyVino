@@ -150,8 +150,6 @@
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
 
   /* ── MISC ── */
-  .email-tooltip { position: fixed; background: var(--ink); color: #fff; font-size: 0.75rem; font-weight: 600; padding: 6px 14px; border-radius: 4px; pointer-events: none; opacity: 0; transition: opacity 0.18s; z-index: 9999; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
-  .email-tooltip.visible { opacity: 1; }
   .featured-section { margin-bottom: 2.5rem; }
   .featured-section-header { background: var(--wine-deep); border-radius: 6px 6px 0 0; padding: 0.75rem 1rem; border-bottom: 2px solid var(--gold); }
   .featured-section-header .section-title { color: var(--gold-light); }
@@ -237,7 +235,7 @@
     <li><a href="#">Red Wines</a></li>
     <li><a href="#">White Wines</a></li>
     <li><a href="#">Regions</a></li>
-    <li><a href="#">Advertise</a></li>
+    <li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise</a></li>
   </ul>
   <button class="nav-cta">Get Alerts</button>
 </nav>
@@ -268,7 +266,7 @@
   <div class="ad-placeholder-sign">
     <span class="ad-placeholder-label">Advertisement</span>
     <div class="ad-placeholder-heading">🍷 Work With HeyVino — reach thousands of active wine buyers through advertising or an exclusive promotional partnership. Email HeyVinoMarketing@gmail.com</div>
-    <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Partnership%20Inquiry%20-%20HeyVino">Get In Touch →</a>
+    <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Get In Touch →</a>
   </div>
 </div>
 
@@ -316,7 +314,7 @@
         <span class="ad-placeholder-label">Advertise With Us</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Advertise With Us</div>
         <div class="ad-placeholder-sub">Place your brand in front of thousands of engaged wine lovers. Banner ads and featured placements available.</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20-%20HeyVino">Inquire Now →</a>
+        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Inquire Now →</a>
       </div>
     </div>
     <div class="widget">
@@ -337,7 +335,7 @@
         <span class="ad-placeholder-label">Exclusive Promo Partnerships</span>
         <div class="ad-placeholder-heading" style="font-size:0.88rem">Exclusive Promo Partnerships</div>
         <div class="ad-placeholder-sub">Interested in creating an exclusive HeyVino promo code for your winery or brand? We'd love to work with you.</div>
-        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Promo%20Partnership%20-%20HeyVino">Let's Talk →</a>
+        <a class="ad-placeholder-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Let's Talk →</a>
       </div>
     </div>
     <div class="widget">
@@ -368,7 +366,7 @@
     <div>
       <div class="footer-heading">Business</div>
       <ul class="footer-links">
-        <li><a href="#">Advertise With Us</a></li><li><a href="#">Partner Vineyards</a></li>
+        <li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise With Us</a></li><li><a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Partner Vineyards</a></li>
         <li><a href="#">Media Kit</a></li><li><a href="#">Distributor Program</a></li>
       </ul>
     </div>
@@ -382,7 +380,7 @@
   </div>
   <div class="footer-bottom">
     <span class="footer-copy">© 2026 HeyVino LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
-    <a class="advertise-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertising%20Inquiry%20-%20HeyVino">Advertise Here →</a>
+    <a class="advertise-cta" href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino">Advertise Here →</a>
   </div>
 </footer>
 
@@ -546,24 +544,6 @@ document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.
 
 loadCodes();
 
-// Ad CTA links: mailto on mobile, copy-to-clipboard on desktop
-document.querySelectorAll('.ad-placeholder-cta, .advertise-cta').forEach(link => {
-  link.addEventListener('click', e => {
-    const isMobile = window.matchMedia('(hover: none)').matches;
-    if (!isMobile) {
-      e.preventDefault();
-      navigator.clipboard.writeText('HeyVinoMarketing@gmail.com').then(() => {
-        const tip = document.getElementById('emailTooltip');
-        tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 160) + 'px';
-        tip.style.top = (e.clientY - 36) + 'px';
-        tip.classList.add('visible');
-        setTimeout(() => tip.classList.remove('visible'), 2000);
-      });
-    }
-  });
-});
 </script>
-
-<div id="emailTooltip" class="email-tooltip">Email copied!</div>
 </body>
 </html>
