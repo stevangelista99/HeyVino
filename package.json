@@ -5,6 +5,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@supabase/supabase-js": "^2.0.0",
-    "googleapis": "^144.0.0"
+    "googleapis": "^144.0.0",
+    "ws": "^8.0.0"
   }
 }
