@@ -151,6 +151,29 @@ async function expireOldCodes() {
   }
 }
 
+async function deleteStaleCodes() {
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const { error: err1 } = await supabase
+    .from('promo_codes')
+    .delete()
+    .not('expiry_date', 'is', null)
+    .lt('expiry_date', sixtyDaysAgo);
+
+  if (err1) console.error('Error deleting expired stale codes:', err1.message);
+
+  const { error: err2 } = await supabase
+    .from('promo_codes')
+    .delete()
+    .is('expiry_date', null)
+    .lt('created_at', sixtyDaysAgo)
+    .eq('is_active', false);
+
+  if (err2) console.error('Error deleting no-expiry stale codes:', err2.message);
+
+  if (!err1 && !err2) console.log('Deleted stale promo codes.');
+}
+
 async function main() {
   console.log('Starting daily promo update...');
   const messages = await getRecentPromoEmails();
@@ -171,6 +194,7 @@ async function main() {
   }
 
   await expireOldCodes();
+  await deleteStaleCodes();
   console.log('Done!');
 }
 
