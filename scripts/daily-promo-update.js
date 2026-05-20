@@ -135,6 +135,22 @@ async function savePromo(promo) {
   }
 }
 
+async function expireOldCodes() {
+  const today = new Date().toISOString().split('T')[0];
+  const { error } = await supabase
+    .from('promo_codes')
+    .update({ is_active: false })
+    .not('expiry_date', 'is', null)
+    .lt('expiry_date', today)
+    .eq('is_active', true);
+
+  if (error) {
+    console.error('Error expiring old codes:', error.message);
+  } else {
+    console.log('Expired old promo codes.');
+  }
+}
+
 async function main() {
   console.log('Starting daily promo update...');
   const messages = await getRecentPromoEmails();
@@ -154,6 +170,7 @@ async function main() {
     }
   }
 
+  await expireOldCodes();
   console.log('Done!');
 }
 
