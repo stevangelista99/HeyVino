@@ -96,6 +96,8 @@
   .card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0.7rem; }
   .winery-avatar { width: 44px; height: 44px; border-radius: 5px; border: 1px solid var(--stone); background: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--wine); font-weight: 700; flex-shrink: 0; }
   .winery-name { font-weight: 600; font-size: 0.88rem; color: var(--ink); line-height: 1.3; }
+  .winery-name a { color: inherit; text-decoration: none; }
+  .winery-name a:hover { color: var(--wine); text-decoration: underline; }
   .winery-region { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .winery-link { font-size: 0.68rem; color: var(--wine); text-decoration: none; font-weight: 600; letter-spacing: 0.03em; margin-top: 3px; display: inline-block; }
   .winery-link:hover { color: var(--wine-light); text-decoration: underline; }
@@ -456,6 +458,8 @@ async function loadCodes() {
   }
 }
 
+function toSlug(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+
 const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫🇷", Italy:"🇮🇹", italy:"🇮🇹", Spain:"🇪🇸", spain:"🇪🇸", Australia:"🇦🇺", australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", argentina:"🇦🇷", Germany:"🇩🇪", germany:"🇩🇪" };
 const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
@@ -489,7 +493,7 @@ function cardHTML(c) {
     <div class="card-body">
       <div class="card-head">
         <div class="winery-avatar">${initials}</div>
-        <div><div class="winery-name">${c.winery}</div><div class="winery-region">${regionStr}</div></div>
+        <div><div class="winery-name"><a href="winery.html?slug=${toSlug(c.winery)}">${c.winery}</a></div><div class="winery-region">${regionStr}</div></div>
       </div>
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
       <div class="code-block">
