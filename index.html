@@ -426,11 +426,23 @@ async function loadCodes() {
     id:         row.id,
     winery:     row.winery_name      || row.winery   || '',
     code:       row.code             || '',
-    discount:   row.discount_amount && row.discount_type === 'percentage' ? row.discount_amount + '% off'
-              : row.discount_amount && row.discount_type === 'fixed'      ? '$' + row.discount_amount + ' off'
-              : row.discount_type === 'free_shipping'                     ? 'Free shipping'
-              : row.discount_amount || row.discount || '',
-    conditions: row.conditions       || row.minimum_spend || row.spend_requirement || row.terms || '',
+    discount:   (() => {
+                  const raw = row.discount_amount;
+                  if (raw === null || raw === undefined || raw === '') return row.discount || '';
+                  const isNumeric = typeof raw === 'number' || (!isNaN(raw) && String(raw).trim() !== '');
+                  if (isNumeric) {
+                    if (row.discount_type === 'percentage')   return raw + '% off';
+                    if (row.discount_type === 'fixed')        return '$' + raw + ' off';
+                    if (row.discount_type === 'free_shipping') return 'Free shipping';
+                  }
+                  const s = String(raw);
+                  if (/off|%|\$/.test(s)) return s;
+                  return row.discount_type === 'free_shipping' ? 'Free shipping' : s || row.discount || '';
+                })(),
+    conditions: (() => {
+                  const c = row.conditions || row.minimum_spend || row.spend_requirement || row.terms || '';
+                  return (c && (c.trimStart().startsWith('{') || c.trimStart().startsWith('['))) ? '' : c;
+                })(),
     description: row.description || '',
     type:       row.varietal_type    || row.type      || 'red',
     varietal:   row.varietal         || '',
