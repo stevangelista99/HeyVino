@@ -426,8 +426,12 @@ async function loadCodes() {
     id:         row.id,
     winery:     row.winery_name      || row.winery   || '',
     code:       row.code             || '',
-    discount:   row.discount_amount  || row.discount  || '',
+    discount:   row.discount_amount && row.discount_type === 'percentage' ? row.discount_amount + '% off'
+              : row.discount_amount && row.discount_type === 'fixed'      ? '$' + row.discount_amount + ' off'
+              : row.discount_type === 'free_shipping'                     ? 'Free shipping'
+              : row.discount_amount || row.discount || '',
     conditions: row.conditions       || row.minimum_spend || row.spend_requirement || row.terms || '',
+    description: row.description || '',
     type:       row.varietal_type    || row.type      || 'red',
     varietal:   row.varietal         || '',
     region:     row.region           || '',
@@ -500,7 +504,7 @@ function cardHTML(c) {
         <span class="code-text">${c.code}</span>
         <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
       </div>
-      <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${c.discount}${c.conditions?`<span class="conditions"> · ${c.conditions}</span>`:''}</span></div>
+      <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${c.discount}${(c.conditions||c.description)?`<span class="conditions"> · ${c.conditions||c.description}</span>`:''}</span></div>
       ${c.website_url?`<a class="visit-site-link" href="${c.website_url}" target="_blank" rel="noopener">Visit Site →</a>`:''}
     </div>
   </div>`;
