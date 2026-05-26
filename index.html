@@ -38,6 +38,13 @@
   .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
   .nav-links a:hover { color: var(--gold); }
   .nav-cta { background: var(--gold); color: var(--wine-deep); padding: 7px 18px; border-radius: 2px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: none; }
+  .nav-hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+  .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--gold); border-radius: 2px; transition: all 0.2s; }
+  .mobile-drawer { display: none; position: fixed; top: 62px; left: 0; right: 0; background: var(--wine-deep); border-bottom: 1px solid rgba(201,168,76,0.25); z-index: 99; flex-direction: column; padding: 0.75rem 1rem 1rem; }
+  .mobile-drawer.open { display: flex; }
+  .mobile-drawer a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.65rem 0; border-bottom: 1px solid rgba(201,168,76,0.1); transition: color 0.2s; }
+  .mobile-drawer a:last-child { border-bottom: none; }
+  .mobile-drawer a:hover { color: var(--gold); }
 
   /* ── HERO (mobile-first: tighter padding, 2×2 stats grid) ── */
   .hero { background: linear-gradient(135deg, var(--wine-deep) 0%, var(--wine) 55%, #8B2535 100%); padding: 40px 1rem 48px; text-align: center; position: relative; overflow: hidden; }
@@ -166,6 +173,8 @@
     nav { padding: 0 2rem; }
     .nav-logo small { display: inline; }
     .nav-links { display: flex; }
+    .nav-hamburger { display: none; }
+    .mobile-drawer { display: none !important; }
     .hero { padding: 64px 2rem 72px; }
     .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
     .filter-bar { padding: 1.5rem 2rem 1rem; }
@@ -237,7 +246,15 @@
     <li><a href="partner.html">Partner With Us</a></li>
     <li><a href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise</a></li>
   </ul>
+  <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <a href="partner.html">Partner With Us</a>
+  <a href="#" onclick="openAdvertiseModal();this.closest('.mobile-drawer').classList.remove('open');return false;">Advertise</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -555,6 +572,7 @@ document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.
 
 loadCodes();
 
+function toggleMobileNav() { document.getElementById('mobileDrawer').classList.toggle('open'); }
 function openAdvertiseModal() { document.getElementById('advertiseModal').style.display='flex'; }
 function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display='none'; }
 function copyAdvertiseEmail() {
