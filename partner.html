@@ -140,7 +140,7 @@
 <div class="cta-section">
   <h2>Let's Talk</h2>
   <p>Pricing is straightforward and built around your goals. Reach out to discuss which option is right for your brand.</p>
-  <a class="cta-email" href="mailto:HeyVinoMarketing@gmail.com?subject=Partner%20With%20HeyVino">HeyVinoMarketing@gmail.com</a>
+  <button class="cta-email" onclick="openAdvertiseModal()">Get In Touch →</button>
 </div>
 
 <footer>
@@ -154,6 +154,31 @@
     </ul>
   </div>
 </footer>
+
+<div id="advertiseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--cream);border-radius:8px;padding:2.5rem;max-width:420px;width:90%;text-align:center;position:relative;">
+    <button onclick="closeAdvertiseModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">×</button>
+    <div style="font-size:2.5rem;margin-bottom:1rem;">🍷</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
+    <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
+      <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
+    </div>
+    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App →</a>
+  </div>
+</div>
+
+<script>
+function openAdvertiseModal() { document.getElementById('advertiseModal').style.display='flex'; }
+function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display='none'; }
+function copyAdvertiseEmail() {
+  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
+  document.getElementById('copyEmailBtn').textContent='Copied!';
+  setTimeout(() => document.getElementById('copyEmailBtn').textContent='Copy', 2000);
+}
+document.getElementById('advertiseModal').addEventListener('click', function(e) { if(e.target===this) closeAdvertiseModal(); });
+</script>
 
 </body>
 </html>
