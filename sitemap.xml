@@ -53,6 +53,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=jcb-collection</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=jordan-winery</loc>
     <priority>0.7</priority>
   </url>
@@ -66,10 +70,6 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=mira-winery</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=mirror-napa-valley</loc>
     <priority>0.7</priority>
   </url>
   <url>
