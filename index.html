@@ -154,6 +154,7 @@
   .featured-discount { font-size: 0.78rem; color: var(--wine); font-weight: 700; margin-bottom: 4px; }
   .featured-visit { font-size: 0.7rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
   .featured-visit:hover { color: var(--wine); text-decoration: underline; }
+  .featured-skeleton-bar { height: 10px; border-radius: 4px; background: var(--stone); }
 
   /* ── FOOTER (mobile-first: grid hidden) ── */
   footer { background: var(--wine-deep); padding: 2rem 1rem 1.5rem; margin-top: 2rem; }
@@ -349,9 +350,15 @@
         <a class="ad-placeholder-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Inquire Now →</a>
       </div>
     </div>
-    <div class="widget featured-widget" id="featuredWidget" style="display:none;">
+    <div class="widget featured-widget" id="featuredWidget">
       <div class="widget-head featured-widget-head"><span>⭐</span><span class="widget-title">Featured</span></div>
-      <div class="widget-body" id="featuredCodesWidget"></div>
+      <div class="widget-body" id="featuredCodesWidget">
+        <div class="featured-code-item featured-skeleton"><div class="featured-skeleton-bar" style="width:70%"></div><div class="featured-skeleton-bar" style="width:40%;margin-top:6px"></div></div>
+        <div class="featured-code-item featured-skeleton"><div class="featured-skeleton-bar" style="width:80%"></div><div class="featured-skeleton-bar" style="width:35%;margin-top:6px"></div></div>
+        <div class="featured-code-item featured-skeleton"><div class="featured-skeleton-bar" style="width:65%"></div><div class="featured-skeleton-bar" style="width:45%;margin-top:6px"></div></div>
+        <div class="featured-code-item featured-skeleton"><div class="featured-skeleton-bar" style="width:75%"></div><div class="featured-skeleton-bar" style="width:30%;margin-top:6px"></div></div>
+        <div class="featured-code-item featured-skeleton"><div class="featured-skeleton-bar" style="width:60%"></div><div class="featured-skeleton-bar" style="width:50%;margin-top:6px"></div></div>
+      </div>
     </div>
     <div class="widget">
       <div class="widget-head"><span>🔥</span><span class="widget-title">Top Codes</span></div>
@@ -581,19 +588,18 @@ loadTopCodes();
 loadFeaturedCodes();
 
 // NOTE: requires is_featured boolean column on promo_codes table in Supabase.
-// If the column does not exist the query will return an error and the section stays hidden.
+// If the column is missing or no results exist, skeleton rows remain visible.
 async function loadFeaturedCodes() {
+  const el = document.getElementById('featuredCodesWidget');
+  if (!el) return;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,website_url&is_featured=eq.true&is_active=eq.true&order=created_at.desc&limit=3`,
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,website_url&is_featured=eq.true&is_active=eq.true&order=created_at.desc&limit=5`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     if (!res.ok) return;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return;
-    const el = document.getElementById('featuredCodesWidget');
-    const widget = document.getElementById('featuredWidget');
-    if (!el || !widget) return;
     el.innerHTML = data.map(r => {
       const name = r.winery_name || 'Unknown Winery';
       const discount = r.discount_type === 'percentage' && r.discount_amount ? r.discount_amount + '% off'
@@ -610,8 +616,7 @@ async function loadFeaturedCodes() {
         ${visitLink}
       </div>`;
     }).join('');
-    widget.style.display = '';
-  } catch(e) { /* column missing or network error — section stays hidden */ }
+  } catch(e) { /* column missing or network error — skeleton rows remain */ }
 }
 
 async function loadTopCodes() {
