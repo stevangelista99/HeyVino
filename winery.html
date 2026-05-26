@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" id="metaDesc" content="Wine promo codes and discounts — HeyVino">
 
+<script>
+  (function() {
+    var slug = new URLSearchParams(window.location.search).get('slug') || '';
+    var displayName = slug.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    if (displayName) {
+      document.title = displayName + ' Promo Codes & Discounts 2026 | HeyVino';
+      document.getElementById('metaDesc').setAttribute('content', 'Save on ' + displayName + ' wines. Find the latest promo codes, discounts and deals — updated daily on HeyVino.');
+    }
+  })();
+</script>
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -261,8 +272,8 @@ async function load() {
       ? data[0].winery_name
       : searchName.replace(/\b\w/g, c => c.toUpperCase());
 
-    document.title = `${displayName} Promo Codes — HeyVino`;
-    document.getElementById('metaDesc').setAttribute('content', `Get the latest promo codes and discounts for ${displayName}. Updated daily by HeyVino.`);
+    document.title = `${displayName} Promo Codes & Discounts 2026 | HeyVino`;
+    document.getElementById('metaDesc').setAttribute('content', `Save on ${displayName} wines. Find the latest promo codes, discounts and deals — updated daily on HeyVino.`);
     document.getElementById('wineryHeading').textContent = displayName;
 
     if (data.length === 0) {
