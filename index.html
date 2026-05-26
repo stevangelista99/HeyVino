@@ -145,6 +145,15 @@
   .expiring-code { font-size: 0.78rem; font-weight: 600; font-family: monospace; color: var(--wine); letter-spacing: 0.05em; }
   .expiring-winery { font-size: 0.68rem; color: var(--muted); }
   .expiring-days { font-size: 0.7rem; font-weight: 700; }
+  .featured-widget { border-color: var(--gold) !important; box-shadow: 0 0 0 1px var(--gold); }
+  .featured-widget-head { background: linear-gradient(90deg, var(--wine-deep), #5a1520) !important; border-bottom: 1px solid rgba(201,168,76,0.4); }
+  .featured-code-item { padding: 0.7rem 0; border-bottom: 1px solid var(--stone); }
+  .featured-code-item:last-child { border-bottom: none; }
+  .featured-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--wine-deep); background: var(--gold); padding: 2px 7px; border-radius: 2px; margin-bottom: 4px; }
+  .featured-winery { font-size: 0.85rem; font-weight: 600; color: var(--ink); line-height: 1.3; margin-bottom: 2px; }
+  .featured-discount { font-size: 0.78rem; color: var(--wine); font-weight: 700; margin-bottom: 4px; }
+  .featured-visit { font-size: 0.7rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
+  .featured-visit:hover { color: var(--wine); text-decoration: underline; }
 
   /* ── FOOTER (mobile-first: grid hidden) ── */
   footer { background: var(--wine-deep); padding: 2rem 1rem 1.5rem; margin-top: 2rem; }
@@ -339,6 +348,10 @@
         <div class="ad-placeholder-sub">Place your brand in front of thousands of engaged wine lovers. Banner ads and featured placements available.</div>
         <a class="ad-placeholder-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Inquire Now →</a>
       </div>
+    </div>
+    <div class="widget featured-widget" id="featuredWidget" style="display:none;">
+      <div class="widget-head featured-widget-head"><span>⭐</span><span class="widget-title">Featured</span></div>
+      <div class="widget-body" id="featuredCodesWidget"></div>
     </div>
     <div class="widget">
       <div class="widget-head"><span>🔥</span><span class="widget-title">Top Codes</span></div>
@@ -565,6 +578,41 @@ document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.
 
 loadCodes();
 loadTopCodes();
+loadFeaturedCodes();
+
+// NOTE: requires is_featured boolean column on promo_codes table in Supabase.
+// If the column does not exist the query will return an error and the section stays hidden.
+async function loadFeaturedCodes() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,website_url&is_featured=eq.true&is_active=eq.true&order=created_at.desc&limit=3`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+    const el = document.getElementById('featuredCodesWidget');
+    const widget = document.getElementById('featuredWidget');
+    if (!el || !widget) return;
+    el.innerHTML = data.map(r => {
+      const name = r.winery_name || 'Unknown Winery';
+      const discount = r.discount_type === 'percentage' && r.discount_amount ? r.discount_amount + '% off'
+                     : r.discount_type === 'fixed' && r.discount_amount ? '$' + r.discount_amount + ' off'
+                     : r.discount_type === 'free_shipping' ? 'Free shipping'
+                     : r.description || '';
+      const visitLink = r.website_url
+        ? `<a class="featured-visit" href="${r.website_url}" target="_blank" rel="noopener">Visit Site →</a>`
+        : '';
+      return `<div class="featured-code-item">
+        <span class="featured-badge">Featured</span>
+        <div class="featured-winery">${name}</div>
+        ${discount ? `<div class="featured-discount">${discount}</div>` : ''}
+        ${visitLink}
+      </div>`;
+    }).join('');
+    widget.style.display = '';
+  } catch(e) { /* column missing or network error — section stays hidden */ }
+}
 
 async function loadTopCodes() {
   try {
