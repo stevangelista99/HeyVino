@@ -130,9 +130,6 @@
   <p>A historical archive of past promo codes from wineries and retailers.</p>
 </div>
 
-<!-- DEBUG -->
-<div id="debug" style="max-width:1100px;margin:1rem auto;padding:0.75rem 1rem;background:#1a1a1a;color:#00ff88;font-family:monospace;font-size:0.78rem;border-radius:4px;white-space:pre-wrap;word-break:break-all;">Waiting for fetch…</div>
-
 <!-- DISCLAIMER -->
 <div class="disclaimer" style="display:block;">
   💡 Some codes listed here may still be active — wineries occasionally extend promotions. Always worth trying at checkout.
@@ -153,13 +150,12 @@
         <th>Winery</th>
         <th>Code</th>
         <th>Discount</th>
-        <th>Region</th>
         <th>Varietal</th>
         <th>Expired</th>
       </tr>
     </thead>
     <tbody id="tableBody">
-      <tr><td colspan="6" class="td-loading">Loading legacy codes…</td></tr>
+      <tr><td colspan="5" class="td-loading">Loading legacy codes…</td></tr>
     </tbody>
   </table>
 </div>
@@ -186,7 +182,6 @@
 </footer>
 
 <script>
-const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
 
 const PAGE_SIZE = 50;
@@ -194,38 +189,46 @@ let allCodes = [];
 let filtered = [];
 let page = 1;
 
-async function load() {
+async function loadLegacyCodes() {
+  const url = 'https://lzeicurexdpludaltetf.supabase.co/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc';
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+  };
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc&limit=10000`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    const rawText = await res.text();
-    document.getElementById('debug').textContent =
-      `STATUS: ${res.status} ${res.statusText}\n\nBODY (first 500 chars):\n${rawText.slice(0, 500)}`;
-    if (!res.ok) {
-      console.error('Legacy fetch failed:', res.status, rawText);
-      throw new Error('Fetch failed');
-    }
-    allCodes = JSON.parse(rawText);
-    populateFilters();
-    applyFilters();
+    const res = await fetch(url, { headers });
+    const data = await res.json();
+    renderTable(data);
   } catch(e) {
-    document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" class="td-empty">Unable to load legacy codes. Please try again later.</td></tr>';
+    console.error('loadLegacyCodes failed:', e);
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="td-empty">Unable to load legacy codes. Please try again later.</td></tr>';
   }
 }
 
+function renderTable(data) {
+  allCodes = Array.isArray(data) ? data : [];
+  populateFilters();
+  applyFilters();
+}
+
 function populateFilters() {
-  const varietals = [...new Set(allCodes.map(r => r.varietal_type).filter(Boolean))].sort();
   const varietalSel = document.getElementById('varietalFilter');
-  varietals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; varietalSel.appendChild(o); });
+  const existing = new Set([...varietalSel.options].map(o => o.value));
+  const varietals = [...new Set(allCodes.map(r => r.varietal_type).filter(Boolean))].sort();
+  varietals.forEach(v => {
+    if (!existing.has(v)) {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      varietalSel.appendChild(o);
+    }
+  });
 }
 
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase().trim();
   const varietal = document.getElementById('varietalFilter').value;
   filtered = allCodes.filter(r => {
-    if (search && !( (r.winery_name||'').toLowerCase().includes(search) || (r.code||'').toLowerCase().includes(search) )) return false;
+    if (search && !((r.winery_name||'').toLowerCase().includes(search) || (r.code||'').toLowerCase().includes(search))) return false;
     if (varietal && r.varietal_type !== varietal) return false;
     return true;
   });
@@ -242,8 +245,7 @@ function discountLabel(r) {
 
 function formatDate(d) {
   if (!d) return '—';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function render() {
@@ -258,7 +260,7 @@ function render() {
   document.getElementById('nextBtn').disabled = page >= totalPages || filtered.length === 0;
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="td-empty">No legacy codes yet — check back as codes expire over time.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="td-empty">No legacy codes yet — check back as codes expire over time.</td></tr>';
     return;
   }
 
@@ -270,7 +272,6 @@ function render() {
       <td>${winery}</td>
       <td><code>${r.code || '—'}</code></td>
       <td>${discountLabel(r)}</td>
-      <td>${r.region || '—'}</td>
       <td>${r.varietal_type || '—'}</td>
       <td class="td-expiry">${formatDate(r.expiry_date)}</td>
     </tr>`;
@@ -278,12 +279,11 @@ function render() {
 }
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('regionFilter').addEventListener('change', applyFilters);
 document.getElementById('varietalFilter').addEventListener('change', applyFilters);
-document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; render(); window.scrollTo(0, 0); } });
-document.getElementById('nextBtn').addEventListener('click', () => { if (page < Math.ceil(filtered.length / PAGE_SIZE)) { page++; render(); window.scrollTo(0, 0); } });
+document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; render(); window.scrollTo(0,0); } });
+document.getElementById('nextBtn').addEventListener('click', () => { if (page < Math.ceil(filtered.length / PAGE_SIZE)) { page++; render(); window.scrollTo(0,0); } });
 
-load();
+document.addEventListener('DOMContentLoaded', loadLegacyCodes);
 </script>
 </body>
 </html>
