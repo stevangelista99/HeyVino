@@ -138,7 +138,6 @@
 <!-- CONTROLS -->
 <div class="controls">
   <input type="text" id="searchInput" placeholder="🔍 Search winery or code…">
-  <select id="regionFilter"><option value="">All Regions</option></select>
   <select id="varietalFilter"><option value="">All Varietals</option></select>
   <span class="result-count" id="resultCount"></span>
 </div>
@@ -195,10 +194,14 @@ let page = 1;
 async function load() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,region,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc.nullslast&limit=10000`,
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc&limit=10000`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
-    if (!res.ok) throw new Error('Fetch failed');
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Legacy fetch failed:', res.status, errText);
+      throw new Error('Fetch failed');
+    }
     allCodes = await res.json();
     populateFilters();
     applyFilters();
@@ -208,21 +211,16 @@ async function load() {
 }
 
 function populateFilters() {
-  const regions = [...new Set(allCodes.map(r => r.region).filter(Boolean))].sort();
   const varietals = [...new Set(allCodes.map(r => r.varietal_type).filter(Boolean))].sort();
-  const regionSel = document.getElementById('regionFilter');
   const varietalSel = document.getElementById('varietalFilter');
-  regions.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; regionSel.appendChild(o); });
   varietals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; varietalSel.appendChild(o); });
 }
 
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase().trim();
-  const region = document.getElementById('regionFilter').value;
   const varietal = document.getElementById('varietalFilter').value;
   filtered = allCodes.filter(r => {
     if (search && !( (r.winery_name||'').toLowerCase().includes(search) || (r.code||'').toLowerCase().includes(search) )) return false;
-    if (region && r.region !== region) return false;
     if (varietal && r.varietal_type !== varietal) return false;
     return true;
   });
