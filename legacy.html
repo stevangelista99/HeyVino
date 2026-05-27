@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Legacy promo codes — a historical archive of past wine discount codes from HeyVino. Some may still work at checkout.">
+<meta name="description" id="metaDesc" content="Legacy promo codes — a historical archive of past wine discount codes from HeyVino. Some may still work at checkout.">
+
+<script>
+  document.title = 'Legacy Wine Promo Codes Archive | HeyVino';
+  document.getElementById('metaDesc').setAttribute('content', 'Browse our archive of past wine promo codes from top wineries and retailers. Some codes may still be active — always worth trying at checkout. Updated by HeyVino.');
+</script>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
 <script>
@@ -197,7 +202,9 @@ async function loadLegacyCodes() {
   };
   try {
     const res = await fetch(url, { headers });
+    console.log('Fetch status:', res.status);
     const data = await res.json();
+    console.log('Data received:', Array.isArray(data) ? data.length : 'non-array', 'records', JSON.stringify(data).slice(0, 300));
     renderTable(data);
   } catch(e) {
     console.error('loadLegacyCodes failed:', e);
@@ -206,6 +213,7 @@ async function loadLegacyCodes() {
 }
 
 function renderTable(data) {
+  console.log('renderTable called with', Array.isArray(data) ? data.length : 'non-array', 'records', data && data[0] ? JSON.stringify(data[0]) : data);
   allCodes = Array.isArray(data) ? data : [];
   populateFilters();
   applyFilters();
