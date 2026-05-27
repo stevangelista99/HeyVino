@@ -29,6 +29,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=blackbird-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=cakebread-cellars</loc>
     <priority>0.7</priority>
   </url>
@@ -61,6 +65,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=ghost-block</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=goldeneye</loc>
     <priority>0.7</priority>
   </url>
@@ -69,7 +77,15 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=ink-grade</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=jcb-collection</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=joel-gott-wines</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -78,6 +94,18 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=l-ecole-no-41</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=long-meadow-ranch</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=markham-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=maxville-winery</loc>
     <priority>0.7</priority>
   </url>
   <url>
