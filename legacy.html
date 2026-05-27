@@ -202,18 +202,14 @@ async function loadLegacyCodes() {
   };
   try {
     const res = await fetch(url, { headers });
-    console.log('Fetch status:', res.status);
     const data = await res.json();
-    console.log('Data received:', Array.isArray(data) ? data.length : 'non-array', 'records', JSON.stringify(data).slice(0, 300));
     renderTable(data);
   } catch(e) {
-    console.error('loadLegacyCodes failed:', e);
     document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="td-empty">Unable to load legacy codes. Please try again later.</td></tr>';
   }
 }
 
 function renderTable(data) {
-  console.log('renderTable called with', Array.isArray(data) ? data.length : 'non-array', 'records', data && data[0] ? JSON.stringify(data[0]) : data);
   allCodes = Array.isArray(data) ? data : [];
   populateFilters();
   applyFilters();
