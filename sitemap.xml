@@ -45,11 +45,11 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=charles-krug</loc>
+    <loc>https://www.heyvinowine.com/winery.html?slug=chateau-ste-michelle</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=chateau-ste-michelle</loc>
+    <loc>https://www.heyvinowine.com/winery.html?slug=conn-creek</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -110,6 +110,10 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=priest-ranch</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=raymond-vineyards</loc>
     <priority>0.7</priority>
   </url>
   <url>
