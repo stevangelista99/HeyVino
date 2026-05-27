@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Legacy promo codes — a historical archive of past wine discount codes from HeyVino. Some may still work at checkout.">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7KDQWZYYV5');
+</script>
+
+<title>Legacy Promos | HeyVino</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wine: #6B1E2A; --wine-deep: #3D0D14; --wine-light: #9B3A4A;
+    --gold: #C9A84C; --gold-light: #E8D5A0; --cream: #FAF6EF;
+    --stone: #E8E0D4; --ink: #1A0A0E; --muted: #7A6E64; --white: #fff;
+  }
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: var(--wine-deep); border-bottom: 1px solid rgba(201,168,76,0.25); padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo img { height: 44px; width: 44px; border-radius: 8px; object-fit: cover; }
+  .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); font-style: italic; font-weight: 700; }
+  .nav-logo small { display: none; font-style: italic; color: rgba(201,168,76,0.55); font-size: 0.78rem; font-weight: 400; }
+  .nav-links { display: none; gap: 1.75rem; list-style: none; align-items: center; }
+  .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a.active { color: var(--gold); }
+  .nav-hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+  .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--gold); border-radius: 2px; }
+  .mobile-drawer { display: none; position: fixed; top: 62px; left: 0; right: 0; background: var(--wine-deep); border-bottom: 1px solid rgba(201,168,76,0.25); z-index: 99; flex-direction: column; padding: 0.75rem 1rem 1rem; }
+  .mobile-drawer.open { display: flex; }
+  .mobile-drawer a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.65rem 0; border-bottom: 1px solid rgba(201,168,76,0.1); transition: color 0.2s; }
+  .mobile-drawer a:last-child { border-bottom: none; }
+  .mobile-drawer a:hover { color: var(--gold); }
+
+  .page-hero { background: linear-gradient(135deg, var(--wine-deep) 0%, var(--wine) 55%, #8B2535 100%); padding: 40px 1rem 48px; text-align: center; position: relative; overflow: hidden; }
+  .page-hero::before { content:''; position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.9rem,4vw,2.8rem); color: #fff; margin-bottom: 0.6rem; position: relative; }
+  .page-hero p { color: rgba(255,255,255,0.65); font-size: 0.95rem; max-width: 520px; margin: 0 auto; line-height: 1.7; position: relative; }
+
+  .disclaimer { background: rgba(201,168,76,0.12); border-left: 3px solid var(--gold); padding: 0.75rem 1.25rem; margin: 1.25rem auto; max-width: 1100px; font-size: 0.83rem; color: var(--muted); line-height: 1.6; border-radius: 0 4px 4px 0; }
+
+  .controls { max-width: 1100px; margin: 0 auto 0.75rem; padding: 1rem 1rem 0; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+  .controls input[type="text"] { flex: 1; min-width: 180px; border: 1.5px solid var(--stone); border-radius: 4px; padding: 7px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; color: var(--ink); background: var(--white); outline: none; }
+  .controls input[type="text"]:focus { border-color: var(--gold); }
+  .controls select { border: 1.5px solid var(--stone); border-radius: 4px; padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; color: var(--ink); background: var(--white); outline: none; cursor: pointer; }
+  .controls select:focus { border-color: var(--gold); }
+  .result-count { font-size: 0.75rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+  .table-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1rem; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; background: var(--white); border: 1px solid var(--stone); border-radius: 6px; overflow: hidden; }
+  thead { background: var(--wine-deep); }
+  thead th { padding: 9px 12px; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-light); font-weight: 600; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--stone); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--cream); }
+  tbody td { padding: 8px 12px; color: var(--ink); vertical-align: middle; }
+  tbody td a { color: var(--wine); text-decoration: none; font-weight: 500; }
+  tbody td a:hover { text-decoration: underline; }
+  tbody td code { font-family: 'Courier New', monospace; font-size: 0.8rem; font-weight: 700; color: var(--wine); letter-spacing: 0.05em; background: rgba(107,30,42,0.06); padding: 2px 6px; border-radius: 3px; }
+  .td-expiry { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+  .td-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.9rem; }
+  .td-loading { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.85rem; }
+
+  .pagination { max-width: 1100px; margin: 1rem auto 2.5rem; padding: 0 1rem; display: flex; align-items: center; gap: 1rem; }
+  .pagination button { background: var(--white); border: 1.5px solid var(--stone); color: var(--ink); padding: 6px 16px; border-radius: 3px; font-size: 0.8rem; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+  .pagination button:hover:not(:disabled) { border-color: var(--wine); color: var(--wine); }
+  .pagination button:disabled { opacity: 0.35; cursor: default; }
+  .pagination .page-info { font-size: 0.78rem; color: var(--muted); }
+
+  footer { background: var(--wine-deep); border-top: 1px solid rgba(201,168,76,0.16); padding: 2rem 1rem 1.5rem; margin-top: 1rem; }
+  .footer-bottom { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
+  .footer-links-inline { display: flex; gap: 1.5rem; list-style: none; flex-wrap: wrap; }
+  .footer-links-inline a { color: rgba(255,255,255,0.35); font-size: 0.75rem; text-decoration: none; transition: color 0.15s; }
+  .footer-links-inline a:hover { color: var(--gold-light); }
+
+  @media (min-width: 768px) {
+    nav { padding: 0 2rem; }
+    .nav-logo small { display: inline; }
+    .nav-links { display: flex; }
+    .nav-hamburger { display: none; }
+    .mobile-drawer { display: none !important; }
+    .page-hero { padding: 56px 2rem 64px; }
+    .disclaimer { padding: 0.85rem 1.5rem; }
+    footer { padding: 2rem 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="https://i.imgur.com/Mzt8U31.png" alt="HeyVino Logo"/>
+      <span class="nav-logo-text">HeyVino <small>Wine deals, curated</small></span>
+    </a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="wineries.html">All Wineries</a></li>
+    <li><a href="partner.html">Partner With Us</a></li>
+    <li><a href="legacy.html" class="active">Legacy Promos</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="document.getElementById('mobileDrawer').classList.toggle('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <a href="index.html">Home</a>
+  <a href="wineries.html">All Wineries</a>
+  <a href="partner.html">Partner With Us</a>
+  <a href="legacy.html">Legacy Promos</a>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <h1>Legacy Promos</h1>
+  <p>A historical archive of past promo codes from wineries and retailers.</p>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer" style="display:block;">
+  💡 Some codes listed here may still be active — wineries occasionally extend promotions. Always worth trying at checkout.
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="🔍 Search winery or code…">
+  <select id="regionFilter"><option value="">All Regions</option></select>
+  <select id="varietalFilter"><option value="">All Varietals</option></select>
+  <span class="result-count" id="resultCount"></span>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Winery</th>
+        <th>Code</th>
+        <th>Discount</th>
+        <th>Region</th>
+        <th>Varietal</th>
+        <th>Expired</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="6" class="td-loading">Loading legacy codes…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+  <button id="prevBtn" disabled>← Previous</button>
+  <span class="page-info" id="pageInfo"></span>
+  <button id="nextBtn" disabled>Next →</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 HeyVino LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
+    <ul class="footer-links-inline">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="wineries.html">All Wineries</a></li>
+      <li><a href="partner.html">Partner With Us</a></li>
+      <li><a href="/privacy.html">Privacy Policy</a></li>
+      <li><a href="/terms.html">Terms of Service</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
+
+const PAGE_SIZE = 50;
+let allCodes = [];
+let filtered = [];
+let page = 1;
+
+async function load() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,region,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc.nullslast&limit=10000`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!res.ok) throw new Error('Fetch failed');
+    allCodes = await res.json();
+    populateFilters();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" class="td-empty">Unable to load legacy codes. Please try again later.</td></tr>';
+  }
+}
+
+function populateFilters() {
+  const regions = [...new Set(allCodes.map(r => r.region).filter(Boolean))].sort();
+  const varietals = [...new Set(allCodes.map(r => r.varietal_type).filter(Boolean))].sort();
+  const regionSel = document.getElementById('regionFilter');
+  const varietalSel = document.getElementById('varietalFilter');
+  regions.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; regionSel.appendChild(o); });
+  varietals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; varietalSel.appendChild(o); });
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  const region = document.getElementById('regionFilter').value;
+  const varietal = document.getElementById('varietalFilter').value;
+  filtered = allCodes.filter(r => {
+    if (search && !( (r.winery_name||'').toLowerCase().includes(search) || (r.code||'').toLowerCase().includes(search) )) return false;
+    if (region && r.region !== region) return false;
+    if (varietal && r.varietal_type !== varietal) return false;
+    return true;
+  });
+  page = 1;
+  render();
+}
+
+function discountLabel(r) {
+  if (r.discount_type === 'percentage' && r.discount_amount) return r.discount_amount + '% off';
+  if (r.discount_type === 'fixed' && r.discount_amount) return '$' + r.discount_amount + ' off';
+  if (r.discount_type === 'free_shipping') return 'Free shipping';
+  return r.description || '—';
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function render() {
+  const tbody = document.getElementById('tableBody');
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const start = (page - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('resultCount').textContent = filtered.length ? `${filtered.length} code${filtered.length !== 1 ? 's' : ''}` : '';
+  document.getElementById('pageInfo').textContent = filtered.length ? `Page ${page} of ${totalPages}` : '';
+  document.getElementById('prevBtn').disabled = page <= 1;
+  document.getElementById('nextBtn').disabled = page >= totalPages || filtered.length === 0;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="td-empty">No legacy codes yet — check back as codes expire over time.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => {
+    const winery = r.website_url
+      ? `<a href="${r.website_url}" target="_blank" rel="noopener">${r.winery_name || '—'}</a>`
+      : (r.winery_name || '—');
+    return `<tr>
+      <td>${winery}</td>
+      <td><code>${r.code || '—'}</code></td>
+      <td>${discountLabel(r)}</td>
+      <td>${r.region || '—'}</td>
+      <td>${r.varietal_type || '—'}</td>
+      <td class="td-expiry">${formatDate(r.expiry_date)}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('regionFilter').addEventListener('change', applyFilters);
+document.getElementById('varietalFilter').addEventListener('change', applyFilters);
+document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; render(); window.scrollTo(0, 0); } });
+document.getElementById('nextBtn').addEventListener('click', () => { if (page < Math.ceil(filtered.length / PAGE_SIZE)) { page++; render(); window.scrollTo(0, 0); } });
+
+load();
+</script>
+</body>
+</html>

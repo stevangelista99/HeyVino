@@ -32,9 +32,14 @@ async function generate() {
   slugs.sort();
 
   const today = new Date().toISOString().split('T')[0];
-  const entries = [
+  const staticEntries = [
     urlEntry(`${BASE_URL}/`, '1.0'),
     urlEntry(`${BASE_URL}/wineries.html`, '0.9'),
+    urlEntry(`${BASE_URL}/legacy.html`, '0.7'),
+    urlEntry(`${BASE_URL}/partner.html`, '0.6'),
+  ];
+  const entries = [
+    ...staticEntries,
     ...slugs.map(slug => urlEntry(`${BASE_URL}/winery.html?slug=${slug}`, '0.7')),
   ];
 
@@ -45,7 +50,7 @@ ${entries.join('\n')}
 
   const outPath = path.join(__dirname, '..', 'sitemap.xml');
   fs.writeFileSync(outPath, xml, 'utf8');
-  console.log(`sitemap.xml written — ${slugs.length} winery URLs + 2 static (${today})`);
+  console.log(`sitemap.xml written — ${slugs.length} winery URLs + ${staticEntries.length} static (${today})`);
 }
 
 generate().catch(err => { console.error(err.message); process.exit(1); });
