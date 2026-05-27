@@ -130,6 +130,9 @@
   <p>A historical archive of past promo codes from wineries and retailers.</p>
 </div>
 
+<!-- DEBUG -->
+<div id="debug" style="max-width:1100px;margin:1rem auto;padding:0.75rem 1rem;background:#1a1a1a;color:#00ff88;font-family:monospace;font-size:0.78rem;border-radius:4px;white-space:pre-wrap;word-break:break-all;">Waiting for fetch…</div>
+
 <!-- DISCLAIMER -->
 <div class="disclaimer" style="display:block;">
   💡 Some codes listed here may still be active — wineries occasionally extend promotions. Always worth trying at checkout.
@@ -197,12 +200,14 @@ async function load() {
       `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,code,discount_amount,discount_type,description,varietal_type,expiry_date,website_url&is_active=eq.false&order=expiry_date.desc&limit=10000`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
+    const rawText = await res.text();
+    document.getElementById('debug').textContent =
+      `STATUS: ${res.status} ${res.statusText}\n\nBODY (first 500 chars):\n${rawText.slice(0, 500)}`;
     if (!res.ok) {
-      const errText = await res.text();
-      console.error('Legacy fetch failed:', res.status, errText);
+      console.error('Legacy fetch failed:', res.status, rawText);
       throw new Error('Fetch failed');
     }
-    allCodes = await res.json();
+    allCodes = JSON.parse(rawText);
     populateFilters();
     applyFilters();
   } catch(e) {
