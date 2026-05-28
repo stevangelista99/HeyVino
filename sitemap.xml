@@ -125,6 +125,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=new-rochelle-wines</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=neyers-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=orin-swift-cellars</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=parallel-napa-valley</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=peju-winery</loc>
     <priority>0.7</priority>
   </url>
@@ -154,6 +170,14 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=shannon-wine</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=stony-hill-vineyard</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=sutter-home</loc>
     <priority>0.7</priority>
   </url>
   <url>
