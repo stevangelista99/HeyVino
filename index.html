@@ -443,7 +443,7 @@ async function loadCodes() {
   let data;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc`,
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc,winery_name.asc`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
