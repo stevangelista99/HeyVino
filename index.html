@@ -636,13 +636,14 @@ async function loadFeaturedCodes() {
 async function loadTopCodes() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,website_url&is_active=eq.true&discount_type=eq.percentage&order=discount_amount.desc&limit=5`,
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,website_url&is_active=eq.true&discount_type=eq.percentage&discount_type=not.in.(free_shipping,other)&order=discount_amount.desc&limit=5`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
-    const data = await res.json();
+    const raw = await res.json();
+    const data = Array.isArray(raw) ? raw.filter(r => r.discount_type === 'percentage') : [];
     const el = document.getElementById('topCodesWidget');
     if (!el) return;
-    if (!data || data.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:0.5rem 0;">No codes found.</div>'; return; }
+    if (data.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:0.5rem 0;">No codes found.</div>'; return; }
     el.innerHTML = data.map(r => {
       const name = r.winery_name || 'Unknown Winery';
       const pct = r.discount_amount ? r.discount_amount + '% off' : '';
