@@ -189,7 +189,7 @@
     .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
     .filter-bar { padding: 1.5rem 2rem 1rem; }
     .filter-row { gap: 1rem; }
-    .search-wrap { width: 270px; margin-left: auto; }
+    .search-wrap { width: 270px; margin-left: auto; margin-right: max(0px, calc(100vw - 1400px)); }
     .search-wrap input { width: 100%; }
     .main { padding: 2rem; grid-template-columns: 1fr 270px; margin-left: 0; }
     .sidebar { display: flex; }
@@ -636,7 +636,7 @@ async function loadFeaturedCodes() {
 async function loadTopCodes() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,website_url&is_active=eq.true&discount_type=eq.percentage&discount_type=not.in.(free_shipping,other)&order=discount_amount.desc&limit=5`,
+      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,website_url&is_active=eq.true&discount_type=eq.percentage&order=discount_amount.desc&limit=5`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     const raw = await res.json();
