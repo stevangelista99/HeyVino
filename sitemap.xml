@@ -25,15 +25,15 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=benessere-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=beringer-vineyards</loc>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=blackbird-vineyards</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=cakebread-cellars</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -62,6 +62,10 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=elizabeth-spencer</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=far-niente-winery</loc>
     <priority>0.7</priority>
   </url>
   <url>
