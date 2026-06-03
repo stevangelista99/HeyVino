@@ -15,7 +15,7 @@ function urlEntry(loc, priority = '0.8') {
 
 async function generate() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`,
+    `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name`,
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
   );
   if (!res.ok) throw new Error(`Supabase error: HTTP ${res.status}`);

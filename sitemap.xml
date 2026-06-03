@@ -49,6 +49,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=cakebread-cellars</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=calera</loc>
     <priority>0.7</priority>
   </url>
@@ -58,6 +62,10 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=chappellet</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=charles-krug</loc>
     <priority>0.7</priority>
   </url>
   <url>
