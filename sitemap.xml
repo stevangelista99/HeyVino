@@ -17,7 +17,19 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=amici-cellars</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=ancient-peaks-winery</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=argyle-winery</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=bacio-divino-cellars</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -162,6 +174,10 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=raymond-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=robert-biale-vineyards</loc>
     <priority>0.7</priority>
   </url>
   <url>
