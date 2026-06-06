@@ -51,6 +51,7 @@
   .back-link { display: inline-flex; align-items: center; gap: 5px; color: var(--wine); font-size: 0.82rem; font-weight: 600; text-decoration: none; margin-bottom: 1.25rem; transition: color 0.15s; }
   .back-link:hover { color: var(--wine-light); }
   .page-h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 4vw, 2.6rem); color: var(--wine-deep); margin-bottom: 0.3rem; }
+  .winery-description { font-size: 14px; color: #4a4040; line-height: 1.75; margin: 1rem 0 1.1rem; max-width: 760px; }
   .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; }
 
   .cards-wrap { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
@@ -150,6 +151,7 @@
 <div class="page-header">
   <a href="wineries.html" class="back-link">← All Wineries</a>
   <h1 class="page-h1" id="wineryHeading">Loading…</h1>
+  <p class="winery-description" id="wineryDesc"></p>
   <p class="page-subtitle" id="codeCount"></p>
 </div>
 
@@ -263,12 +265,17 @@ async function load() {
   const searchName = slug.replace(/-/g, ' ');
 
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.${encodeURIComponent(searchName)}&order=is_featured.desc`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const [promoRes, wineryRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.${encodeURIComponent(searchName)}&order=is_featured.desc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=description&slug=eq.${encodeURIComponent(slug)}&limit=1`, { headers })
+    ]);
+    if (!promoRes.ok) throw new Error(`HTTP ${promoRes.status}`);
+    const data = await promoRes.json();
+    const wineryData = wineryRes.ok ? await wineryRes.json() : [];
+
+    const description = wineryData[0]?.description || '';
+    if (description) document.getElementById('wineryDesc').textContent = description;
 
     const displayName = data.length > 0
       ? data[0].winery_name
