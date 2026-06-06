@@ -17,6 +17,10 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=689-cellars</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=amici-cellars</loc>
     <priority>0.7</priority>
   </url>
@@ -46,6 +50,14 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=blackbird-vineyards</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=buena-vista-winery</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=burgess-cellars</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -94,6 +106,10 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=goldeneye</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=goldeneye-winery</loc>
     <priority>0.7</priority>
   </url>
   <url>
