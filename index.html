@@ -305,6 +305,19 @@
   </div>
 </div>
 
+<!-- NEWSLETTER SIGNUP -->
+<div style="background:#4A1B2E;padding:2.5rem 1.5rem;text-align:center;">
+  <div style="max-width:520px;margin:0 auto;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.35rem;color:#fff;font-weight:700;margin-bottom:0.4rem;">Get Deals Before They Expire</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;line-height:1.6;margin-bottom:1.25rem;">New promo codes land in your inbox every week. No noise, just wine deals.</p>
+    <div id="newsletterForm" style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+      <input id="newsletterEmail" type="email" placeholder="your@email.com" style="flex:1;min-width:200px;max-width:300px;padding:10px 14px;border:none;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;color:#1A0A0E;">
+      <button onclick="subscribeNewsletter()" style="background:#C9A84C;color:#1A0A0E;border:none;padding:10px 22px;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;white-space:nowrap;transition:background 0.15s;" onmouseover="this.style.background='#E8D5A0'" onmouseout="this.style.background='#C9A84C'">Subscribe</button>
+    </div>
+    <div id="newsletterMsg" style="display:none;margin-top:0.9rem;font-size:0.88rem;font-weight:600;"></div>
+  </div>
+</div>
+
 <!-- FILTERS -->
 <div class="filter-bar">
   <div class="filter-row">
@@ -740,6 +753,35 @@ async function loadPromoTrends() {
 }
 
 function toggleMobileNav() { document.getElementById('mobileDrawer').classList.toggle('open'); }
+async function subscribeNewsletter() {
+  const input = document.getElementById('newsletterEmail');
+  const msg = document.getElementById('newsletterMsg');
+  const email = (input.value || '').trim();
+  if (!email) { input.focus(); return; }
+  msg.style.display = 'none';
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (res.ok) {
+      document.getElementById('newsletterForm').style.display = 'none';
+      msg.textContent = "You're in! Check your inbox 🍷";
+      msg.style.color = '#C9A84C';
+      msg.style.display = 'block';
+    } else {
+      msg.textContent = 'Something went wrong, please try again.';
+      msg.style.color = 'rgba(255,255,255,0.75)';
+      msg.style.display = 'block';
+    }
+  } catch {
+    msg.textContent = 'Something went wrong, please try again.';
+    msg.style.color = 'rgba(255,255,255,0.75)';
+    msg.style.display = 'block';
+  }
+}
+
 function openAdvertiseModal() { document.getElementById('advertiseModal').style.display='flex'; }
 function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display='none'; }
 function copyAdvertiseEmail() {
