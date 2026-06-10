@@ -1,6 +1,5 @@
 {
   "functions": {
-    "api/ingest.js": { "maxDuration": 30 },
     "api/cleanup.js": { "maxDuration": 10 }
   },
   "crons": [
