@@ -1,8 +1,12 @@
 {
   "functions": {
     "api/cleanup.js": { "maxDuration": 10 },
-    "api/subscribe.js": { "maxDuration": 10 }
+    "api/subscribe.js": { "maxDuration": 10 },
+    "api/winery.js": { "maxDuration": 10 }
   },
+  "rewrites": [
+    { "source": "/winery.html", "destination": "/api/winery" }
+  ],
   "crons": [
     {
       "path": "/api/cleanup",

@@ -1,0 +1,351 @@
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lzeicurexdpludaltetf.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
+
+const COUNTRY_CODES = { us:'USA', usa:'USA', it:'Italy', fr:'France', es:'Spain', au:'Australia', nz:'New Zealand', ar:'Argentina', de:'Germany', gb:'UK', uk:'UK' };
+function normalizeCountry(c) { return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
+function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
+
+function expiryHTML(expiry) {
+  if (!expiry) return '<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>';
+  const date = new Date(expiry);
+  if (isNaN(date.getTime())) return '<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>';
+  const d = daysUntil(expiry);
+  if (d < 0) return '<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>';
+  if (d <= 21) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">⚠️ ${d}d left</span></span>`;
+  const fmt = date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${fmt}</span></span>`;
+}
+
+function accentClass(t) { return { red:'accent-red', white:'accent-white', rose:'accent-rose', sparkling:'accent-sparkling' }[t] || 'accent-red'; }
+function badgeClass(t)  { return { red:'badge-red',  white:'badge-white',  rose:'badge-rose',  sparkling:'badge-sparkling'  }[t] || 'badge-red'; }
+
+function safeUrl(url) {
+  try { const u = new URL(url); return (u.protocol === 'https:' || u.protocol === 'http:') ? esc(url) : ''; }
+  catch { return ''; }
+}
+
+function cardHTML(c) {
+  const initials = (c.winery || '??').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const country = normalizeCountry(c.country);
+  const regionStr = c.region ? esc(c.region) + ', ' + esc(country) : esc(country);
+  const siteLink = safeUrl(c.website_url);
+  return [
+    `<div class="card${c.featured ? ' featured' : ''}">`,
+    `  <div class="card-accent ${accentClass(c.type)}"></div>`,
+    c.featured ? '  <div class="featured-tag">⭐ Featured</div>' : '',
+    '  <div class="card-body">',
+    '    <div class="card-head">',
+    `      <div class="winery-avatar">${esc(initials)}</div>`,
+    `      <div><div class="winery-name">${esc(c.winery)}</div><div class="winery-region">${regionStr}</div></div>`,
+    '    </div>',
+    `    <span class="badge ${badgeClass(c.type)}">${esc(c.varietal)}</span>`,
+    '    <div class="code-block">',
+    `      <span class="code-text">${esc(c.code)}</span>`,
+    `      <button class="copy-btn" data-code="${esc(c.code)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
+    '    </div>',
+    `    <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
+    siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener">Visit Site →</a>` : '',
+    '  </div>',
+    '</div>'
+  ].filter(Boolean).join('\n');
+}
+
+function buildPage({ slug, displayName, description, cards }) {
+  const title     = esc(displayName) + ' Promo Codes &amp; Discounts 2026 | HeyVino';
+  const metaDesc  = 'Save on ' + esc(displayName) + ' wines. Find the latest promo codes, discounts and deals — updated daily on HeyVino.';
+  const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
+  const countText = cards.length > 0 ? cards.length + ' active code' + (cards.length !== 1 ? 's' : '') : '';
+
+  const cardsInner = cards.length === 0
+    ? `<div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
+        <div style="font-size:2.5rem;margin-bottom:1rem">🥾</div>
+        <div style="font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:0.5rem">No active codes right now</div>
+        <div style="font-size:0.85rem;color:var(--muted)">Check back soon — we update daily.</div>
+      </div>`
+    : cards.map(cardHTML).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="${metaDesc}">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${metaDesc}">
+<meta property="og:url" content="${canonical}">
+<meta property="og:type" content="website">
+<link rel="canonical" href="${canonical}">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7KDQWZYYV5');
+</script>
+<title>${title}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wine: #6B1E2A; --wine-deep: #3D0D14; --wine-light: #9B3A4A;
+    --gold: #C9A84C; --gold-light: #E8D5A0; --cream: #FAF6EF;
+    --stone: #E8E0D4; --ink: #1A0A0E; --muted: #7A6E64; --white: #fff;
+  }
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: var(--wine-deep); border-bottom: 1px solid rgba(201,168,76,0.25); padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo img { height: 44px; width: 44px; border-radius: 8px; object-fit: cover; }
+  .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); font-style: italic; font-weight: 700; }
+  .nav-logo small { display: none; font-style: italic; color: rgba(201,168,76,0.55); font-size: 0.78rem; font-weight: 400; }
+  .nav-links { display: none; gap: 1.75rem; list-style: none; align-items: center; }
+  .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta { background: var(--gold); color: var(--wine-deep); padding: 7px 18px; border-radius: 2px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: none; }
+
+  .page-header { max-width: 1400px; margin: 0 auto; padding: 2rem 1rem 0; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; color: var(--wine); font-size: 0.82rem; font-weight: 600; text-decoration: none; margin-bottom: 1.25rem; transition: color 0.15s; }
+  .back-link:hover { color: var(--wine-light); }
+  .page-h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 4vw, 2.6rem); color: var(--wine-deep); margin-bottom: 0.3rem; }
+  .winery-description { font-size: 14px; color: #4a4040; line-height: 1.75; margin: 1rem 0 1.1rem; max-width: 760px; }
+  .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; }
+
+  .cards-wrap { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.1rem; }
+
+  .card { background: var(--white); border: 1px solid var(--stone); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; animation: fadeUp 0.4s ease both; }
+  .card:hover { box-shadow: 0 8px 28px rgba(107,30,42,0.1); transform: translateY(-2px); }
+  .card.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .card-accent { height: 3px; }
+  .accent-red { background: linear-gradient(90deg, var(--wine), var(--wine-light)); }
+  .accent-white { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .accent-rose { background: linear-gradient(90deg, #E8739A, #F4A8C0); }
+  .accent-sparkling { background: linear-gradient(90deg, #3C64A0, #6A8EC8); }
+  .featured-tag { position: absolute; top: 10px; right: 12px; font-size: 0.63rem; color: var(--gold); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .card-body { padding: 0.75rem; }
+  .card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0.7rem; }
+  .winery-avatar { width: 44px; height: 44px; border-radius: 5px; border: 1px solid var(--stone); background: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--wine); font-weight: 700; flex-shrink: 0; }
+  .winery-name { font-weight: 600; font-size: 0.88rem; color: var(--ink); line-height: 1.3; }
+  .winery-region { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.7rem; }
+  .badge-red { background: rgba(107,30,42,0.1); color: var(--wine); }
+  .badge-white { background: rgba(201,168,76,0.15); color: #8B6914; }
+  .badge-rose { background: rgba(232,115,154,0.12); color: #B5476F; }
+  .badge-sparkling { background: rgba(60,100,160,0.1); color: #3C64A0; }
+  .code-block { background: var(--cream); border: 1.5px dashed var(--stone); border-radius: 5px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 0.7rem; overflow: hidden; }
+  .code-text { font-family: 'Courier New', monospace; font-size: 0.82rem; font-weight: 700; color: var(--wine); letter-spacing: 0.06em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy-btn { flex-shrink: 0; background: var(--wine); color: var(--white); border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.68rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; white-space: nowrap; }
+  .copy-btn:hover { background: var(--wine-light); }
+  .copy-btn.copied { background: #2D7A4F; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
+  .expiry { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: #2D7A4F; } .dot-amber { background: #D4831A; } .dot-red { background: #C0392B; }
+  .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; } .expiry-text-na { color: #9e9e9e; }
+  .discount { font-weight: 700; color: var(--wine); font-size: 0.85rem; }
+  .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
+  .visit-site-link { display: inline-block; margin-top: 0.55rem; font-size: 0.72rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
+  .visit-site-link:hover { color: var(--gold-light); text-decoration: underline; }
+
+  footer { background: var(--wine-deep); padding: 2rem 1rem 1.5rem; margin-top: 2rem; }
+  .footer-grid { display: none; }
+  .footer-tagline { color: rgba(255,255,255,0.38); font-size: 0.83rem; line-height: 1.7; }
+  .footer-heading { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 0.85rem; font-weight: 600; }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .footer-links a { color: rgba(255,255,255,0.42); font-size: 0.82rem; text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--gold-light); }
+  .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
+  .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .card:nth-child(1){animation-delay:0.04s} .card:nth-child(2){animation-delay:0.08s} .card:nth-child(3){animation-delay:0.12s}
+  .card:nth-child(4){animation-delay:0.16s} .card:nth-child(5){animation-delay:0.20s} .card:nth-child(6){animation-delay:0.24s}
+
+  @media (min-width: 768px) {
+    nav { padding: 0 2rem; }
+    .nav-logo small { display: inline; }
+    .nav-links { display: flex; }
+    .page-header { padding: 2.5rem 2rem 0; }
+    .cards-wrap { padding: 1.5rem 2rem 3rem; }
+    .cards-grid { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
+    .card-body { padding: 1.1rem 1.25rem; }
+    .code-text { font-size: 0.92rem; letter-spacing: 0.1em; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
+    footer { padding: 2.5rem 2rem 1.5rem; }
+  }
+
+  @media (max-width: 768px) {
+    .card { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+    .cards-grid { grid-template-columns: 1fr !important; width: 100% !important; padding: 0 !important; }
+    .cards-wrap { padding: 0.75rem !important; overflow-x: hidden !important; }
+    .code-block { display: flex !important; align-items: center !important; gap: 8px !important; width: 100% !important; }
+    .code-text { flex: 1 !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+    .copy-btn { flex-shrink: 0 !important; white-space: nowrap !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="https://i.imgur.com/Mzt8U31.png" alt="HeyVino Logo"/>
+      <span class="nav-logo-text">HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> <small>Wine deals, curated</small></span>
+    </a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/wineries.html">All Wineries</a></li>
+    <li><a href="/partner.html">Partner With Us</a></li>
+    <li><a href="/legacy.html">Legacy Promos</a></li>
+    <li><a href="#" onclick="openAdvertiseModal();return false;">Advertise</a></li>
+  </ul>
+  <button class="nav-cta">Get Alerts</button>
+</nav>
+
+<div class="page-header">
+  <a href="/wineries.html" class="back-link">&larr; All Wineries</a>
+  <h1 class="page-h1">${esc(displayName)}</h1>
+  ${description ? '<p class="winery-description">' + esc(description) + '</p>' : ''}
+  ${countText ? '<p class="page-subtitle">' + countText + '</p>' : ''}
+</div>
+
+<div class="cards-wrap">
+  <div class="cards-grid" id="cards">
+    ${cardsInner}
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;">
+        <img src="https://i.imgur.com/Mzt8U31.png" alt="HeyVino" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"/>
+        <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-style:italic;">HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup></span>
+      </div>
+      <p class="footer-tagline">The world's most comprehensive wine promotion aggregator. Updated every 6 hours from 200+ winery newsletters across 23 countries.</p>
+    </div>
+    <div>
+      <div class="footer-heading">Browse</div>
+      <ul class="footer-links">
+        <li><a href="/index.html">All Deals</a></li>
+        <li><a href="/wineries.html">By Winery</a></li>
+        <li><a href="/index.html">Expiring Soon</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Business</div>
+      <ul class="footer-links">
+        <li><a href="#" onclick="openAdvertiseModal();return false;">Advertise With Us</a></li>
+        <li><a href="#" onclick="openAdvertiseModal();return false;">Partner Vineyards</a></li>
+        <li><a href="#">Media Kit</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="/privacy.html">Privacy Policy</a></li>
+        <li><a href="/terms.html">Terms of Service</a></li>
+        <li><a href="#" onclick="openAdvertiseModal();return false;">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2026 HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> LLC &middot; HeyVinoWine.com &middot; Promotional codes sourced from publicly available winery communications.</span>
+    <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here &rarr;</a>
+  </div>
+</footer>
+
+<script>
+function copyCode(btn, code) {
+  navigator.clipboard.writeText(code).then(function() {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+function openAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'flex'; }
+function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'none'; }
+function copyAdvertiseEmail() {
+  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
+  document.getElementById('copyEmailBtn').textContent = 'Copied!';
+  setTimeout(function() { document.getElementById('copyEmailBtn').textContent = 'Copy'; }, 2000);
+}
+document.getElementById('advertiseModal').addEventListener('click', function(e) { if (e.target === this) closeAdvertiseModal(); });
+</script>
+
+<div id="advertiseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--cream);border-radius:8px;padding:2.5rem;max-width:420px;width:90%;text-align:center;position:relative;">
+    <button onclick="closeAdvertiseModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">&times;</button>
+    <div style="font-size:2.5rem;margin-bottom:1rem;">🍷</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
+    <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
+      <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
+    </div>
+    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App &rarr;</a>
+  </div>
+</div>
+
+</body>
+</html>`;
+}
+
+module.exports = async function handler(req, res) {
+  const slug = (req.query.slug || '').trim().toLowerCase();
+
+  if (!slug) {
+    res.writeHead(302, { Location: '/wineries.html' });
+    return res.end();
+  }
+
+  const searchName = slug.replace(/-/g, ' ');
+  const headers = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
+
+  try {
+    const [promoRes, wineryRes] = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=description&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
+    ]);
+
+    const promoData  = promoRes.ok  ? await promoRes.json()  : [];
+    const wineryData = wineryRes.ok ? await wineryRes.json() : [];
+
+    const description = (wineryData[0] || {}).description || '';
+    const displayName = promoData.length > 0
+      ? promoData[0].winery_name
+      : searchName.replace(/\b\w/g, c => c.toUpperCase());
+
+    const cards = promoData.map(row => ({
+      winery:      row.winery_name     || '',
+      code:        row.code            || '',
+      discount:    row.discount_amount || row.discount   || '',
+      conditions:  row.conditions      || '',
+      type:        row.varietal_type   || row.type       || 'red',
+      varietal:    row.varietal        || '',
+      region:      row.region          || '',
+      country:     row.country         || '',
+      expiry:      row.expiry_date     || row.expiry     || '',
+      featured:    row.is_featured     || false,
+      website_url: row.website_url     || ''
+    }));
+
+    const html = buildPage({ slug, displayName, description, cards });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    return res.status(200).send(html);
+
+  } catch (err) {
+    console.error('winery SSR error:', err);
+    const displayName = searchName.replace(/\b\w/g, c => c.toUpperCase());
+    const html = buildPage({ slug, displayName, description: '', cards: [] });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(html);
+  }
+};
