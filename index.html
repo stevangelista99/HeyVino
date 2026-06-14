@@ -501,7 +501,7 @@ async function loadCodes() {
     type:       row.varietal_type    || row.type      || 'red',
     varietal:   row.varietal         || '',
     region:     row.region           || '',
-    country:    row.country          || '',
+    country:    normalizeCountry(row.country),
     expiry:     row.expiry_date      || row.expiry    || '',
     featured:   row.is_featured      || row.featured  || false,
     website_url: row.website_url || row.website || '',
