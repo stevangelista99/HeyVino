@@ -242,7 +242,6 @@ function buildPage({ slug, displayName, description, cards }) {
       <ul class="footer-links">
         <li><a href="#" onclick="openAdvertiseModal();return false;">Advertise With Us</a></li>
         <li><a href="#" onclick="openAdvertiseModal();return false;">Partner Vineyards</a></li>
-        <li><a href="#">Media Kit</a></li>
       </ul>
     </div>
     <div>
