@@ -1,27 +1,29 @@
 const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios');
+const { google } = require('googleapis');
+const Anthropic = require('@anthropic-ai/sdk');
 const crypto = require('crypto');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// ── Gmail helpers ──────────────────────────────────────────────────────────────
+// ── Gmail client ───────────────────────────────────────────────────────────────
 
-async function getGmailAccessToken() {
-  const { data } = await axios.post('https://oauth2.googleapis.com/token', {
-    client_id: process.env.GMAIL_CLIENT_ID,
-    client_secret: process.env.GMAIL_CLIENT_SECRET,
-    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
-    grant_type: 'refresh_token',
-  });
-  return data.access_token;
+function makeGmailClient() {
+  const auth = new google.auth.OAuth2(
+    process.env.GMAIL_CLIENT_ID,
+    process.env.GMAIL_CLIENT_SECRET
+  );
+  auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
+  return google.gmail({ version: 'v1', auth });
 }
 
-async function searchGmailThreads(accessToken, query) {
-  const { data } = await axios.get('https://gmail.googleapis.com/gmail/v1/users/me/messages', {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    params: { q: query, maxResults: 50 },
+async function searchGmailMessages(gmail, query) {
+  const res = await gmail.users.messages.list({
+    userId: 'me',
+    q: query,
+    maxResults: 50,
   });
-  return data.messages || [];
+  return res.data.messages || [];
 }
 
 function decodeBase64Url(str) {
@@ -31,12 +33,10 @@ function decodeBase64Url(str) {
 function extractBody(payload) {
   if (!payload) return '';
 
-  // Prefer plain text part
   if (payload.mimeType === 'text/plain' && payload.body?.data) {
     return decodeBase64Url(payload.body.data);
   }
 
-  // Recurse into parts
   if (payload.parts) {
     let plain = '';
     let html = '';
@@ -50,7 +50,6 @@ function extractBody(payload) {
       }
     }
     if (plain) return plain;
-    // Strip HTML tags as fallback
     return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
@@ -58,19 +57,17 @@ function extractBody(payload) {
   return '';
 }
 
-async function fetchEmailBody(accessToken, messageId) {
-  const { data } = await axios.get(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      params: { format: 'full' },
-    }
-  );
-  const headers = data.payload?.headers || [];
+async function fetchEmailBody(gmail, messageId) {
+  const res = await gmail.users.messages.get({
+    userId: 'me',
+    id: messageId,
+    format: 'full',
+  });
+  const headers = res.data.payload?.headers || [];
   const subject = headers.find(h => h.name === 'Subject')?.value || '';
   const from = headers.find(h => h.name === 'From')?.value || '';
   const date = headers.find(h => h.name === 'Date')?.value || '';
-  const body = extractBody(data.payload);
+  const body = extractBody(res.data.payload);
   return { subject, from, date, body };
 }
 
@@ -109,23 +106,13 @@ Extract and return a single JSON object with these exact fields:
 }`;
 
 async function extractWithClaude(emailBody, sourceDate) {
-  const { data } = await axios.post(
-    'https://api.anthropic.com/v1/messages',
-    {
-      model: 'claude-sonnet-4-6',
-      max_tokens: 512,
-      system: EXTRACTION_SYSTEM,
-      messages: [{ role: 'user', content: EXTRACTION_USER(emailBody, sourceDate) }],
-    },
-    {
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-    }
-  );
-  const text = data.content?.[0]?.text || '';
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 512,
+    system: EXTRACTION_SYSTEM,
+    messages: [{ role: 'user', content: EXTRACTION_USER(emailBody, sourceDate) }],
+  });
+  const text = message.content?.[0]?.text || '';
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) return { has_code: false };
   return JSON.parse(jsonMatch[0]);
@@ -177,7 +164,7 @@ function buildInsertSQL(extracted, wineryId) {
 
 // ── Gmail send ─────────────────────────────────────────────────────────────────
 
-async function sendDigestEmail({ scanned, codes, flagged, sqlBlock, approvalToken, runDate, accessToken }) {
+async function sendDigestEmail({ scanned, codes, flagged, sqlBlock, approvalToken, runDate, gmail }) {
   const approveUrl = `https://www.heyvinowine.com/api/promo-approve?token=${approvalToken}`;
 
   const codeRows = codes.map(c =>
@@ -226,7 +213,6 @@ ${flagged.length > 0 ? `
 
   const subject = `HeyVino Promo Agent — ${scanned} scanned, ${codes.length} codes, ${flagged.length} flagged [${runDate}]`;
 
-  // Build a minimal RFC 2822 message and base64url-encode it for the Gmail API
   const rfc2822 = [
     `From: HeyVinoPromos@gmail.com`,
     `To: HeyVinoMarketing@gmail.com`,
@@ -243,11 +229,10 @@ ${flagged.length > 0 ? `
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 
-  await axios.post(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
-    { raw: encoded },
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  );
+  await gmail.users.messages.send({
+    userId: 'me',
+    requestBody: { raw: encoded },
+  });
 }
 
 // ── Main handler ───────────────────────────────────────────────────────────────
@@ -255,7 +240,6 @@ ${flagged.length > 0 ? `
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Auth check
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '');
   if (!token || token !== process.env.AGENT_SECRET) {
@@ -270,17 +254,17 @@ module.exports = async function handler(req, res) {
   const runDate = yesterday.toISOString().split('T')[0];
   const gmailQuery = `after:${fmt(yesterday)} before:${fmt(today)} (promo OR discount OR code OR "% off" OR welcome OR offer OR save OR shipping)`;
 
-  let accessToken;
+  let gmail;
   try {
-    accessToken = await getGmailAccessToken();
+    gmail = makeGmailClient();
   } catch (err) {
-    console.error('Gmail auth failed:', err.message);
-    return res.status(500).json({ error: 'Gmail auth failed', detail: err.message });
+    console.error('Gmail client init failed:', err.message);
+    return res.status(500).json({ error: 'Gmail client init failed', detail: err.message });
   }
 
   let messages;
   try {
-    messages = await searchGmailThreads(accessToken, gmailQuery);
+    messages = await searchGmailMessages(gmail, gmailQuery);
   } catch (err) {
     console.error('Gmail search failed:', err.message);
     return res.status(500).json({ error: 'Gmail search failed', detail: err.message });
@@ -296,7 +280,7 @@ module.exports = async function handler(req, res) {
   for (const msg of messages) {
     let email;
     try {
-      email = await fetchEmailBody(accessToken, msg.id);
+      email = await fetchEmailBody(gmail, msg.id);
       emailsScanned++;
     } catch (err) {
       console.error(`Failed to fetch message ${msg.id}:`, err.message);
@@ -315,7 +299,6 @@ module.exports = async function handler(req, res) {
 
     extracted.source_email_date = extracted.source_email_date || runDate;
 
-    // Look up winery
     let winery;
     try {
       winery = await findWinery(extracted.winery_name);
@@ -330,7 +313,6 @@ module.exports = async function handler(req, res) {
       continue;
     }
 
-    // Duplicate check
     let duplicate;
     try {
       duplicate = await codeExists(extracted.code, winery.id);
@@ -348,13 +330,11 @@ module.exports = async function handler(req, res) {
     codesForDigest.push({ ...extracted, winery_name: winery.name });
   }
 
-  // Append deactivation sweep
   const deactivation = `UPDATE promo_codes SET is_active = false WHERE expiry_date < CURRENT_DATE AND is_active = true;`;
   const sqlBlock = [...insertStatements, deactivation].join('\n\n');
 
   const approvalToken = crypto.randomUUID();
 
-  // Persist run record
   try {
     const { error } = await supabase.from('promo_agent_runs').insert({
       run_date: runDate,
@@ -370,7 +350,6 @@ module.exports = async function handler(req, res) {
     console.error('Failed to save run record:', err.message);
   }
 
-  // Send digest email
   try {
     await sendDigestEmail({
       scanned: emailsScanned,
@@ -379,7 +358,7 @@ module.exports = async function handler(req, res) {
       sqlBlock,
       approvalToken,
       runDate,
-      accessToken,
+      gmail,
     });
   } catch (err) {
     console.error('Failed to send digest email:', err.message);
