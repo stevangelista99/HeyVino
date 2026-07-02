@@ -193,7 +193,7 @@ function buildPage({ slug, displayName, description, cards }) {
 <nav>
   <div class="nav-logo">
     <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-      <img src="https://i.imgur.com/Mzt8U31.png" alt="HeyVino Logo"/>
+      <img src="/images/logo.png" alt="HeyVino Logo"/>
       <span class="nav-logo-text">HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> <small>Wine deals, curated</small></span>
     </a>
   </div>
@@ -224,10 +224,10 @@ function buildPage({ slug, displayName, description, cards }) {
   <div class="footer-grid">
     <div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;">
-        <img src="https://i.imgur.com/Mzt8U31.png" alt="HeyVino" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"/>
+        <img src="/images/logo.png" alt="HeyVino" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"/>
         <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-style:italic;">HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup></span>
       </div>
-      <p class="footer-tagline">The world's most comprehensive wine promotion aggregator. Updated every 6 hours from 200+ winery newsletters across 23 countries.</p>
+      <p class="footer-tagline">The wine promo code aggregator — updated daily from 250+ winery newsletters worldwide.</p>
     </div>
     <div>
       <div class="footer-heading">Browse</div>
@@ -247,7 +247,7 @@ function buildPage({ slug, displayName, description, cards }) {
     <div>
       <div class="footer-heading">Company</div>
       <ul class="footer-links">
-        <li><a href="#">About</a></li>
+        <li><a href="/#about">About</a></li>
         <li><a href="/privacy.html">Privacy Policy</a></li>
         <li><a href="/terms.html">Terms of Service</a></li>
         <li><a href="#" onclick="openAdvertiseModal();return false;">Contact</a></li>
