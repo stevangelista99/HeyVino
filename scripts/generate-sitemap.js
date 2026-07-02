@@ -5,21 +5,32 @@ const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
 const BASE_URL = 'https://www.heyvinowine.com';
 
+const today = new Date().toISOString().split('T')[0];
+
 function urlEntry(loc, priority = '0.8') {
-  return `  <url>\n    <loc>${loc}</loc>\n    <priority>${priority}</priority>\n  </url>`;
+  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
 async function generate() {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/wineries?select=slug&is_active=eq.true`,
-    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-  );
-  if (!res.ok) throw new Error(`Supabase error: HTTP ${res.status}`);
-  const data = await res.json();
+  const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
 
-  const slugs = data.map(r => r.slug).filter(Boolean).sort();
+  const [wRes, pRes] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description&is_active=eq.true`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers })
+  ]);
+  if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
+  const wineries = await wRes.json();
+  const codes = pRes.ok ? await pRes.json() : [];
 
-  const today = new Date().toISOString().split('T')[0];
+  // Which wineries currently have active codes
+  const hasCode = new Set(codes.map(r => (r.winery_name || '').toLowerCase()).filter(Boolean));
+
+  // Only index a winery page if it has codes OR a written description — never empty pages
+  const slugs = wineries
+    .filter(w => w.slug && (hasCode.has((w.name || '').toLowerCase()) || (w.description && w.description.trim())))
+    .map(w => w.slug)
+    .sort();
+
   const staticEntries = [
     urlEntry(`${BASE_URL}/`, '1.0'),
     urlEntry(`${BASE_URL}/wineries.html`, '0.9'),

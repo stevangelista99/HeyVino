@@ -130,7 +130,7 @@
 
 <div class="page-hero">
   <h1>All Wine Promo Codes <em>by Winery</em></h1>
-  <p>Browse every winery and retailer with active discount codes, sourced daily from newsletters worldwide.</p>
+  <p>Browse every winery and retailer we track — with promo codes sourced daily from newsletters worldwide.</p>
   <div class="winery-count" id="wineryCount"></div>
 </div>
 
@@ -206,26 +206,33 @@ let allWineries = [];
 
 async function load() {
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,country,region&is_active=eq.true`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const [wRes, pRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,region,country&is_active=eq.true`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers })
+    ]);
+    if (!wRes.ok) throw new Error(`HTTP ${wRes.status}`);
+    const wineries = await wRes.json();
+    const codes = pRes.ok ? await pRes.json() : [];
 
-    const map = {};
-    data.forEach(row => {
-      const name = row.winery_name || '';
-      if (!name) return;
-      const key = name.toLowerCase();
-      if (!map[key]) {
-        map[key] = { name, country: normalizeCountry(row.country), region: row.region || '', count: 0 };
-      }
-      map[key].count++;
+    const codeCount = {};
+    codes.forEach(row => {
+      const key = (row.winery_name || '').toLowerCase();
+      if (key) codeCount[key] = (codeCount[key] || 0) + 1;
     });
 
-    allWineries = Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
-    document.getElementById('wineryCount').textContent = `${allWineries.length} winer${allWineries.length !== 1 ? 'ies' : 'y'} with active codes`;
+    allWineries = wineries
+      .filter(w => w.name && w.slug)
+      .map(w => ({
+        name: w.name,
+        slug: w.slug,
+        country: normalizeCountry(w.country),
+        region: w.region || '',
+        count: codeCount[w.name.toLowerCase()] || 0
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    document.getElementById('wineryCount').textContent = `${allWineries.length} winer${allWineries.length !== 1 ? 'ies' : 'y'}`;
 
     renderWineries(allWineries);
   } catch (err) {
@@ -259,13 +266,13 @@ function renderWineries(list) {
     const meta = w.region ? `${flag} ${w.region}, ${w.country}` : (w.country ? `${flag} ${w.country}` : '');
     const delay = (i % 12) * 0.04;
 
-    html += `<a class="winery-card" href="winery.html?slug=${toSlug(w.name)}" style="animation-delay:${delay}s">
+    html += `<a class="winery-card" href="winery.html?slug=${w.slug}" style="animation-delay:${delay}s">
       <div class="winery-avatar">${initials}</div>
       <div class="winery-info">
         <div class="winery-card-name">${w.name}</div>
         ${meta ? `<div class="winery-card-meta">${meta}</div>` : ''}
       </div>
-      <div class="winery-card-count">${w.count} code${w.count !== 1 ? 's' : ''}</div>
+      <div class="winery-card-count">${w.count > 0 ? w.count + ' code' + (w.count !== 1 ? 's' : '') : 'View →'}</div>
     </a>`;
   });
 
