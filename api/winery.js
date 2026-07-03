@@ -20,9 +20,17 @@ function expiryHTML(expiry) {
 function accentClass(t) { return { red:'accent-red', white:'accent-white', rose:'accent-rose', sparkling:'accent-sparkling' }[t] || 'accent-red'; }
 function badgeClass(t)  { return { red:'badge-red',  white:'badge-white',  rose:'badge-rose',  sparkling:'badge-sparkling'  }[t] || 'badge-red'; }
 
+const AFFILIATE_URLS = {
+  'wineaccess.com': 'https://sovrn.co/18t2ocj',
+};
+
 function safeUrl(url) {
-  try { const u = new URL(url); return (u.protocol === 'https:' || u.protocol === 'http:') ? esc(url) : ''; }
-  catch { return ''; }
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    const override = AFFILIATE_URLS[u.hostname.replace(/^www\./, '')];
+    return esc(override || url);
+  } catch { return ''; }
 }
 
 function cardHTML(c) {
