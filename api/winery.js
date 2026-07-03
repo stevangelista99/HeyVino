@@ -255,6 +255,7 @@ function buildPage({ slug, displayName, description, cards }) {
     </div>
   </div>
   <div class="footer-bottom">
+    <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;width:100%;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
     <span class="footer-copy">&copy; 2026 HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> LLC &middot; HeyVinoWine.com &middot; Promotional codes sourced from publicly available winery communications.</span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here &rarr;</a>
   </div>
