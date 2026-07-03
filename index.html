@@ -552,6 +552,8 @@ function toSlug(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-
 const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫🇷", Italy:"🇮🇹", italy:"🇮🇹", Spain:"🇪🇸", spain:"🇪🇸", Australia:"🇦🇺", australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", argentina:"🇦🇷", Germany:"🇩🇪", germany:"🇩🇪" };
 const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
+const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj' };
+function affiliateUrl(url){ try{ const u=new URL(url); return AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url; }catch{ return url; } }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="";
 
@@ -590,7 +592,7 @@ function cardHTML(c) {
         <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
       </div>
       <div class="card-footer">${expiryHTML(c.offer_type==='welcome'?null:c.expiry)}<span class="discount">${c.discountLabel}${c.conditionsLabel?`<span class="conditions"> · ${c.conditionsLabel}</span>`:''}</span></div>
-      ${c.website_url?`<a class="visit-site-link" href="${c.website_url}" target="_blank" rel="noopener">Visit Site →</a>`:''}
+      ${c.website_url?`<a class="visit-site-link" href="${affiliateUrl(c.website_url)}" target="_blank" rel="noopener">Visit Site →</a>`:''}
     </div>
   </div>`;
 }
@@ -664,7 +666,7 @@ async function loadFeaturedCodes() {
                      : r.discount_type === 'free_shipping' ? 'Free shipping'
                      : r.description || '';
       const visitLink = r.website_url
-        ? `<a class="featured-visit" href="${r.website_url}" target="_blank" rel="noopener">Visit Site →</a>`
+        ? `<a class="featured-visit" href="${affiliateUrl(r.website_url)}" target="_blank" rel="noopener">Visit Site →</a>`
         : '';
       return `<div class="featured-code-item">
         <span class="featured-badge">Featured</span>
@@ -695,7 +697,7 @@ async function loadTopCodes() {
       const pct = r.discount_amount ? r.discount_amount + '% off' : '';
       const inner = `<span>${name}</span><span class="region-count">${pct}</span>`;
       return r.website_url
-        ? `<a href="${r.website_url}" target="_blank" rel="noopener" class="region-item" style="text-decoration:none;color:inherit;">${inner}</a>`
+        ? `<a href="${affiliateUrl(r.website_url)}" target="_blank" rel="noopener" class="region-item" style="text-decoration:none;color:inherit;">${inner}</a>`
         : `<div class="region-item">${inner}</div>`;
     }).join('');
   } catch(e) {
