@@ -18,38 +18,66 @@ function makeGmailClient() {
 }
 
 async function searchGmailMessages(gmail, query) {
-  const res = await gmail.users.messages.list({
-    userId: 'me',
-    q: query,
-    maxResults: 50,
-  });
-  return res.data.messages || [];
+  // Paginate: heavy promo days (holidays) can exceed a single 50-result page.
+  const all = [];
+  let pageToken;
+  do {
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      q: query,
+      maxResults: 50,
+      pageToken,
+    });
+    all.push(...(res.data.messages || []));
+    pageToken = res.data.nextPageToken;
+  } while (pageToken && all.length < 150);
+  return all;
 }
 
 function decodeBase64Url(str) {
   return Buffer.from(str.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
 }
 
-function extractPreheaderText(html) {
+function decodeEntities(s) {
+  return String(s || '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/&quot;/gi, '"')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\u00ad|\u200b|͏/g, ' ');
+}
+
+function extractHiddenText(html) {
   if (!html) return '';
-  // Marketing emails commonly hide preview/preheader text in a display:none div
-  // at the top of the HTML body (shown only in the inbox preview line). Codes
-  // sometimes appear ONLY here even when a sparse plaintext part exists.
-  const match = html.match(/<div[^>]*style=["'][^"']*display\s*:\s*none[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
-  if (!match) return '';
-  return match[1]
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;|\u00ad|\u200b|͏/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Marketing emails hide preview/preheader text in display:none divs/spans
+  // (shown only in the inbox preview line). Codes sometimes appear ONLY here,
+  // and templates often contain more than one hidden block — capture them all.
+  const blocks = [...html.matchAll(/<(div|span)[^>]*style=["'][^"']*display\s*:\s*none[^"']*["'][^>]*>([\s\S]*?)<\/\1>/gi)]
+    .map(m => decodeEntities(m[2].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  return blocks.join(' ').slice(0, 1200);
 }
 
 function extractImageAltText(html) {
   if (!html) return '';
   const alts = [...html.matchAll(/<img[^>]*alt=["']([^"']+)["']/gi)]
-    .map(m => m[1])
+    .map(m => decodeEntities(m[1]).trim())
     .filter(Boolean);
-  return alts.join(' | ');
+  return alts.join(' | ').slice(0, 800);
+}
+
+function extractLinkCodes(html) {
+  if (!html) return '';
+  // Codes are sometimes only present as URL params in CTA links,
+  // e.g. href="https://winery.com/shop?promo=SUMMER25".
+  const found = new Set();
+  for (const m of html.matchAll(/[?&](?:promo(?:_?code)?|coupon(?:_?code)?|code|discount)=([A-Za-z0-9_-]{3,24})(?=[&"'\s>]|$)/gi)) {
+    found.add(m[1]);
+    if (found.size >= 10) break;
+  }
+  return found.size ? 'Possible codes found in links: ' + [...found].join(', ') : '';
 }
 
 function extractBody(payload) {
@@ -72,17 +100,20 @@ function extractBody(payload) {
       }
     }
 
-    // Hidden preheader text and image alt text can carry the actual offer/code
-    // even when the visible plaintext is just nav links or the email is image-only.
-    const preheader = extractPreheaderText(html);
-    const altText = extractImageAltText(html);
-    const extras = [preheader, altText].filter(Boolean).join('\n');
+    // Hidden preheader text, image alt text, and link-embedded codes can carry
+    // the actual offer/code even when the visible plaintext is just nav links
+    // or the email is image-only. Placed FIRST so downstream length slicing
+    // can never truncate them away.
+    const extras = [extractHiddenText(html), extractImageAltText(html), extractLinkCodes(html)]
+      .filter(Boolean)
+      .join('\n');
+    const visible = plain
+      ? plain
+      : decodeEntities(html.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 
-    if (plain) {
-      return extras ? `${plain}\n\n[Hidden preview/image text]\n${extras}` : plain;
-    }
-    const htmlText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    return extras ? `${htmlText}\n\n[Hidden preview/image text]\n${extras}` : htmlText;
+    return extras
+      ? `[Hidden preview/image/link text]\n${extras}\n\n[Visible body]\n${visible}`
+      : visible;
   }
 
   if (payload.body?.data) return decodeBase64Url(payload.body.data);
@@ -106,61 +137,163 @@ async function fetchEmailBody(gmail, messageId) {
 // ── Claude extraction ──────────────────────────────────────────────────────────
 
 const EXTRACTION_SYSTEM = `You are a promo code extraction assistant for HeyVino, a US wine discovery platform.
-Extract redeemable promo codes from marketing emails.
+Extract ALL redeemable promo codes from marketing emails — an email may contain zero, one, or several distinct codes.
 
 Rules:
 - Only extract codes that must be manually entered at checkout (not automatic/instant discounts)
 - Skip offers that are Australia-only or international-only (outside the USA)
-- The email body may include a "[Hidden preview/image text]" section at the end — this contains hidden inbox-preview text and image alt text from the original email, which sometimes contains the actual promo code even when the visible email body does not. Check it carefully.
+- The email body may begin with a "[Hidden preview/image/link text]" section — this contains hidden inbox-preview text, image alt text, and codes found inside link URLs from the original email. Codes sometimes appear ONLY there. Check it carefully, but only report a code if the email context confirms it is a real redeemable offer.
+- Report each distinct code exactly once; if one code has multiple tiers or conditions, combine them into a single entry's conditions field
+- discount_amount must be a plain number only (e.g. 20, 10.5) — no $, %, or words. Use null if there is no numeric amount (e.g. plain free shipping)
 - offer_type must be "welcome" if the code contains WELCOME, SIGNUP, or SMS (case-insensitive), OR if conditions mention first order/purchase/subscriber; otherwise use "standard"
 - discount_type must be exactly one of: percentage, fixed, free_shipping, other
 - expiry_date must be YYYY-MM-DD or null
-- Return null (as JSON: {"has_code": false}) if no valid redeemable code is found
+- Return {"codes": []} if no valid redeemable code is found
 - Return JSON only — no markdown, no explanation`;
 
 const EXTRACTION_USER = (body, sourceDate) => `Email received: ${sourceDate}
 
 ---
-${body.slice(0, 8000)}
+${body.slice(0, 12000)}
 ---
 
-Extract and return a single JSON object with these exact fields:
+Extract and return a single JSON object with this exact shape:
 {
-  "has_code": boolean,
-  "winery_name": string | null,
-  "code": string | null,
-  "discount_amount": string | null,
-  "discount_type": "percentage" | "fixed" | "free_shipping" | "other" | null,
-  "description": string | null,
-  "conditions": string | null,
-  "expiry_date": "YYYY-MM-DD" | null,
-  "offer_type": "welcome" | "standard" | null,
-  "source_email_date": "YYYY-MM-DD" | null
+  "codes": [
+    {
+      "winery_name": string,
+      "code": string,
+      "discount_amount": number | null,
+      "discount_type": "percentage" | "fixed" | "free_shipping" | "other",
+      "description": string | null,
+      "conditions": string | null,
+      "expiry_date": "YYYY-MM-DD" | null,
+      "offer_type": "welcome" | "standard",
+      "source_email_date": "YYYY-MM-DD" | null
+    }
+  ]
 }`;
+
+function sanitizeDiscountAmount(v) {
+  if (v == null) return null;
+  const cleaned = String(v).replace(/[^0-9.]/g, '');
+  if (!cleaned) return null;
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseExtraction(text) {
+  const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    return [];
+  }
+  // New shape: { codes: [...] }. Tolerate the legacy single-object shape too.
+  let codes;
+  if (Array.isArray(parsed?.codes)) {
+    codes = parsed.codes;
+  } else if (parsed?.has_code && parsed?.code) {
+    codes = [parsed];
+  } else {
+    codes = [];
+  }
+  return codes
+    .filter(c => c && typeof c.code === 'string' && c.code.trim())
+    .map(c => ({
+      ...c,
+      code: c.code.trim(),
+      discount_amount: sanitizeDiscountAmount(c.discount_amount),
+    }));
+}
 
 async function extractWithClaude(emailBody, sourceDate) {
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 512,
+    max_tokens: 1024,
     system: EXTRACTION_SYSTEM,
     messages: [{ role: 'user', content: EXTRACTION_USER(emailBody, sourceDate) }],
   });
   const text = message.content?.[0]?.text || '';
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return { has_code: false };
-  return JSON.parse(jsonMatch[0]);
+  return parseExtraction(text);
 }
 
 // ── Supabase helpers ───────────────────────────────────────────────────────────
 
-async function findWinery(wineryName) {
-  if (!wineryName) return null;
-  const { data } = await supabase
+function normalizeWineryName(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // strip accents: Supéry → supery
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')                        // strip punctuation incl. curly apostrophes
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const GENERIC_NAME_WORDS = new Set([
+  'winery', 'wineries', 'wine', 'wines', 'vineyard', 'vineyards',
+  'cellar', 'cellars', 'estate', 'estates', 'family', 'co', 'company', 'collection',
+]);
+
+function coreWineryName(normalized) {
+  const kept = normalized.split(' ').filter(w => !GENERIC_NAME_WORDS.has(w));
+  return (kept.length ? kept : normalized.split(' ')).join(' ');
+}
+
+function buildWineryMatcher(rows) {
+  const byNormalized = new Map();
+  const byCompactCore = new Map(); // space-free core → rows (may collide, e.g. Ghost Block / Ghost Block Estate Wines)
+  for (const row of rows) {
+    const norm = normalizeWineryName(row.name);
+    const compactCore = coreWineryName(norm).replace(/ /g, '');
+    if (!byNormalized.has(norm)) byNormalized.set(norm, row);
+    if (!byCompactCore.has(compactCore)) byCompactCore.set(compactCore, []);
+    byCompactCore.get(compactCore).push(row);
+  }
+  return {
+    find(name) {
+      if (!name) return null;
+      const norm = normalizeWineryName(name);
+      if (!norm) return null;
+
+      // 1. Exact normalized match ("PEJU Winery" ≡ "peju winery")
+      const exact = byNormalized.get(norm);
+      if (exact) return exact;
+
+      // 2. Compact-core match: strips spacing + generic suffix words, so
+      //    "Longmeadow Ranch" ≡ "Long Meadow Ranch", "Robert Mondavi" ≡ "Robert Mondavi Winery".
+      //    Only accept when unambiguous.
+      const compactCore = coreWineryName(norm).replace(/ /g, '');
+      const coreHits = byCompactCore.get(compactCore) || [];
+      if (coreHits.length === 1) return coreHits[0];
+      if (coreHits.length > 1) return null; // ambiguous → flag for manual review, never guess
+
+      // 3. Containment fallback for prefix variants ("Peju Province Winery" → "PEJU Winery").
+      //    Email-side core must be ≥5 chars to avoid junk substring hits (e.g. "com");
+      //    DB-side keys as short as 4 ("peju") are fine because a UNIQUE hit is still required.
+      if (compactCore.length >= 5) {
+        const candidates = [];
+        for (const [key, rowsForKey] of byCompactCore) {
+          if (key.length >= 4 && (key.includes(compactCore) || compactCore.includes(key))) {
+            candidates.push(...rowsForKey);
+          }
+        }
+        if (candidates.length === 1) return candidates[0];
+      }
+      return null;
+    },
+  };
+}
+
+async function createWineryMatcher() {
+  const { data, error } = await supabase
     .from('wineries')
     .select('id, name')
-    .ilike('name', wineryName.trim())
-    .limit(1);
-  return data?.[0] || null;
+    .eq('is_active', true);
+  if (error) throw new Error('Failed to load wineries: ' + error.message);
+  return buildWineryMatcher(data || []);
 }
 
 async function codeExists(code, wineryId) {
@@ -175,15 +308,17 @@ async function codeExists(code, wineryId) {
 
 // ── SQL generation ─────────────────────────────────────────────────────────────
 
-function buildInsertSQL(extracted, wineryId) {
+function buildInsertSQL(extracted, winery) {
   const esc = v => v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`;
+  const num = v => (v == null || !Number.isFinite(Number(v))) ? 'NULL' : String(Number(v));
   return [
     'INSERT INTO promo_codes',
-    '  (winery_id, code, discount_amount, discount_type, description, conditions, expiry_date, offer_type, source_email_date, is_active, is_featured)',
+    '  (winery_id, winery_name, code, discount_amount, discount_type, description, conditions, expiry_date, offer_type, source_email_date, is_active, is_featured)',
     'VALUES (',
-    `  ${wineryId},`,
+    `  ${winery.id},`,
+    `  ${esc(winery.name)},`,
     `  ${esc(extracted.code)},`,
-    `  ${esc(extracted.discount_amount)},`,
+    `  ${num(extracted.discount_amount)},`,
     `  ${esc(extracted.discount_type)},`,
     `  ${esc(extracted.description)},`,
     `  ${esc(extracted.conditions)},`,
@@ -270,7 +405,7 @@ ${flagged.length > 0 ? `
 
 // ── Main handler ───────────────────────────────────────────────────────────────
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const authHeader = req.headers['authorization'] || '';
@@ -285,7 +420,7 @@ module.exports = async function handler(req, res) {
 
   const fmt = d => `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   const runDate = yesterday.toISOString().split('T')[0];
-  const gmailQuery = `after:${fmt(yesterday)} before:${fmt(today)} (promo OR discount OR code OR "% off" OR welcome OR offer OR save OR shipping)`;
+  const gmailQuery = `after:${fmt(yesterday)} before:${fmt(today)} (promo OR discount OR code OR "% off" OR welcome OR offer OR save OR shipping OR sale OR deal OR exclusive OR complimentary)`;
 
   let gmail;
   try {
@@ -293,6 +428,14 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error('Gmail client init failed:', err.message);
     return res.status(500).json({ error: 'Gmail client init failed', detail: err.message });
+  }
+
+  let matcher;
+  try {
+    matcher = await createWineryMatcher();
+  } catch (err) {
+    console.error('Winery load failed:', err.message);
+    return res.status(500).json({ error: 'Winery load failed', detail: err.message });
   }
 
   let messages;
@@ -308,6 +451,7 @@ module.exports = async function handler(req, res) {
   const insertStatements = [];
   const codesForDigest = [];
   const flaggedWineries = [];
+  const seenThisRun = new Set(); // prevents same code+winery inserted twice in one run
   let emailsScanned = 0;
 
   for (const msg of messages) {
@@ -320,47 +464,48 @@ module.exports = async function handler(req, res) {
       continue;
     }
 
-    let extracted;
+    let extractedCodes;
     try {
-      extracted = await extractWithClaude(email.body, runDate);
+      extractedCodes = await extractWithClaude(email.body, runDate);
     } catch (err) {
       console.error(`Claude extraction failed for message ${msg.id}:`, err.message);
       continue;
     }
 
-    if (!extracted?.has_code || !extracted.code) continue;
+    for (const extracted of extractedCodes) {
+      extracted.source_email_date = extracted.source_email_date || runDate;
 
-    extracted.source_email_date = extracted.source_email_date || runDate;
+      const winery = matcher.find(extracted.winery_name);
 
-    let winery;
-    try {
-      winery = await findWinery(extracted.winery_name);
-    } catch (err) {
-      console.error(`Winery lookup failed for "${extracted.winery_name}":`, err.message);
-      continue;
+      if (!winery) {
+        flaggedWineries.push({ winery_name: extracted.winery_name, code: extracted.code });
+        console.log(`Flagged (winery not matched): ${extracted.winery_name}`);
+        continue;
+      }
+
+      const seenKey = `${winery.id}:${extracted.code.toUpperCase()}`;
+      if (seenThisRun.has(seenKey)) {
+        console.log(`Skipping in-run duplicate: ${extracted.code} for winery ${winery.id}`);
+        continue;
+      }
+
+      let duplicate;
+      try {
+        duplicate = await codeExists(extracted.code, winery.id);
+      } catch (err) {
+        console.error(`Duplicate check failed for code ${extracted.code}:`, err.message);
+        continue;
+      }
+
+      if (duplicate) {
+        console.log(`Skipping duplicate code: ${extracted.code} for winery ${winery.id}`);
+        continue;
+      }
+
+      seenThisRun.add(seenKey);
+      insertStatements.push(buildInsertSQL(extracted, winery));
+      codesForDigest.push({ ...extracted, winery_name: winery.name });
     }
-
-    if (!winery) {
-      flaggedWineries.push({ winery_name: extracted.winery_name, code: extracted.code });
-      console.log(`Flagged (winery not in DB): ${extracted.winery_name}`);
-      continue;
-    }
-
-    let duplicate;
-    try {
-      duplicate = await codeExists(extracted.code, winery.id);
-    } catch (err) {
-      console.error(`Duplicate check failed for code ${extracted.code}:`, err.message);
-      continue;
-    }
-
-    if (duplicate) {
-      console.log(`Skipping duplicate code: ${extracted.code} for winery ${winery.id}`);
-      continue;
-    }
-
-    insertStatements.push(buildInsertSQL(extracted, winery.id));
-    codesForDigest.push({ ...extracted, winery_name: winery.name });
   }
 
   const deactivation = `UPDATE promo_codes SET is_active = false WHERE expiry_date < CURRENT_DATE AND is_active = true;`;
@@ -405,4 +550,18 @@ module.exports = async function handler(req, res) {
     approval_token: approvalToken,
     sql_lines: insertStatements.length,
   });
+}
+
+module.exports = handler;
+// Pure functions exposed for unit testing only — not used by the route.
+module.exports._internals = {
+  extractBody,
+  extractHiddenText,
+  extractImageAltText,
+  extractLinkCodes,
+  parseExtraction,
+  sanitizeDiscountAmount,
+  buildWineryMatcher,
+  normalizeWineryName,
+  buildInsertSQL,
 };
