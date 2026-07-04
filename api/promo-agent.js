@@ -30,6 +30,28 @@ function decodeBase64Url(str) {
   return Buffer.from(str.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
 }
 
+function extractPreheaderText(html) {
+  if (!html) return '';
+  // Marketing emails commonly hide preview/preheader text in a display:none div
+  // at the top of the HTML body (shown only in the inbox preview line). Codes
+  // sometimes appear ONLY here even when a sparse plaintext part exists.
+  const match = html.match(/<div[^>]*style=["'][^"']*display\s*:\s*none[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+  if (!match) return '';
+  return match[1]
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|\u00ad|\u200b|͏/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractImageAltText(html) {
+  if (!html) return '';
+  const alts = [...html.matchAll(/<img[^>]*alt=["']([^"']+)["']/gi)]
+    .map(m => m[1])
+    .filter(Boolean);
+  return alts.join(' | ');
+}
+
 function extractBody(payload) {
   if (!payload) return '';
 
@@ -49,8 +71,18 @@ function extractBody(payload) {
         plain += extractBody(part);
       }
     }
-    if (plain) return plain;
-    return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Hidden preheader text and image alt text can carry the actual offer/code
+    // even when the visible plaintext is just nav links or the email is image-only.
+    const preheader = extractPreheaderText(html);
+    const altText = extractImageAltText(html);
+    const extras = [preheader, altText].filter(Boolean).join('\n');
+
+    if (plain) {
+      return extras ? `${plain}\n\n[Hidden preview/image text]\n${extras}` : plain;
+    }
+    const htmlText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return extras ? `${htmlText}\n\n[Hidden preview/image text]\n${extras}` : htmlText;
   }
 
   if (payload.body?.data) return decodeBase64Url(payload.body.data);
@@ -79,6 +111,7 @@ Extract redeemable promo codes from marketing emails.
 Rules:
 - Only extract codes that must be manually entered at checkout (not automatic/instant discounts)
 - Skip offers that are Australia-only or international-only (outside the USA)
+- The email body may include a "[Hidden preview/image text]" section at the end — this contains hidden inbox-preview text and image alt text from the original email, which sometimes contains the actual promo code even when the visible email body does not. Check it carefully.
 - offer_type must be "welcome" if the code contains WELCOME, SIGNUP, or SMS (case-insensitive), OR if conditions mention first order/purchase/subscriber; otherwise use "standard"
 - discount_type must be exactly one of: percentage, fixed, free_shipping, other
 - expiry_date must be YYYY-MM-DD or null
