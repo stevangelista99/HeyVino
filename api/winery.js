@@ -59,9 +59,29 @@ function cardHTML(c) {
   ].filter(Boolean).join('\n');
 }
 
+function buildMetaDescription(displayName, description) {
+  const fallback = 'Save on ' + esc(displayName) + ' wines. Find the latest promo codes, discounts and deals — updated daily on HeyVino.';
+  if (!description || !description.trim()) return fallback;
+
+  // Derive a unique, search-friendly description from the winery's actual
+  // description text so each page has distinct content (avoids duplicate
+  // meta descriptions across hundreds of pages, which hurts indexing).
+  const clean = description.trim().replace(/\s+/g, ' ');
+  const maxLen = 155;
+  if (clean.length <= maxLen) {
+    return esc(clean) + ' Find current promo codes on HeyVino.';
+  }
+  // Cut at the last full sentence that fits, otherwise at the last word boundary.
+  const truncated = clean.slice(0, maxLen);
+  const lastPeriod = truncated.lastIndexOf('. ');
+  const lastSpace = truncated.lastIndexOf(' ');
+  const cut = lastPeriod > 60 ? truncated.slice(0, lastPeriod + 1) : truncated.slice(0, lastSpace) + '…';
+  return esc(cut);
+}
+
 function buildPage({ slug, displayName, description, cards }) {
   const title     = esc(displayName) + ' Promo Codes &amp; Discounts 2026 | HeyVino';
-  const metaDesc  = 'Save on ' + esc(displayName) + ' wines. Find the latest promo codes, discounts and deals — updated daily on HeyVino.';
+  const metaDesc  = buildMetaDescription(displayName, description);
   const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
   const countText = cards.length > 0 ? cards.length + ' active code' + (cards.length !== 1 ? 's' : '') : '';
 
