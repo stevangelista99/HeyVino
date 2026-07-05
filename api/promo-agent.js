@@ -127,9 +127,10 @@ async function fetchEmailBody(gmail, messageId) {
     format: 'full',
   });
   const headers = res.data.payload?.headers || [];
-  const subject = headers.find(h => h.name === 'Subject')?.value || '';
-  const from = headers.find(h => h.name === 'From')?.value || '';
-  const date = headers.find(h => h.name === 'Date')?.value || '';
+  const getHeader = name => headers.find(h => (h.name || '').toLowerCase() === name)?.value || '';
+  const subject = getHeader('subject');
+  const from = getHeader('from');
+  const date = getHeader('date');
   const body = extractBody(res.data.payload);
   return { subject, from, date, body };
 }
@@ -143,6 +144,7 @@ Rules:
 - Only extract codes that must be manually entered at checkout (not automatic/instant discounts)
 - Skip offers that are Australia-only or international-only (outside the USA)
 - The email body may begin with a "[Hidden preview/image/link text]" section — this contains hidden inbox-preview text, image alt text, and codes found inside link URLs from the original email. Codes sometimes appear ONLY there. Check it carefully, but only report a code if the email context confirms it is a real redeemable offer.
+- Use the sender address and subject line to identify winery_name when the body is ambiguous — the sender domain is usually the winery's own domain
 - Report each distinct code exactly once; if one code has multiple tiers or conditions, combine them into a single entry's conditions field
 - discount_amount must be a plain number only (e.g. 20, 10.5) — no $, %, or words. Use null if there is no numeric amount (e.g. plain free shipping)
 - offer_type must be "welcome" if the code contains WELCOME, SIGNUP, or SMS (case-insensitive), OR if conditions mention first order/purchase/subscriber; otherwise use "standard"
@@ -151,10 +153,12 @@ Rules:
 - Return {"codes": []} if no valid redeemable code is found
 - Return JSON only — no markdown, no explanation`;
 
-const EXTRACTION_USER = (body, sourceDate) => `Email received: ${sourceDate}
+const EXTRACTION_USER = (email, sourceDate) => `Email received: ${sourceDate}
+From: ${email.from}
+Subject: ${email.subject}
 
 ---
-${body.slice(0, 12000)}
+${email.body.slice(0, 12000)}
 ---
 
 Extract and return a single JSON object with this exact shape:
@@ -182,23 +186,27 @@ function sanitizeDiscountAmount(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+// Returns an array of codes, or null when the model's response could not be
+// understood. null is a PIPELINE FAILURE and must never be conflated with
+// "no codes found" ([]), otherwise real misses become invisible in the digest.
 function parseExtraction(text) {
-  const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return [];
-  let parsed;
+  const cleaned = String(text || '').replace(/```(?:json)?/gi, '').trim();
+  let parsed = null;
   try {
-    parsed = JSON.parse(jsonMatch[0]);
+    parsed = JSON.parse(cleaned);
   } catch {
-    return [];
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    try { parsed = JSON.parse(jsonMatch[0]); } catch { return null; }
   }
-  // New shape: { codes: [...] }. Tolerate the legacy single-object shape too.
   let codes;
   if (Array.isArray(parsed?.codes)) {
     codes = parsed.codes;
-  } else if (parsed?.has_code && parsed?.code) {
-    codes = [parsed];
+  } else if (parsed && typeof parsed === 'object' && 'has_code' in parsed) {
+    // Legacy single-object shape
+    codes = (parsed.has_code && parsed.code) ? [parsed] : [];
   } else {
-    codes = [];
+    return null; // valid JSON but not a recognized shape → failure, not "none"
   }
   return codes
     .filter(c => c && typeof c.code === 'string' && c.code.trim())
@@ -209,15 +217,45 @@ function parseExtraction(text) {
     }));
 }
 
-async function extractWithClaude(emailBody, sourceDate) {
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: EXTRACTION_SYSTEM,
-    messages: [{ role: 'user', content: EXTRACTION_USER(emailBody, sourceDate) }],
-  });
-  const text = message.content?.[0]?.text || '';
-  return parseExtraction(text);
+// Returns { codes: [...], failure: string|null }. failure is set when the
+// extraction pipeline itself broke (API error, truncated or unparseable
+// response) — meaning the email MAY contain codes we could not read.
+async function extractWithClaude(email, sourceDate) {
+  const attempt = async () => {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system: EXTRACTION_SYSTEM,
+      messages: [{ role: 'user', content: EXTRACTION_USER(email, sourceDate) }],
+    });
+    const text = (message.content || [])
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('');
+    if (message.stop_reason === 'max_tokens') {
+      return { codes: null, reason: 'response truncated (max_tokens)' };
+    }
+    const codes = parseExtraction(text);
+    if (codes === null) return { codes: null, reason: 'unparseable model response' };
+    return { codes, reason: null };
+  };
+
+  let first;
+  try {
+    first = await attempt();
+  } catch (err) {
+    first = { codes: null, reason: 'API error: ' + err.message };
+  }
+  if (first.codes !== null) return { codes: first.codes, failure: null };
+
+  // One retry — transient API errors and malformed responses usually clear.
+  try {
+    const second = await attempt();
+    if (second.codes !== null) return { codes: second.codes, failure: null };
+    return { codes: [], failure: second.reason };
+  } catch (err) {
+    return { codes: [], failure: 'API error on retry: ' + err.message };
+  }
 }
 
 // ── Supabase helpers ───────────────────────────────────────────────────────────
@@ -297,11 +335,14 @@ async function createWineryMatcher() {
 }
 
 async function codeExists(code, wineryId) {
+  // Only an ACTIVE row counts as a duplicate. Wineries re-issue the same code
+  // seasonally; a code that expired and was deactivated should be re-addable.
   const { data } = await supabase
     .from('promo_codes')
     .select('id')
     .eq('code', code)
     .eq('winery_id', wineryId)
+    .eq('is_active', true)
     .limit(1);
   return (data?.length || 0) > 0;
 }
@@ -332,21 +373,27 @@ function buildInsertSQL(extracted, winery) {
 
 // ── Gmail send ─────────────────────────────────────────────────────────────────
 
-async function sendDigestEmail({ scanned, codes, flagged, sqlBlock, approvalToken, runDate, gmail }) {
+async function sendDigestEmail({ scanned, codes, flagged, failures, sqlBlock, approvalToken, runDate, gmail }) {
   const approveUrl = `https://www.heyvinowine.com/api/promo-approve?token=${approvalToken}`;
+  const escHtml = v => String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   const codeRows = codes.map(c =>
     `<tr>
-      <td>${c.winery_name || '—'}</td>
-      <td><code>${c.code}</code></td>
-      <td>${c.discount_amount || '—'}</td>
-      <td>${c.expiry_date || 'No expiry'}</td>
-      <td>${c.offer_type || 'standard'}</td>
+      <td>${escHtml(c.winery_name) || '—'}</td>
+      <td><code>${escHtml(c.code)}</code></td>
+      <td>${escHtml(c.discount_amount) || '—'}</td>
+      <td>${escHtml(c.expiry_date) || 'No expiry'}</td>
+      <td>${escHtml(c.offer_type) || 'standard'}</td>
     </tr>`
   ).join('');
 
   const flaggedRows = flagged.map(f =>
-    `<li>${f.winery_name} — code: <code>${f.code}</code></li>`
+    `<li>${escHtml(f.winery_name)} — code: <code>${escHtml(f.code)}</code></li>`
+  ).join('');
+
+  const failureRows = (failures || []).map(f =>
+    `<li><strong>${escHtml(f.subject)}</strong> (${escHtml(f.from)}) — ${escHtml(f.reason)}</li>`
   ).join('');
 
   const htmlBody = `
@@ -354,7 +401,8 @@ async function sendDigestEmail({ scanned, codes, flagged, sqlBlock, approvalToke
 <h2>HeyVino Promo Agent — ${runDate}</h2>
 <p><strong>${scanned}</strong> emails scanned &nbsp;|&nbsp;
    <strong>${codes.length}</strong> codes found &nbsp;|&nbsp;
-   <strong>${flagged.length}</strong> flagged for review</p>
+   <strong>${flagged.length}</strong> flagged for review &nbsp;|&nbsp;
+   <strong>${(failures || []).length}</strong> extraction issues</p>
 
 ${codes.length > 0 ? `
 <h3>Codes ready to insert</h3>
@@ -366,6 +414,11 @@ ${codes.length > 0 ? `
 ${flagged.length > 0 ? `
 <h3>Wineries not in DB (manual review)</h3>
 <ul>${flaggedRows}</ul>` : ''}
+
+${(failures || []).length > 0 ? `
+<h3 style="color:#b45309">⚠ Extraction issues — review these emails manually</h3>
+<p>The code-extraction step failed on these emails even after a retry. They were counted as scanned but <strong>may contain codes that were missed</strong>:</p>
+<ul>${failureRows}</ul>` : ''}
 
 <h3>Approve &amp; run SQL</h3>
 <p>
@@ -379,7 +432,7 @@ ${flagged.length > 0 ? `
 
 </body></html>`;
 
-  const subject = `HeyVino Promo Agent — ${scanned} scanned, ${codes.length} codes, ${flagged.length} flagged [${runDate}]`;
+  const subject = `HeyVino Promo Agent — ${scanned} scanned, ${codes.length} codes, ${flagged.length} flagged${(failures || []).length ? `, ${failures.length} issues` : ''} [${runDate}]`;
 
   const rfc2822 = [
     `From: HeyVinoPromos@gmail.com`,
@@ -451,6 +504,7 @@ async function handler(req, res) {
   const insertStatements = [];
   const codesForDigest = [];
   const flaggedWineries = [];
+  const extractionFailures = [];
   const seenThisRun = new Set(); // prevents same code+winery inserted twice in one run
   let emailsScanned = 0;
 
@@ -464,16 +518,26 @@ async function handler(req, res) {
       continue;
     }
 
+    // Prefer the email's own Date header for source_email_date.
+    const parsedEmailDate = new Date(email.date);
+    const emailDate = isNaN(parsedEmailDate) ? runDate : parsedEmailDate.toISOString().split('T')[0];
+
     let extractedCodes;
     try {
-      extractedCodes = await extractWithClaude(email.body, runDate);
+      const result = await extractWithClaude(email, runDate);
+      if (result.failure) {
+        extractionFailures.push({ subject: email.subject, from: email.from, reason: result.failure });
+        console.error(`Extraction failed for "${email.subject}": ${result.failure}`);
+      }
+      extractedCodes = result.codes;
     } catch (err) {
+      extractionFailures.push({ subject: email.subject, from: email.from, reason: 'Unexpected error: ' + err.message });
       console.error(`Claude extraction failed for message ${msg.id}:`, err.message);
       continue;
     }
 
     for (const extracted of extractedCodes) {
-      extracted.source_email_date = extracted.source_email_date || runDate;
+      extracted.source_email_date = extracted.source_email_date || emailDate;
 
       const winery = matcher.find(extracted.winery_name);
 
@@ -533,6 +597,7 @@ async function handler(req, res) {
       scanned: emailsScanned,
       codes: codesForDigest,
       flagged: flaggedWineries,
+      failures: extractionFailures,
       sqlBlock,
       approvalToken,
       runDate,
@@ -547,6 +612,7 @@ async function handler(req, res) {
     emails_scanned: emailsScanned,
     codes_found: codesForDigest.length,
     codes_skipped_new_winery: flaggedWineries.length,
+    extraction_failures: extractionFailures.length,
     approval_token: approvalToken,
     sql_lines: insertStatements.length,
   });
@@ -560,6 +626,7 @@ module.exports._internals = {
   extractImageAltText,
   extractLinkCodes,
   parseExtraction,
+  extractWithClaude,
   sanitizeDiscountAmount,
   buildWineryMatcher,
   normalizeWineryName,
