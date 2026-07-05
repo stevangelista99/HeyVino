@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>HeyVino — Private Dashboard</title>
+<style>
+  :root { --wine:#6B1E2A; --gold:#C9A84C; --cream:#FAF6EF; --ink:#2A2523; --muted:#8a8580; --green:#2D7A4F; --red:#B3261E; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: var(--cream); color: var(--ink); }
+  header { background: var(--wine); padding: 1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+  header .brand { color: var(--gold); font-size: 1.05rem; font-weight: 700; text-decoration:none; }
+  header .win { color: rgba(255,255,255,0.55); font-size: 0.75rem; }
+  main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+  .msg { text-align:center; padding: 3rem 1rem; color: var(--muted); font-size: 0.95rem; }
+  .totals { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 0.9rem; margin-bottom: 1.6rem; }
+  .tot { background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:8px; padding: 1rem; text-align:center; }
+  .tot .n { font-size: 1.7rem; font-weight:700; color: var(--wine); }
+  .tot .l { font-size: 0.7rem; color: var(--muted); letter-spacing:0.05em; text-transform:uppercase; margin-top:2px; }
+  h2 { font-size: 1.05rem; color: var(--wine); margin: 1.6rem 0 0.6rem; }
+  .hint { font-size:0.75rem; color:var(--muted); margin-bottom:0.5rem; }
+  table { width:100%; background:#fff; border-collapse:collapse; border:1px solid rgba(0,0,0,0.07); border-radius:8px; overflow:hidden; font-size:0.85rem; }
+  th { background: rgba(107,30,42,0.06); text-align:left; padding: 8px 10px; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color: var(--wine); }
+  td { padding: 8px 10px; border-top: 1px solid rgba(0,0,0,0.05); }
+  code { font-family: 'Courier New', monospace; background: rgba(201,168,76,0.12); padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
+  .up { color: var(--green); font-weight:700; } .down { color: var(--red); font-weight:700; }
+  .warnrow { background: rgba(179,38,30,0.05); }
+  .refresh { background: var(--wine); color:#fff; border:none; border-radius:6px; padding: 8px 16px; cursor:pointer; font-size:0.85rem; font-family: inherit; }
+  .empty { color: var(--muted); font-size: 0.85rem; padding: 0.8rem 0; }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">HeyVino — Dashboard</a>
+  <span class="win" id="windowLabel"></span>
+</header>
+<main>
+  <div class="msg" id="status">Loading…</div>
+  <div id="content" style="display:none">
+    <div class="totals">
+      <div class="tot"><div class="n" id="tVotes">–</div><div class="l">Feedback votes</div></div>
+      <div class="tot"><div class="n" id="tCopies">–</div><div class="l">Code copies</div></div>
+      <div class="tot"><div class="n" id="tVisits">–</div><div class="l">Visit-site clicks</div></div>
+    </div>
+
+    <h2>⚠ Codes with downvotes</h2>
+    <p class="hint">These may be dead or broken — verify and deactivate in Supabase if confirmed.</p>
+    <div id="downSection"></div>
+
+    <h2>Feedback by code</h2>
+    <div id="fbSection"></div>
+
+    <h2>Clicks by winery</h2>
+    <p class="hint">Partnership ammo: "we sent your site N clicks last month."</p>
+    <div id="clickSection"></div>
+
+    <h2>Recent votes</h2>
+    <div id="recentSection"></div>
+
+    <p style="margin-top:1.4rem"><button class="refresh" onclick="load()">↻ Refresh</button></p>
+  </div>
+</main>
+<script>
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
+
+function tableHTML(headers, rows) {
+  if (!rows.length) return '<p class="empty">Nothing yet — check back once real traffic arrives.</p>';
+  return '<table><thead><tr>' + headers.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+}
+
+async function load() {
+  const status = document.getElementById('status');
+  const content = document.getElementById('content');
+  status.style.display = 'block'; status.textContent = 'Loading…';
+  const key = new URLSearchParams(location.search).get('key') || '';
+  if (!key) { status.textContent = 'Missing key — open this page as /dashboard.html?key=YOUR_DASHBOARD_KEY'; return; }
+  let data;
+  try {
+    const res = await fetch('/api/dashboard-data?key=' + encodeURIComponent(key));
+    data = await res.json();
+    if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }
+  } catch (e) { status.textContent = 'Failed to load: ' + e.message; return; }
+
+  document.getElementById('windowLabel').textContent = 'Last ' + data.window_days + ' days';
+  document.getElementById('tVotes').textContent = data.totals.votes;
+  document.getElementById('tCopies').textContent = data.totals.code_copies;
+  document.getElementById('tVisits').textContent = data.totals.site_visits;
+
+  document.getElementById('downSection').innerHTML = tableHTML(
+    ['Winery','Code','👎','👍','Last vote'],
+    data.codes_with_downvotes.map(f => '<tr class="warnrow"><td>'+esc(f.winery)+'</td><td><code>'+esc(f.code)+'</code></td><td class="down">'+f.downs+'</td><td class="up">'+f.ups+'</td><td>'+fmtDate(f.last)+'</td></tr>')
+  );
+
+  document.getElementById('fbSection').innerHTML = tableHTML(
+    ['Winery','Code','👍','👎','Last vote'],
+    data.feedback_by_code.map(f => '<tr><td>'+esc(f.winery)+'</td><td><code>'+esc(f.code)+'</code></td><td class="up">'+f.ups+'</td><td class="down">'+f.downs+'</td><td>'+fmtDate(f.last)+'</td></tr>')
+  );
+
+  document.getElementById('clickSection').innerHTML = tableHTML(
+    ['Winery','Code copies','Visit clicks','Total'],
+    data.clicks_by_winery.map(c => '<tr><td>'+esc(c.winery)+'</td><td>'+c.copies+'</td><td>'+c.visits+'</td><td><strong>'+(c.copies+c.visits)+'</strong></td></tr>')
+  );
+
+  document.getElementById('recentSection').innerHTML = tableHTML(
+    ['When','Winery','Code','Vote'],
+    data.recent_feedback.map(r => '<tr><td>'+fmtDate(r.created_at)+'</td><td>'+esc(r.winery)+'</td><td><code>'+esc(r.code)+'</code></td><td>'+(r.vote==='up'?'<span class="up">👍</span>':'<span class="down">👎</span>')+'</td></tr>')
+  );
+
+  status.style.display = 'none';
+  content.style.display = 'block';
+}
+load();
+</script>
+</body>
+</html>
