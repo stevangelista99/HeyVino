@@ -50,13 +50,22 @@ function cardHTML(c) {
     `    <span class="badge ${badgeClass(c.type)}">${esc(c.varietal)}</span>`,
     '    <div class="code-block">',
     `      <span class="code-text">${esc(c.code)}</span>`,
-    `      <button class="copy-btn" data-code="${esc(c.code)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
+    `      <button class="copy-btn" data-code="${esc(c.code)}" data-winery="${esc(c.winery)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
     '    </div>',
+    `    <div class="trust-row">${addedLabel(c.created_at)}<span class="fb-wrap" data-codeid="${esc(c.id || '')}">Worked? <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button><button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button></span></div>`,
     `    <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
-    siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener">Visit Site →</a>` : '',
+    siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener" data-winery="${esc(c.winery)}" data-code="${esc(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>` : '',
     '  </div>',
     '</div>'
   ].filter(Boolean).join('\n');
+}
+
+function addedLabel(iso) {
+  if (!iso) return '<span class="added-date"></span>';
+  const d = new Date(iso);
+  if (isNaN(d)) return '<span class="added-date"></span>';
+  const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+  return `<span class="added-date">✓ Added ${label}</span>`;
 }
 
 function buildMetaDescription(displayName, description) {
@@ -187,6 +196,13 @@ function buildPage({ slug, displayName, description, cards }) {
   .footer-links a:hover { color: var(--gold-light); }
   .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
+  .footer-legal-links { font-size: 0.7rem; } .footer-legal-links a { color: rgba(255,255,255,0.4); text-decoration: none; } .footer-legal-links a:hover { color: var(--gold); }
+  .trust-row { display: flex; align-items: center; justify-content: space-between; margin: -0.35rem 0 0.55rem; font-size: 0.66rem; color: #8a8580; }
+  .added-date { letter-spacing: 0.02em; }
+  .fb-wrap { display: inline-flex; align-items: center; gap: 4px; }
+  .fb-btn { background: none; border: 1px solid rgba(0,0,0,0.12); border-radius: 4px; cursor: pointer; font-size: 0.72rem; padding: 1px 5px; line-height: 1.4; }
+  .fb-btn:hover { border-color: var(--gold); }
+  .fb-thanks { color: #2D7A4F; font-weight: 600; }
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -285,6 +301,7 @@ function buildPage({ slug, displayName, description, cards }) {
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;width:100%;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
     <span class="footer-copy">&copy; 2026 HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> LLC &middot; HeyVinoWine.com &middot; Promotional codes sourced from publicly available winery communications.</span>
+    <span class="footer-legal-links"><a href="/privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="/terms.html">Terms of Use</a></span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here &rarr;</a>
   </div>
 </footer>
@@ -296,6 +313,21 @@ function copyCode(btn, code) {
     btn.classList.add('copied');
     setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   });
+  track('code_copy', btn.dataset.winery || '', code);
+}
+function track(event, winery, code) {
+  try {
+    var payload = JSON.stringify({ event: event, winery: winery || '', code: code || '', page: location.pathname + location.search });
+    if (navigator.sendBeacon) { navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' })); }
+    else { fetch('/api/track', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: payload }); }
+  } catch (e) {}
+}
+function sendFeedback(btn, vote) {
+  var wrap = btn.closest('.fb-wrap');
+  var codeId = wrap && wrap.dataset.codeid;
+  if (!codeId) return;
+  wrap.innerHTML = '<span class="fb-thanks">Thanks!</span>';
+  fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code_id: codeId, vote: vote }) }).catch(function(){});
 }
 function openAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'flex'; }
 function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'none'; }
@@ -361,7 +393,9 @@ module.exports = async function handler(req, res) {
       country:     row.country         || '',
       expiry:      row.expiry_date     || row.expiry     || '',
       featured:    row.is_featured     || false,
-      website_url: row.website_url     || ''
+      website_url: row.website_url     || '',
+      id:          row.id              || '',
+      created_at:  row.created_at      || ''
     }));
 
     const html = buildPage({ slug, displayName, description, cards });

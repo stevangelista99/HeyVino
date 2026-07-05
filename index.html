@@ -190,6 +190,13 @@
   .footer-links a:hover { color: var(--gold-light); }
   .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
+  .footer-legal-links { font-size: 0.7rem; } .footer-legal-links a { color: rgba(255,255,255,0.4); text-decoration: none; } .footer-legal-links a:hover { color: var(--gold); }
+  .trust-row { display: flex; align-items: center; justify-content: space-between; margin: -0.35rem 0 0.55rem; font-size: 0.66rem; color: var(--muted, #999); }
+  .added-date { letter-spacing: 0.02em; }
+  .fb-wrap { display: inline-flex; align-items: center; gap: 4px; }
+  .fb-btn { background: none; border: 1px solid rgba(0,0,0,0.12); border-radius: 4px; cursor: pointer; font-size: 0.72rem; padding: 1px 5px; line-height: 1.4; }
+  .fb-btn:hover { border-color: var(--gold); }
+  .fb-thanks { color: #2D7A4F; font-weight: 600; }
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
 
   /* ── MISC ── */
@@ -470,6 +477,7 @@
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:var(--text-muted,#888);text-align:center;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
     <span class="footer-copy">© 2026 HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup> LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
+    <span class="footer-legal-links"><a href="privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="terms.html">Terms of Use</a></span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise Here →</a>
   </div>
 </footer>
@@ -526,7 +534,8 @@ async function loadCodes() {
     expiry:     row.expiry_date      || row.expiry    || '',
     featured:   row.is_featured      || row.featured  || false,
     website_url: row.website_url || row.website || '',
-    offer_type: row.offer_type || ''
+    offer_type: row.offer_type || '',
+    created_at: row.created_at || ''
   }));
 
   // Remove duplicates — same promo code from the same winery
@@ -591,10 +600,17 @@ function cardHTML(c) {
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
       <div class="code-block">
         <span class="code-text">${c.code}</span>
-        <button class="copy-btn" onclick="copyCode(this,'${c.code}')">Copy</button>
+        <button class="copy-btn" data-code="${attr(c.code)}" data-winery="${attr(c.winery)}" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="trust-row">
+        ${addedLabel(c.created_at)}
+        <span class="fb-wrap" data-codeid="${attr(c.id)}">Worked?
+          <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button>
+          <button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button>
+        </span>
       </div>
       <div class="card-footer">${expiryHTML(c.offer_type==='welcome'?null:c.expiry)}<span class="discount">${c.discountLabel}${c.conditionsLabel?`<span class="conditions"> · ${c.conditionsLabel}</span>`:''}</span></div>
-      ${c.website_url?`<a class="visit-site-link" href="${affiliateUrl(c.website_url)}" target="_blank" rel="noopener">Visit Site →</a>`:''}
+      ${c.website_url?`<a class="visit-site-link" href="${affiliateUrl(c.website_url)}" target="_blank" rel="noopener" data-winery="${attr(c.winery)}" data-code="${attr(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>`:''}
     </div>
   </div>`;
 }
@@ -628,7 +644,32 @@ function render() {
 }
 
 
-function copyCode(btn,code){navigator.clipboard.writeText(code).then(()=>{btn.textContent="✓ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("copied");},2000);});}
+function copyCode(btn,code){
+  code = code || btn.dataset.code;
+  navigator.clipboard.writeText(code).then(()=>{btn.textContent="✓ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("copied");},2000);});
+  track('code_copy', btn.dataset.winery || '', code);
+}
+function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function addedLabel(iso){
+  if(!iso) return '<span class="added-date"></span>';
+  const d=new Date(iso);
+  if(isNaN(d)) return '<span class="added-date"></span>';
+  return `<span class="added-date">✓ Added ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
+}
+function track(event,winery,code){
+  try{
+    const payload=JSON.stringify({event,winery:winery||'',code:code||'',page:location.pathname+location.search});
+    if(navigator.sendBeacon){navigator.sendBeacon('/api/track',new Blob([payload],{type:'application/json'}));}
+    else{fetch('/api/track',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:payload});}
+  }catch(e){}
+}
+function sendFeedback(btn,vote){
+  const wrap=btn.closest('.fb-wrap');
+  const codeId=wrap&&wrap.dataset.codeid;
+  if(!codeId) return;
+  wrap.innerHTML='<span class="fb-thanks">Thanks!</span>';
+  fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code_id:codeId,vote})}).catch(()=>{});
+}
 function filterCards(){searchQ=document.getElementById("searchInput").value;render();}
 function footerFilter(filter,scrollTo){
   const chip=document.querySelector(`#varietalChips .chip[data-filter="${filter}"]`);
