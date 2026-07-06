@@ -22,6 +22,7 @@ function badgeClass(t)  { return { red:'badge-red',  white:'badge-white',  rose:
 
 const AFFILIATE_URLS = {
   'wineaccess.com': 'https://sovrn.co/18t2ocj',
+  'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com',
 };
 
 function safeUrl(url) {

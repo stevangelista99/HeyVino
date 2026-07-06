@@ -563,7 +563,7 @@ function toSlug(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-
 const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫🇷", Italy:"🇮🇹", italy:"🇮🇹", Spain:"🇪🇸", spain:"🇪🇸", Australia:"🇦🇺", australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", argentina:"🇦🇷", Germany:"🇩🇪", germany:"🇩🇪" };
 const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
-const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj' };
+const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj', 'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com' };
 function affiliateUrl(url){ try{ const u=new URL(url); return AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url; }catch{ return url; } }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="";
