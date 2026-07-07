@@ -381,6 +381,10 @@
       <button class="chip" data-region="Argentina">🇦🇷 Argentina</button>
     </div>
   </div>
+  <div class="filter-row" id="usRegionRow" style="display:none">
+    <span class="filter-label">US Region:</span>
+    <div class="chips" id="usRegionChips"></div>
+  </div>
   <div class="filter-row">
     <span class="filter-label">Offer Type:</span>
     <div class="chips" id="offerChips">
@@ -566,9 +570,9 @@ const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫�
 const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain", au:"Australia", nz:"New Zealand", ar:"Argentina", de:"Germany", gb:"UK", uk:"UK" };
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
 const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj', 'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com' };
-function affiliateUrl(url){ try{ const u=new URL(url); return AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url; }catch{ return url; } }
+function affiliateUrl(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return ''; return attr(AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url); }catch{ return ''; } }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
-let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="";
+let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all";
 
 function daysUntil(d) { return Math.ceil((new Date(d)-new Date())/86400000); }
 
@@ -621,10 +625,11 @@ function render() {
   const filtered=CODES.filter(c=>{
     const mV=activeVarietal==="all"||c.type===activeVarietal||(activeVarietal==="featured"&&c.featured);
     const mR=activeRegion==="all"||c.country===activeRegion;
+    const mUS=activeRegion!=="USA"||activeUSRegion==="all"||(c.region||'')===activeUSRegion;
     const mO=activeOfferType==="all"||(c.offer_type||'')=== activeOfferType;
     const q=searchQ.toLowerCase();
     const mQ=!q||(c.winery||'').toLowerCase().includes(q)||(c.code||'').toLowerCase().includes(q)||(c.varietal||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q);
-    return mV&&mR&&mO&&mQ;
+    return mV&&mR&&mUS&&mO&&mQ;
   });
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
   const napaCAbs=filtered.filter(c=>(c.varietal||'').includes("Cabernet Sauvignon")&&c.country==="USA");
@@ -681,7 +686,20 @@ function footerFilter(filter,scrollTo){
 }
 
 document.getElementById("varietalChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeVarietal=e.target.dataset.filter;render();}});
-document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;render();}});
+document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;activeUSRegion="all";updateUSRegionChips();render();}});
+function updateUSRegionChips(){
+  const row=document.getElementById("usRegionRow");
+  if(activeRegion!=="USA"){row.style.display="none";return;}
+  const counts={};
+  CODES.filter(c=>c.country==="USA"&&c.region&&c.region!=="USA").forEach(c=>{counts[c.region]=(counts[c.region]||0)+1;});
+  const regions=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  if(regions.length===0){row.style.display="none";return;}
+  document.getElementById("usRegionChips").innerHTML=
+    `<button class="chip${activeUSRegion==="all"?" active":""}" data-usregion="all">All US</button>`+
+    regions.map(r=>`<button class="chip${activeUSRegion===r?" active":""}" data-usregion="${attr(r)}">${attr(r)} (${counts[r]})</button>`).join("");
+  row.style.display="";
+}
+document.getElementById("usRegionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#usRegionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeUSRegion=e.target.dataset.usregion;render();}});
 document.getElementById("offerChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#offerChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeOfferType=e.target.dataset.offer;render();}});
 
 loadCodes();
