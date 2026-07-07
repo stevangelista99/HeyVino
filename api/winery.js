@@ -89,17 +89,19 @@ function buildMetaDescription(displayName, description) {
   return esc(cut);
 }
 
-function buildPage({ slug, displayName, description, cards }) {
+function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl }) {
   const title     = esc(displayName) + ' Promo Codes &amp; Discounts 2026 | HeyVino';
   const metaDesc  = buildMetaDescription(displayName, description);
   const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
   const countText = cards.length > 0 ? cards.length + ' active code' + (cards.length !== 1 ? 's' : '') : '';
 
+  const noCodesSiteLink = safeUrl(wineryWebsiteUrl);
   const cardsInner = cards.length === 0
     ? `<div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
         <div style="font-size:2.5rem;margin-bottom:1rem">🥾</div>
         <div style="font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:0.5rem">No active codes right now</div>
         <div style="font-size:0.85rem;color:var(--muted)">Check back soon — we update daily.</div>
+        ${noCodesSiteLink ? `<a href="${noCodesSiteLink}" target="_blank" rel="noopener" data-winery="${esc(displayName)}" onclick="track('visit_site',this.dataset.winery,'')" style="display:inline-block;margin-top:1.25rem;font-size:0.85rem;font-weight:600;color:var(--wine);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:2px;">Visit ${esc(displayName)} →</a>` : ''}
       </div>`
     : cards.map(cardHTML).join('\n');
 
@@ -372,16 +374,16 @@ module.exports = async function handler(req, res) {
   try {
     const [promoRes, wineryRes] = await Promise.all([
       fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=description&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
     ]);
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
     const wineryData = wineryRes.ok ? await wineryRes.json() : [];
 
     const description = (wineryData[0] || {}).description || '';
-    const displayName = promoData.length > 0
-      ? promoData[0].winery_name
-      : searchName.replace(/\b\w/g, c => c.toUpperCase());
+    const wineryWebsiteUrl = (wineryData[0] || {}).website_url || '';
+    const displayName = (wineryData[0] || {}).name
+      || (promoData.length > 0 ? promoData[0].winery_name : searchName.replace(/\b\w/g, c => c.toUpperCase()));
 
     const cards = promoData.map(row => ({
       winery:      row.winery_name     || '',
@@ -399,7 +401,7 @@ module.exports = async function handler(req, res) {
       created_at:  row.created_at      || ''
     }));
 
-    const html = buildPage({ slug, displayName, description, cards });
+    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
     return res.status(200).send(html);
