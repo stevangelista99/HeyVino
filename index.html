@@ -625,7 +625,7 @@ function render() {
   const filtered=CODES.filter(c=>{
     const mV=activeVarietal==="all"||c.type===activeVarietal||(activeVarietal==="featured"&&c.featured);
     const mR=activeRegion==="all"||c.country===activeRegion;
-    const mUS=activeRegion!=="USA"||activeUSRegion==="all"||(c.region||'')===activeUSRegion;
+    const mUS=activeRegion!=="USA"||activeUSRegion==="all"||parentRegion(c.region||'')===activeUSRegion;
     const mO=activeOfferType==="all"||(c.offer_type||'')=== activeOfferType;
     const q=searchQ.toLowerCase();
     const mQ=!q||(c.winery||'').toLowerCase().includes(q)||(c.code||'').toLowerCase().includes(q)||(c.varietal||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q);
@@ -687,11 +687,23 @@ function footerFilter(filter,scrollTo){
 
 document.getElementById("varietalChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeVarietal=e.target.dataset.filter;render();}});
 document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;activeUSRegion="all";updateUSRegionChips();render();}});
+const REGION_GROUP_MAP={
+  "Calistoga":"Napa Valley","Coombsville":"Napa Valley","Howell Mountain":"Napa Valley",
+  "Mount Veeder":"Napa Valley","Oakville":"Napa Valley","Pritchard Hill":"Napa Valley",
+  "Rutherford":"Napa Valley","Spring Mountain":"Napa Valley","St. Helena":"Napa Valley",
+  "Stags Leap District":"Napa Valley","Yountville":"Napa Valley",
+  "Alexander Valley":"Sonoma","Chalk Hill":"Sonoma","Dry Creek Valley":"Sonoma",
+  "Knights Valley":"Sonoma","Russian River Valley":"Sonoma","Sonoma Coast":"Sonoma",
+  "Sonoma County":"Sonoma","Sonoma Mountain":"Sonoma","Sonoma Valley":"Sonoma",
+  "Hamptons, Long Island":"Long Island","North Fork, Long Island":"Long Island",
+  "Walla Walla Valley":"Washington"
+};
+function parentRegion(r){ return REGION_GROUP_MAP[r]||r; }
 function updateUSRegionChips(){
   const row=document.getElementById("usRegionRow");
   if(activeRegion!=="USA"){row.style.display="none";return;}
   const counts={};
-  CODES.filter(c=>c.country==="USA"&&c.region&&c.region!=="USA").forEach(c=>{counts[c.region]=(counts[c.region]||0)+1;});
+  CODES.filter(c=>c.country==="USA"&&c.region&&c.region!=="USA").forEach(c=>{const p=parentRegion(c.region);counts[p]=(counts[p]||0)+1;});
   const regions=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
   if(regions.length===0){row.style.display="none";return;}
   document.getElementById("usRegionChips").innerHTML=
