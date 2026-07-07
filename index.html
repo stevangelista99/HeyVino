@@ -688,7 +688,7 @@ function footerFilter(filter,scrollTo){
 document.getElementById("varietalChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#varietalChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeVarietal=e.target.dataset.filter;render();}});
 document.getElementById("regionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#regionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeRegion=e.target.dataset.region;activeUSRegion="all";updateUSRegionChips();render();}});
 const REGION_GROUP_MAP={
-  "Calistoga":"Napa Valley","Coombsville":"Napa Valley","Howell Mountain":"Napa Valley",
+  "Calistoga":"Napa Valley","Carneros":"Napa Valley","Coombsville":"Napa Valley","Howell Mountain":"Napa Valley",
   "Mount Veeder":"Napa Valley","Oakville":"Napa Valley","Pritchard Hill":"Napa Valley",
   "Rutherford":"Napa Valley","Spring Mountain":"Napa Valley","St. Helena":"Napa Valley",
   "Stags Leap District":"Napa Valley","Yountville":"Napa Valley",
