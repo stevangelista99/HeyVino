@@ -6,6 +6,23 @@ function normalizeCountry(c) { return COUNTRY_CODES[(c||'').toLowerCase()] || c 
 function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
 
+// Maps a winery's DB region to its parent region landing page, when one exists.
+const REGION_PAGE = (() => {
+  const groups = {
+    'napa-valley': ['Napa Valley','Calistoga','Carneros','Coombsville','Howell Mountain','Mount Veeder','Oakville','Pritchard Hill','Rutherford','Spring Mountain','St. Helena','Stags Leap District','Yountville'],
+    'sonoma': ['Sonoma','Alexander Valley','Chalk Hill','Dry Creek Valley','Knights Valley','Russian River Valley','Sonoma Coast','Sonoma County','Sonoma Mountain','Sonoma Valley'],
+    'long-island': ['North Fork, Long Island','Hamptons, Long Island'],
+    'paso-robles': ['Paso Robles'],
+    'washington': ['Washington','Walla Walla Valley'],
+    'oregon': ['Oregon'],
+    'lodi': ['Lodi'],
+  };
+  const titles = { 'napa-valley':'Napa Valley','sonoma':'Sonoma','long-island':'Long Island','paso-robles':'Paso Robles','washington':'Washington','oregon':'Oregon','lodi':'Lodi' };
+  const map = {};
+  for (const [slug, regions] of Object.entries(groups)) regions.forEach(r => { map[r] = { slug, title: titles[slug] }; });
+  return map;
+})();
+
 function expiryHTML(expiry) {
   if (!expiry) return '<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>';
   const date = new Date(expiry);
@@ -89,7 +106,11 @@ function buildMetaDescription(displayName, description) {
   return esc(cut);
 }
 
-function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl }) {
+function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion }) {
+  const regionPage = REGION_PAGE[wineryRegion || ''];
+  const regionLinkHtml = regionPage
+    ? `<p style="margin:0.5rem 0 0;font-size:0.82rem;"><a href="/region/${regionPage.slug}" style="color:var(--wine);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.5);">See all ${esc(regionPage.title)} wine promo codes \u2192</a></p>`
+    : '';
   const title     = esc(displayName) + ' Promo Codes &amp; Discounts 2026 | HeyVino';
   const metaDesc  = buildMetaDescription(displayName, description);
   const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
@@ -278,6 +299,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl }) 
   <h1 class="page-h1">${esc(displayName)}</h1>
   ${description ? '<p class="winery-description">' + esc(description) + '</p>' : ''}
   ${countText ? '<p class="page-subtitle">' + countText + '</p>' : ''}
+  ${regionLinkHtml}
 </div>
 
 <div class="cards-wrap">
@@ -393,7 +415,7 @@ module.exports = async function handler(req, res) {
   try {
     const [promoRes, wineryRes] = await Promise.all([
       fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
     ]);
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
@@ -401,6 +423,7 @@ module.exports = async function handler(req, res) {
 
     const description = (wineryData[0] || {}).description || '';
     const wineryWebsiteUrl = (wineryData[0] || {}).website_url || '';
+    const wineryRegion = (wineryData[0] || {}).region || (promoData[0] || {}).region || '';
     const displayName = (wineryData[0] || {}).name
       || (promoData.length > 0 ? promoData[0].winery_name : searchName.replace(/\b\w/g, c => c.toUpperCase()));
 
@@ -420,7 +443,7 @@ module.exports = async function handler(req, res) {
       created_at:  row.created_at      || ''
     }));
 
-    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl });
+    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
     return res.status(200).send(html);

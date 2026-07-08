@@ -31,9 +31,11 @@ async function generate() {
     .map(w => w.slug)
     .sort();
 
+  const REGION_SLUGS = ['napa-valley', 'sonoma', 'long-island', 'paso-robles', 'washington', 'oregon', 'lodi'];
   const staticEntries = [
     urlEntry(`${BASE_URL}/`, '1.0'),
     urlEntry(`${BASE_URL}/wineries.html`, '0.9'),
+    ...REGION_SLUGS.map(r => urlEntry(`${BASE_URL}/region/${r}`, '0.8')),
     urlEntry(`${BASE_URL}/legacy.html`, '0.7'),
     urlEntry(`${BASE_URL}/partner.html`, '0.6'),
   ];

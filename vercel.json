@@ -1,11 +1,27 @@
 {
   "functions": {
-    "api/cleanup.js": { "maxDuration": 10 },
-    "api/subscribe.js": { "maxDuration": 10 },
-    "api/winery.js": { "maxDuration": 10 }
+    "api/cleanup.js": {
+      "maxDuration": 10
+    },
+    "api/subscribe.js": {
+      "maxDuration": 10
+    },
+    "api/winery.js": {
+      "maxDuration": 10
+    },
+    "api/region.js": {
+      "maxDuration": 10
+    }
   },
   "rewrites": [
-    { "source": "/winery.html", "destination": "/api/winery" }
+    {
+      "source": "/region/:rslug",
+      "destination": "/api/region?region=:rslug"
+    },
+    {
+      "source": "/winery.html",
+      "destination": "/api/winery"
+    }
   ],
   "crons": [
     {
