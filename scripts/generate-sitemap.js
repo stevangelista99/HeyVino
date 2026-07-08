@@ -11,11 +11,102 @@ function urlEntry(loc, priority = '0.8') {
   return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
+// Replaces every occurrence of `oldStr` in `content` with `newStr`, but throws
+// if the count of occurrences found doesn't match `expected`. This is
+// deliberately strict: a silent 0-match (page copy changed) or unexpected
+// multi-match must stop the script rather than write a corrupted file.
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+// Replaces a recurring "NNN+" number inside a larger, uniquely-anchored
+// string. Uses \d+ so this matches whether it's the original hardcoded
+// number OR a number written by a previous run — safe to run every time.
+function replaceRecurringNumber(content, template, newNumber, label) {
+  const pattern = new RegExp(escapeRegex(template).replace('__NUM__', '\\d+'), 'g');
+  const matches = content.match(pattern);
+  if (!matches || matches.length !== 1) {
+    throw new Error(`updateHomepageStats: expected exactly 1 match for "${label}", found ${matches ? matches.length : 0}. Aborting — index.html markup may have changed.`);
+  }
+  return content.replace(pattern, template.replace('__NUM__', newNumber));
+}
+
+// Applies a one-time content swap (e.g. old copy -> new copy) ONLY if the
+// old text is still present. If it's already been applied by a previous
+// run, this is a no-op — NOT an error, since re-running is expected.
+function replaceOnce(content, oldStr, newStr, label) {
+  const count = content.split(oldStr).length - 1;
+  if (count === 0) return content; // already applied previously — fine
+  if (count > 1) {
+    throw new Error(`updateHomepageStats: expected at most 1 occurrence of "${label}", found ${count}. Aborting — index.html markup may have changed.`);
+  }
+  return content.split(oldStr).join(newStr);
+}
+
+function updateHomepageStats(wineries) {
+  const indexPath = path.join(__dirname, '..', 'index.html');
+  let html = fs.readFileSync(indexPath, 'utf8');
+
+  const wineryCount = wineries.length;
+  const roundedCount = Math.floor(wineryCount / 10) * 10; // e.g. 296 -> 290+, avoids the number looking wrong if a few wineries get deactivated
+  const countryCount = new Set(wineries.map(w => (w.country || '').trim()).filter(Boolean)).size;
+
+  // ── One-time content swaps — run FIRST, while original word-based/NZ
+  // copy is still intact. Silently skipped on subsequent runs once the
+  // old copy is gone (this is what makes re-running the script safe). ──
+  html = replaceOnce(html,
+    'Real promo codes from 250+ wineries worldwide — Napa, Burgundy, Tuscany, NZ and more. Updated daily, free to browse.',
+    `Real promo codes from ${roundedCount}+ wineries worldwide — Napa, Burgundy, Tuscany, Long Island and more. Updated daily, free to browse.`,
+    'meta description NZ->Long Island');
+  html = replaceOnce(html,
+    'Real promo codes from real wineries — Napa Cab, Burgundy, Tuscany, New Zealand and more. Updated daily, direct from the source.',
+    'Real promo codes from real wineries — Napa Cab, Burgundy, Tuscany, Long Island and more. Updated daily, direct from the source.',
+    'hero subhead');
+  html = replaceOnce(html,
+    '<div><span class="stat-num">Top</span><span class="stat-label">Wineries</span></div>',
+    `<div><span class="stat-num">${roundedCount}+</span><span class="stat-label">Wineries</span></div>`,
+    'hero stat: wineries (first-run migration)');
+  html = replaceOnce(html,
+    '<div><span class="stat-num">Global</span><span class="stat-label">Regions</span></div>',
+    `<div><span class="stat-num">${countryCount}</span><span class="stat-label">Countries</span></div>`,
+    'hero stat: countries (first-run migration)');
+
+  // ── Recurring numeric updates — idempotent, run every time after the
+  // migrations above. Each template includes unique surrounding markup
+  // so tags with similar text (og:description / twitter:description)
+  // can never cross-match. ──
+  html = replaceRecurringNumber(html,
+    '<meta name="description" content="Real promo codes from __NUM__+ wineries worldwide',
+    roundedCount, 'meta description');
+  html = replaceRecurringNumber(html,
+    '<meta property="og:description" content="Real promo codes from __NUM__+ wineries worldwide',
+    roundedCount, 'og:description');
+  html = replaceRecurringNumber(html,
+    '<meta name="twitter:description" content="Real promo codes from __NUM__+ wineries worldwide',
+    roundedCount, 'twitter:description');
+  html = replaceRecurringNumber(html,
+    '"description":"Wine promo code aggregator — updated daily from __NUM__+ winery newsletters worldwide."',
+    roundedCount, 'JSON-LD description');
+  html = replaceRecurringNumber(html,
+    '<div class="hero-eyebrow">🍷 Codes from __NUM__+ wineries worldwide</div>',
+    roundedCount, 'hero eyebrow');
+  html = replaceRecurringNumber(html,
+    '<p class="footer-tagline">The wine promo code aggregator — updated daily from __NUM__+ winery newsletters worldwide.</p>',
+    roundedCount, 'footer tagline');
+  html = replaceRecurringNumber(html,
+    '<div><span class="stat-num">__NUM__+</span><span class="stat-label">Wineries</span></div>',
+    roundedCount, 'hero stat: wineries');
+  html = replaceRecurringNumber(html,
+    '<div><span class="stat-num">__NUM__</span><span class="stat-label">Countries</span></div>',
+    countryCount, 'hero stat: countries');
+
+  fs.writeFileSync(indexPath, html, 'utf8');
+  console.log(`index.html stats updated — ${roundedCount}+ wineries, ${countryCount} countries (${today})`);
+}
+
 async function generate() {
   const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
 
   const [wRes, pRes] = await Promise.all([
-    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description&is_active=eq.true`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country&is_active=eq.true`, { headers }),
     fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers })
   ]);
   if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
@@ -52,6 +143,8 @@ ${entries.join('\n')}
   const outPath = path.join(__dirname, '..', 'sitemap.xml');
   fs.writeFileSync(outPath, xml, 'utf8');
   console.log(`sitemap.xml written — ${slugs.length} winery URLs + ${staticEntries.length} static (${today})`);
+
+  updateHomepageStats(wineries);
 }
 
 generate().catch(err => { console.error(err.message); process.exit(1); });
