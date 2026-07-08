@@ -1,9 +1,12 @@
 name: Daily Promo Update
 
 on:
-  schedule:
-    - cron: '0 9 * * *'  # Runs daily at 9am UTC
-  workflow_dispatch:  # Allows manual trigger
+  # PAUSED as of 2026-07-09 — Anthropic API credits not being funded currently.
+  # Manual refreshes are handled by Claude in chat instead (see chat history).
+  # To resume: uncomment the schedule below and add credits at console.anthropic.com.
+  # schedule:
+  #   - cron: '0 9 * * *'  # Runs daily at 9am UTC
+  workflow_dispatch:  # Allows manual trigger from the Actions tab
 
 jobs:
   update-promos:
