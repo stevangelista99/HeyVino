@@ -95,6 +95,24 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl }) 
   const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
   const countText = cards.length > 0 ? cards.length + ' active code' + (cards.length !== 1 ? 's' : '') : '';
 
+  // Structured data: breadcrumbs + the winery as an Organization.
+  // \u003c escaping prevents a "</script>" inside description from breaking out of the tag.
+  const canonicalRaw = 'https://www.heyvinowine.com/winery.html?slug=' + slug;
+  const orgEntity = { '@type': 'Organization', name: displayName };
+  if (description) orgEntity.description = description.slice(0, 500);
+  if (wineryWebsiteUrl && /^https?:\/\//.test(wineryWebsiteUrl)) orgEntity.url = wineryWebsiteUrl;
+  const ldJson = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.heyvinowine.com/' },
+        { '@type': 'ListItem', position: 2, name: 'All Wineries', item: 'https://www.heyvinowine.com/wineries.html' },
+        { '@type': 'ListItem', position: 3, name: displayName, item: canonicalRaw },
+      ]},
+      orgEntity,
+    ],
+  }).replace(/</g, '\\u003c');
+
   const noCodesSiteLink = safeUrl(wineryWebsiteUrl);
   const cardsInner = cards.length === 0
     ? `<div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
@@ -116,6 +134,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl }) 
 <meta property="og:url" content="${canonical}">
 <meta property="og:type" content="website">
 <link rel="canonical" href="${canonical}">
+<script type="application/ld+json">${ldJson}</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
 <script>
   window.dataLayer = window.dataLayer || [];

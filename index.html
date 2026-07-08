@@ -97,6 +97,7 @@
   /* ── FILTERS (mobile-first: wrapping rows, full-width search) ── */
   .filter-bar { padding: 1rem; background: var(--cream); border-bottom: 1px solid var(--stone); }
   .filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .sort-select { font-family: inherit; font-size: 0.8rem; padding: 6px 10px; border: 1.5px solid rgba(107,30,42,0.25); border-radius: 999px; background: #fff; color: var(--ink); cursor: pointer; }
   .filter-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); font-weight: 600; white-space: nowrap; }
   .chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
   .chip { padding: 5px 13px; border-radius: 100px; font-size: 0.78rem; cursor: pointer; border: 1.5px solid var(--stone); background: var(--white); color: var(--muted); transition: all 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
@@ -393,6 +394,15 @@
       <button class="chip" data-offer="sitewide">🏷️ Sitewide Deals</button>
     </div>
   </div>
+  <div class="filter-row">
+    <span class="filter-label">Sort:</span>
+    <select id="sortSelect" class="sort-select" onchange="setSort(this.value)">
+      <option value="featured">Featured</option>
+      <option value="newest">Newest first</option>
+      <option value="expiring">Expiring soon</option>
+      <option value="az">Winery A–Z</option>
+    </select>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -572,7 +582,7 @@ function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c |
 const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj', 'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com' };
 function affiliateUrl(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return ''; return attr(AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url); }catch{ return ''; } }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
-let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all";
+let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all", activeSort="featured";
 
 function daysUntil(d) { return Math.ceil((new Date(d)-new Date())/86400000); }
 
@@ -622,7 +632,7 @@ function cardHTML(c) {
 }
 
 function render() {
-  const filtered=CODES.filter(c=>{
+  let filtered=CODES.filter(c=>{
     const mV=activeVarietal==="all"||c.type===activeVarietal||(activeVarietal==="featured"&&c.featured);
     const mR=activeRegion==="all"||c.country===activeRegion;
     const mUS=activeRegion!=="USA"||activeUSRegion==="all"||parentRegion(c.region||'')===activeUSRegion;
@@ -632,6 +642,7 @@ function render() {
     return mV&&mR&&mUS&&mO&&mQ;
   });
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
+  filtered=applySort(filtered);
   const napaCAbs=filtered.filter(c=>(c.varietal||'').includes("Cabernet Sauvignon")&&c.country==="USA");
   const napaCabIds=new Set(napaCAbs.map(c=>c.id));
   const remaining=filtered.filter(c=>!napaCabIds.has(c.id));
@@ -678,6 +689,16 @@ function sendFeedback(btn,vote){
   fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code_id:codeId,vote})}).catch(()=>{});
 }
 function filterCards(){searchQ=document.getElementById("searchInput").value;render();}
+function setSort(v){activeSort=v;render();}
+function applySort(list){
+  if(activeSort==="newest") return [...list].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+  if(activeSort==="expiring") return [...list].sort((a,b)=>{
+    const key=c=>{ if(!c.expiry||c.offer_type==='welcome') return 9e9; const d=daysUntil(c.expiry); return d<0?9e9:d; };
+    return key(a)-key(b);
+  });
+  if(activeSort==="az") return [...list].sort((a,b)=>(a.winery||'').localeCompare(b.winery||''));
+  return list;
+}
 function footerFilter(filter,scrollTo){
   const chip=document.querySelector(`#varietalChips .chip[data-filter="${filter}"]`);
   if(chip) chip.click();
