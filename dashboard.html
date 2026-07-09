@@ -27,6 +27,9 @@
   .up { color: var(--green); font-weight:700; } .down { color: var(--red); font-weight:700; }
   .warnrow { background: rgba(179,38,30,0.05); }
   .refresh { background: var(--wine); color:#fff; border:none; border-radius:6px; padding: 8px 16px; cursor:pointer; font-size:0.85rem; font-family: inherit; }
+  .win-toggle { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:1.2rem; }
+  .win-btn { background:#fff; color:var(--ink); border:1.5px solid rgba(107,30,42,0.25); border-radius:999px; padding:6px 14px; cursor:pointer; font-size:0.78rem; font-family:inherit; }
+  .win-btn.active { background:var(--wine); color:#fff; border-color:var(--wine); }
   .empty { color: var(--muted); font-size: 0.85rem; padding: 0.8rem 0; }
 </style>
 </head>
@@ -38,6 +41,13 @@
 <main>
   <div class="msg" id="status">Loading…</div>
   <div id="content" style="display:none">
+    <div class="win-toggle" id="winToggle">
+      <button class="win-btn active" data-days="30">30 days</button>
+      <button class="win-btn" data-days="90">3 months</button>
+      <button class="win-btn" data-days="180">6 months</button>
+      <button class="win-btn" data-days="365">1 year</button>
+      <button class="win-btn" data-days="all">All-time</button>
+    </div>
     <div class="totals">
       <div class="tot"><div class="n" id="tVotes">–</div><div class="l">Feedback votes</div></div>
       <div class="tot"><div class="n" id="tCopies">–</div><div class="l">Code copies</div></div>
@@ -70,6 +80,15 @@ function tableHTML(headers, rows) {
   return '<table><thead><tr>' + headers.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table>';
 }
 
+let activeDays = '30';
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('win-btn')) {
+    document.querySelectorAll('.win-btn').forEach(function(b){ b.classList.remove('active'); });
+    e.target.classList.add('active');
+    activeDays = e.target.dataset.days;
+    load();
+  }
+});
 async function load() {
   const status = document.getElementById('status');
   const content = document.getElementById('content');
@@ -78,12 +97,12 @@ async function load() {
   if (!key) { status.textContent = 'Missing key — open this page as /dashboard.html?key=YOUR_DASHBOARD_KEY'; return; }
   let data;
   try {
-    const res = await fetch('/api/dashboard-data?key=' + encodeURIComponent(key));
+    const res = await fetch('/api/dashboard-data?key=' + encodeURIComponent(key) + '&days=' + encodeURIComponent(activeDays));
     data = await res.json();
     if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }
   } catch (e) { status.textContent = 'Failed to load: ' + e.message; return; }
 
-  document.getElementById('windowLabel').textContent = 'Last ' + data.window_days + ' days';
+  document.getElementById('windowLabel').textContent = data.window_days === 'all' ? 'All-time' : 'Last ' + data.window_days + ' days';
   document.getElementById('tVotes').textContent = data.totals.votes;
   document.getElementById('tCopies').textContent = data.totals.code_copies;
   document.getElementById('tVisits').textContent = data.totals.site_visits;

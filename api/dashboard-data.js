@@ -2,7 +2,8 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const WINDOW_DAYS = 30;
+// Allowed reporting windows (days). 'all' disables the date filter entirely.
+const ALLOWED_WINDOWS = ['30', '90', '180', '365', 'all'];
 
 function summarizeFeedback(rows) {
   const byCode = new Map();
@@ -42,22 +43,27 @@ module.exports = async function handler(req, res) {
   if (!expected) return res.status(503).json({ error: 'DASHBOARD_KEY env var not configured in Vercel' });
   if ((req.query?.key || '') !== expected) return res.status(401).json({ error: 'Unauthorized' });
 
-  const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const windowParam = String(req.query?.days || '30');
+  const windowDays = ALLOWED_WINDOWS.includes(windowParam) ? windowParam : '30';
 
-  const [fb, clicks] = await Promise.all([
-    supabase
-      .from('code_feedback')
-      .select('vote, created_at, code_id, promo_codes(winery_name, code)')
-      .gte('created_at', since)
-      .order('created_at', { ascending: false })
-      .limit(2000),
-    supabase
-      .from('click_events')
-      .select('event_type, winery, code, created_at')
-      .gte('created_at', since)
-      .order('created_at', { ascending: false })
-      .limit(5000),
-  ]);
+  let fbQuery = supabase
+    .from('code_feedback')
+    .select('vote, created_at, code_id, promo_codes(winery_name, code)')
+    .order('created_at', { ascending: false })
+    .limit(2000);
+  let clickQuery = supabase
+    .from('click_events')
+    .select('event_type, winery, code, created_at')
+    .order('created_at', { ascending: false })
+    .limit(5000);
+
+  if (windowDays !== 'all') {
+    const since = new Date(Date.now() - parseInt(windowDays, 10) * 24 * 60 * 60 * 1000).toISOString();
+    fbQuery = fbQuery.gte('created_at', since);
+    clickQuery = clickQuery.gte('created_at', since);
+  }
+
+  const [fb, clicks] = await Promise.all([fbQuery, clickQuery]);
 
   if (fb.error) return res.status(500).json({ error: 'feedback query failed: ' + fb.error.message });
   if (clicks.error) return res.status(500).json({ error: 'clicks query failed: ' + clicks.error.message });
@@ -67,7 +73,7 @@ module.exports = async function handler(req, res) {
 
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
-    window_days: WINDOW_DAYS,
+    window_days: windowDays,
     generated_at: new Date().toISOString(),
     totals: {
       votes: (fb.data || []).length,
