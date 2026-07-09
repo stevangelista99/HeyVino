@@ -425,11 +425,10 @@
     <div class="widget featured-widget" id="featuredWidget">
       <div class="widget-head featured-widget-head"><span>⭐</span><span class="widget-title">Featured</span></div>
       <div class="widget-body" id="featuredCodesWidget">
-        <div id="featuredCTA" style="border:1.5px dashed var(--gold);border-radius:5px;padding:0.9rem 0.85rem;text-align:center;background:linear-gradient(135deg,rgba(61,13,20,0.04),rgba(201,168,76,0.06));">
-          <div style="font-size:0.63rem;text-transform:uppercase;letter-spacing:0.18em;color:var(--gold);font-weight:700;margin-bottom:0.4rem;">Paid Placement</div>
-          <div style="font-family:'Playfair Display',serif;font-size:0.88rem;color:var(--wine-deep);font-weight:700;margin-bottom:0.45rem;line-height:1.35;">Market your code here</div>
-          <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;margin-bottom:0.65rem;">Reach wine buyers actively looking to save.</div>
-          <a href="mailto:HeyVinoMarketing@gmail.com?subject=Featured%20Placement%20on%20HeyVino" style="font-size:0.72rem;font-weight:600;color:var(--wine);text-decoration:none;border-bottom:1px solid rgba(107,30,42,0.3);padding-bottom:1px;transition:color 0.15s;">HeyVinoMarketing@gmail.com</a>
+        <div id="featuredCTA" style="text-align:center;">
+          <a href="https://www.wine.com/?s=linkshare&cid=aff_linkshare&ranMID=2025&ranEAID=fjvvkCj02UA&siteID=fjvvkCj02UA-j1%2A5%2FYUb0YYD4GGxSJSjxA&ranSiteID=fjvvkCj02UA-j1%2A5%2FYUb0YYD4GGxSJSjxA" target="_blank" rel="noopener sponsored" onclick="track('visit_site','Wine.com','')" style="display:block;">
+            <img src="images/wine-com-banner.png" alt="This is Wine.com country — Shop Now" style="width:100%;height:auto;border-radius:6px;display:block;">
+          </a>
         </div>
       </div>
     </div>
@@ -745,7 +744,11 @@ document.getElementById("offerChips").addEventListener("click",e=>{if(e.target.c
 
 loadCodes();
 loadTopCodes();
-loadFeaturedCodes();
+// loadFeaturedCodes() disabled — the Featured widget is now a static Wine.com
+// ad (see #featuredCTA above). Leaving this call active would let a future
+// is_featured=true promo code silently hide or replace that ad. To restore
+// dynamic featured codes, re-enable the call below AND remove the static ad.
+// loadFeaturedCodes();
 loadPromoTrends();
 
 // NOTE: requires is_featured boolean column on promo_codes table in Supabase.
