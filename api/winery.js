@@ -415,11 +415,21 @@ module.exports = async function handler(req, res) {
   try {
     const [promoRes, wineryRes] = await Promise.all([
       fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region&slug=eq.' + encodeURIComponent(slug) + '&limit=1', { headers })
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
     ]);
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
     const wineryData = wineryRes.ok ? await wineryRes.json() : [];
+
+    // A deactivated/merged winery (e.g. a de-duped slug like the old
+    // "ghost-block") has no active wineries row and, since its codes were
+    // migrated to the real winery, no promo_codes rows either. Treat that
+    // combination as "doesn't exist" rather than rendering a near-empty
+    // page for a winery that was deliberately removed.
+    if (wineryData.length === 0 && promoData.length === 0) {
+      res.writeHead(302, { Location: '/wineries.html' });
+      return res.end();
+    }
 
     const description = (wineryData[0] || {}).description || '';
     const wineryWebsiteUrl = (wineryData[0] || {}).website_url || '';
