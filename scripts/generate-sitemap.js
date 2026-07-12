@@ -7,8 +7,8 @@ const BASE_URL = 'https://www.heyvinowine.com';
 
 const today = new Date().toISOString().split('T')[0];
 
-function urlEntry(loc, priority = '0.8') {
-  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
+function urlEntry(loc, priority = '0.8', lastmod = today) {
+  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
 // Replaces every occurrence of `oldStr` in `content` with `newStr`, but throws
@@ -106,8 +106,8 @@ async function generate() {
   const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
 
   const [wRes, pRes] = await Promise.all([
-    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country&is_active=eq.true`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers })
+    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country,created_at&is_active=eq.true`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at&is_active=eq.true`, { headers })
   ]);
   if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
   const wineries = await wRes.json();
@@ -116,11 +116,28 @@ async function generate() {
   // Which wineries currently have active codes
   const hasCode = new Set(codes.map(r => (r.winery_name || '').toLowerCase()).filter(Boolean));
 
+  // Per-winery lastmod: the newest code activity for that winery (created or
+  // updated), falling back to the winery row's own created_at. Using real
+  // dates instead of stamping every URL with today's date keeps the lastmod
+  // field trustworthy for crawlers.
+  const toDay = (iso) => (iso || '').split('T')[0];
+  const latestCodeDate = {};
+  codes.forEach(r => {
+    const key = (r.winery_name || '').toLowerCase();
+    if (!key) return;
+    const d = [r.updated_at, r.created_at].filter(Boolean).map(toDay).sort().pop() || '';
+    if (d && (!latestCodeDate[key] || d > latestCodeDate[key])) latestCodeDate[key] = d;
+  });
+
   // Only index a winery page if it has codes OR a written description — never empty pages
-  const slugs = wineries
+  const indexable = wineries
     .filter(w => w.slug && (hasCode.has((w.name || '').toLowerCase()) || (w.description && w.description.trim())))
-    .map(w => w.slug)
-    .sort();
+    .map(w => ({
+      slug: w.slug,
+      lastmod: latestCodeDate[(w.name || '').toLowerCase()] || toDay(w.created_at) || today,
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
+  const slugs = indexable.map(w => w.slug);
 
   const REGION_SLUGS = ['napa-valley', 'sonoma', 'long-island', 'paso-robles', 'washington', 'oregon', 'lodi'];
   const staticEntries = [
@@ -132,7 +149,7 @@ async function generate() {
   ];
   const entries = [
     ...staticEntries,
-    ...slugs.map(slug => urlEntry(`${BASE_URL}/winery.html?slug=${slug}`, '0.7')),
+    ...indexable.map(w => urlEntry(`${BASE_URL}/winery.html?slug=${w.slug}`, '0.7', w.lastmod)),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

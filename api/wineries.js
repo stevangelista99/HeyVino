@@ -1,14 +1,57 @@
-<!DOCTYPE html>
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lzeicurexdpludaltetf.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
+
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
+
+const FLAGS = { USA: '\ud83c\uddfa\ud83c\uddf8', France: '\ud83c\uddeb\ud83c\uddf7', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Australia: '\ud83c\udde6\ud83c\uddfa', 'New Zealand': '\ud83c\uddf3\ud83c\uddff', Argentina: '\ud83c\udde6\ud83c\uddf7', Germany: '\ud83c\udde9\ud83c\uddea', Portugal: '\ud83c\uddf5\ud83c\uddf9', 'South Africa': '\ud83c\uddff\ud83c\udde6', Chile: '\ud83c\udde8\ud83c\uddf1' };
+const COUNTRY_CODES = { us: 'USA', usa: 'USA', it: 'Italy', fr: 'France', es: 'Spain', au: 'Australia', nz: 'New Zealand', ar: 'Argentina', de: 'Germany', gb: 'UK', uk: 'UK' };
+function normalizeCountry(c) { return COUNTRY_CODES[(c || '').toLowerCase()] || c || ''; }
+
+function wineryCard(w, i) {
+  const initials = esc(w.name.split(' ').filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase());
+  const flag = FLAGS[w.country] || '\ud83c\udf0d';
+  const meta = w.region ? `${flag} ${esc(w.region)}, ${esc(w.country)}` : (w.country ? `${flag} ${esc(w.country)}` : '');
+  const delay = (i % 12) * 0.04;
+  return `<a class="winery-card" href="/winery.html?slug=${esc(w.slug)}" data-name="${esc(w.name.toLowerCase())}" style="animation-delay:${delay}s">
+      <div class="winery-avatar">${initials}</div>
+      <div class="winery-info">
+        <div class="winery-card-name">${esc(w.name)}</div>
+        ${meta ? `<div class="winery-card-meta">${meta}</div>` : ''}
+      </div>
+      <div class="winery-card-count">${w.count > 0 ? w.count + ' code' + (w.count !== 1 ? 's' : '') : 'View \u2192'}</div>
+    </a>`;
+}
+
+function buildPage(wineries) {
+  const count = wineries.length;
+  const countText = `${count} winer${count !== 1 ? 'ies' : 'y'}`;
+  const metaDesc = `Browse all ${count} wineries and wine retailers with active promo codes on HeyVino. Find discounts from Napa Valley, Sonoma, Long Island, Tuscany and more \u2014 updated daily.`;
+
+  let gridHtml = '';
+  let currentLetter = '';
+  wineries.forEach((w, i) => {
+    const letter = (w.name[0] || '#').toUpperCase();
+    if (letter !== currentLetter) {
+      currentLetter = letter;
+      gridHtml += `<div class="letter-heading">${esc(letter)}</div>`;
+    }
+    gridHtml += wineryCard(w, i);
+  });
+  if (!gridHtml) {
+    gridHtml = `<div style="text-align:center;padding:4rem;color:var(--muted);grid-column:1/-1"><div style="font-size:2.5rem;margin-bottom:1rem">\u26a0\ufe0f</div><div>Wineries are temporarily unavailable. Please refresh.</div></div>`;
+  }
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://www.heyvinowine.com/wineries.html">
-<meta name="description" content="Browse all wineries and wine retailers with active promo codes on HeyVino. Find discounts from Napa Valley, Burgundy, Tuscany, Willamette Valley and more — updated daily.">
+<meta name="description" content="${esc(metaDesc)}">
 
 <!-- Open Graph -->
-<meta property="og:title" content="All Wineries with Promo Codes — HeyVino">
-<meta property="og:description" content="Browse 250+ wineries with active promo codes. Napa Valley, Burgundy, Tuscany, and more. Updated daily.">
+<meta property="og:title" content="All Wineries with Promo Codes \u2014 HeyVino">
+<meta property="og:description" content="${esc(metaDesc)}">
 <meta property="og:url" content="https://www.heyvinowine.com/wineries.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="HeyVino">
@@ -16,14 +59,12 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="All Wineries with Promo Codes — HeyVino">
-<meta name="twitter:description" content="Browse 250+ wineries with active promo codes. Updated daily.">
+<meta name="twitter:title" content="All Wineries with Promo Codes \u2014 HeyVino">
+<meta name="twitter:description" content="Browse ${count} wineries with active promo codes. Updated daily.">
 <meta name="twitter:image" content="https://www.heyvinowine.com/images/og-image.png">
 
 <!-- Structured data -->
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CollectionPage","name":"All Wineries with Promo Codes","url":"https://www.heyvinowine.com/wineries.html","isPartOf":{"@type":"WebSite","name":"HeyVino","url":"https://www.heyvinowine.com/"}}
-</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"All Wineries with Promo Codes","url":"https://www.heyvinowine.com/wineries.html","isPartOf":{"@type":"WebSite","name":"HeyVino","url":"https://www.heyvinowine.com/"}}</script>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KDQWZYYV5"></script>
 <script>
@@ -33,7 +74,7 @@
   gtag('config', 'G-7KDQWZYYV5');
 </script>
 
-<title>All Wineries with Promo Codes — HeyVino</title>
+<title>All Wineries with Promo Codes \u2014 HeyVino</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -114,39 +155,37 @@
 
 <nav>
   <div class="nav-logo">
-    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
       <img src="/images/logo.png" alt="HeyVino Logo"/>
-      <span class="nav-logo-text">HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup> <small>Wine deals, curated</small></span>
+      <span class="nav-logo-text">HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup> <small>Wine deals, curated</small></span>
     </a>
   </div>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="wineries.html" style="color:var(--gold)">All Wineries</a></li>
-    <li><a href="partner.html">Partner With Us</a></li>
-    <li><a href="legacy.html">Legacy Promos</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="/wineries.html" style="color:var(--gold)">All Wineries</a></li>
+    <li><a href="/partner.html">Partner With Us</a></li>
+    <li><a href="/legacy.html">Legacy Promos</a></li>
     <li><a href="#" onclick="openAdvertiseModal();return false;">Advertise</a></li>
   </ul>
 </nav>
 
 <div class="page-hero">
   <h1>All Wine Promo Codes <em>by Winery</em></h1>
-  <p>Browse every winery and retailer we track — with promo codes sourced daily from newsletters worldwide.</p>
-  <div class="winery-count" id="wineryCount"></div>
+  <p>Browse every winery and retailer we track \u2014 with promo codes sourced daily from newsletters worldwide.</p>
+  <div class="winery-count" id="wineryCount">${esc(countText)}</div>
 </div>
 
 <div class="search-bar">
   <div class="search-wrap">
-    <span>🔍</span>
-    <input type="text" id="searchInput" placeholder="Search wineries…" oninput="filterWineries()">
+    <span>\ud83d\udd0d</span>
+    <input type="text" id="searchInput" placeholder="Search wineries\u2026" oninput="filterWineries()">
   </div>
 </div>
 
 <div class="wineries-wrap">
   <div class="wineries-grid" id="wineriesGrid">
-    <div style="text-align:center;padding:4rem;color:var(--muted);grid-column:1/-1">
-      <div style="font-size:1.5rem;margin-bottom:0.5rem">🍷</div>
-      <div>Loading wineries…</div>
-    </div>
+    ${gridHtml}
+    <div class="no-results" id="noResults" style="display:none"><div style="font-size:2rem;margin-bottom:0.75rem">\ud83c\udf7e</div><div>No wineries found</div></div>
   </div>
 </div>
 
@@ -155,16 +194,18 @@
     <div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;">
         <img src="/images/logo.png" alt="HeyVino" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"/>
-        <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-style:italic;">HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup></span>
+        <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-style:italic;">HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup></span>
       </div>
-      <p class="footer-tagline">The wine promo code aggregator — updated daily from 250+ winery newsletters worldwide.</p>
+      <p class="footer-tagline">The wine promo code aggregator \u2014 updated daily from ${count}+ winery newsletters worldwide.</p>
     </div>
     <div>
       <div class="footer-heading">Browse</div>
       <ul class="footer-links">
-        <li><a href="index.html">All Deals</a></li>
-        <li><a href="wineries.html">By Winery</a></li>
-        <li><a href="index.html">Expiring Soon</a></li>
+        <li><a href="/">All Deals</a></li>
+        <li><a href="/wineries.html">By Winery</a></li>
+        <li><a href="/region/napa-valley">Napa Valley</a></li>
+        <li><a href="/region/sonoma">Sonoma</a></li>
+        <li><a href="/region/long-island">Long Island</a></li>
       </ul>
     </div>
     <div>
@@ -186,35 +227,63 @@
   </div>
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;width:100%;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
-    <span class="footer-legal-links" style="font-size:0.7rem;"><a href="privacy.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="terms.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Terms of Use</a></span>
-    <span class="footer-copy">© 2026 HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup> LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
-    <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here →</a>
+    <span class="footer-legal-links" style="font-size:0.7rem;"><a href="/privacy.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Privacy Policy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Terms of Use</a></span>
+    <span class="footer-copy">\u00a9 2026 HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup> LLC \u00b7 HeyVinoWine.com \u00b7 Promotional codes sourced from publicly available winery communications.</span>
+    <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here \u2192</a>
   </div>
 </footer>
 
 <script>
-const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
-
-const FLAGS = { USA:'🇺🇸', France:'🇫🇷', Italy:'🇮🇹', Spain:'🇪🇸', Australia:'🇦🇺', 'New Zealand':'🇳🇿', Argentina:'🇦🇷', Germany:'🇩🇪' };
-const COUNTRY_CODES = { us:'USA', usa:'USA', it:'Italy', fr:'France', es:'Spain', au:'Australia', nz:'New Zealand', ar:'Argentina', de:'Germany', gb:'UK', uk:'UK' };
-function normalizeCountry(c) { return COUNTRY_CODES[(c||'').toLowerCase()] || c || ''; }
-
-function toSlug(name) {
-  return (name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function filterWineries() {
+  var q = document.getElementById('searchInput').value.toLowerCase().trim();
+  var any = false;
+  document.querySelectorAll('.winery-card').forEach(function(c) {
+    var show = !q || c.dataset.name.indexOf(q) !== -1;
+    c.style.display = show ? '' : 'none';
+    if (show) any = true;
+  });
+  document.querySelectorAll('.letter-heading').forEach(function(h) { h.style.display = q ? 'none' : ''; });
+  document.getElementById('noResults').style.display = any ? 'none' : '';
 }
 
-let allWineries = [];
+function openAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'flex'; }
+function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'none'; }
+function copyAdvertiseEmail() {
+  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
+  document.getElementById('copyEmailBtn').textContent = 'Copied!';
+  setTimeout(function() { document.getElementById('copyEmailBtn').textContent = 'Copy'; }, 2000);
+}
+document.getElementById('advertiseModal').addEventListener('click', function(e) { if (e.target === this) closeAdvertiseModal(); });
+</script>
 
-async function load() {
+<div id="advertiseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--cream);border-radius:8px;padding:2.5rem;max-width:420px;width:90%;text-align:center;position:relative;">
+    <button onclick="closeAdvertiseModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">\u00d7</button>
+    <div style="font-size:2.5rem;margin-bottom:1rem;">\ud83c\udf77</div>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
+    <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
+      <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
+    </div>
+    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App \u2192</a>
+  </div>
+</div>
+
+</body>
+</html>`;
+}
+
+module.exports = async function handler(req, res) {
+  const headers = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
+
+  let wineries = [];
   try {
-    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
     const [wRes, pRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,region,country&is_active=eq.true`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers })
+      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers }),
     ]);
-    if (!wRes.ok) throw new Error(`HTTP ${wRes.status}`);
-    const wineries = await wRes.json();
+    const rows = wRes.ok ? await wRes.json() : [];
     const codes = pRes.ok ? await pRes.json() : [];
 
     const codeCount = {};
@@ -223,95 +292,25 @@ async function load() {
       if (key) codeCount[key] = (codeCount[key] || 0) + 1;
     });
 
-    allWineries = wineries
+    wineries = rows
       .filter(w => w.name && w.slug)
       .map(w => ({
         name: w.name,
         slug: w.slug,
         country: normalizeCountry(w.country),
         region: w.region || '',
-        count: codeCount[w.name.toLowerCase()] || 0
+        count: codeCount[w.name.toLowerCase()] || 0,
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
-
-    document.getElementById('wineryCount').textContent = `${allWineries.length} winer${allWineries.length !== 1 ? 'ies' : 'y'}`;
-
-    renderWineries(allWineries);
   } catch (err) {
-    document.getElementById('wineriesGrid').innerHTML = `
-      <div style="text-align:center;padding:4rem;color:var(--muted);grid-column:1/-1">
-        <div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div>
-        <div>Failed to load wineries. Please refresh.</div>
-      </div>`;
-  }
-}
-
-function renderWineries(list) {
-  const grid = document.getElementById('wineriesGrid');
-  if (list.length === 0) {
-    grid.innerHTML = `<div class="no-results"><div style="font-size:2rem;margin-bottom:0.75rem">🍾</div><div>No wineries found</div></div>`;
-    return;
+    console.error('wineries SSR error:', err);
+    wineries = [];
   }
 
-  let html = '';
-  let currentLetter = '';
+  const html = buildPage(wineries);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
+  return res.status(200).send(html);
+};
 
-  list.forEach((w, i) => {
-    const letter = w.name[0].toUpperCase();
-    if (letter !== currentLetter) {
-      currentLetter = letter;
-      html += `<div class="letter-heading">${letter}</div>`;
-    }
-
-    const initials = w.name.split(' ').slice(0, 2).map(x => x[0]).join('').toUpperCase();
-    const flag = FLAGS[w.country] || '🌍';
-    const meta = w.region ? `${flag} ${w.region}, ${w.country}` : (w.country ? `${flag} ${w.country}` : '');
-    const delay = (i % 12) * 0.04;
-
-    html += `<a class="winery-card" href="winery.html?slug=${w.slug}" style="animation-delay:${delay}s">
-      <div class="winery-avatar">${initials}</div>
-      <div class="winery-info">
-        <div class="winery-card-name">${w.name}</div>
-        ${meta ? `<div class="winery-card-meta">${meta}</div>` : ''}
-      </div>
-      <div class="winery-card-count">${w.count > 0 ? w.count + ' code' + (w.count !== 1 ? 's' : '') : 'View →'}</div>
-    </a>`;
-  });
-
-  grid.innerHTML = html;
-}
-
-function filterWineries() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  const filtered = q ? allWineries.filter(w => w.name.toLowerCase().includes(q)) : allWineries;
-  renderWineries(filtered);
-}
-
-load();
-
-function openAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'flex'; }
-function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'none'; }
-function copyAdvertiseEmail() {
-  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
-  document.getElementById('copyEmailBtn').textContent = 'Copied!';
-  setTimeout(() => document.getElementById('copyEmailBtn').textContent = 'Copy', 2000);
-}
-document.getElementById('advertiseModal').addEventListener('click', function(e) { if (e.target === this) closeAdvertiseModal(); });
-</script>
-
-<div id="advertiseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:var(--cream);border-radius:8px;padding:2.5rem;max-width:420px;width:90%;text-align:center;position:relative;">
-    <button onclick="closeAdvertiseModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">×</button>
-    <div style="font-size:2.5rem;margin-bottom:1rem;">🍷</div>
-    <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
-    <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
-    <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
-      <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
-    </div>
-    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App →</a>
-  </div>
-</div>
-
-</body>
-</html>
+module.exports._internals = { buildPage, normalizeCountry, wineryCard };

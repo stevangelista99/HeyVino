@@ -11,9 +11,16 @@
     },
     "api/region.js": {
       "maxDuration": 10
+    },
+    "api/wineries.js": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
+    {
+      "source": "/wineries.html",
+      "destination": "/api/wineries"
+    },
     {
       "source": "/region/:rslug",
       "destination": "/api/region?region=:rslug"
