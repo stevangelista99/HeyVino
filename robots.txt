@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /api/region
+Allow: /api/winery
+Allow: /api/wineries
 Disallow: /api/
 
 Sitemap: https://www.heyvinowine.com/sitemap.xml
