@@ -499,7 +499,7 @@
   <p style="text-align: center; font-size: 0.75rem; color: #999; margin: 8px 0;">Promo codes are updated daily. Some codes may be expired or temporarily unavailable. Always verify at checkout.</p>
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:var(--text-muted,#888);text-align:center;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
-    <span class="footer-copy">© 2026 HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup> LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
+    <span class="footer-copy">© <span id="copyYear">2026</span> HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup> LLC · HeyVinoWine.com · Promotional codes sourced from publicly available winery communications.</span>
     <span class="footer-legal-links"><a href="privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="terms.html">Terms of Use</a></span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;" style="cursor:pointer;">Advertise Here →</a>
   </div>
@@ -742,6 +742,7 @@ function updateUSRegionChips(){
 document.getElementById("usRegionChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#usRegionChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeUSRegion=e.target.dataset.usregion;render();}});
 document.getElementById("offerChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#offerChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeOfferType=e.target.dataset.offer;render();}});
 
+document.getElementById("copyYear").textContent = new Date().getFullYear();
 loadCodes();
 loadTopCodes();
 // loadFeaturedCodes() disabled — the Featured widget is now a static Wine.com
