@@ -111,7 +111,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   const regionLinkHtml = regionPage
     ? `<p style="margin:0.5rem 0 0;font-size:0.82rem;"><a href="/region/${regionPage.slug}" style="color:var(--wine);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.5);">See all ${esc(regionPage.title)} wine promo codes \u2192</a></p>`
     : '';
-  const title     = esc(displayName) + ' Promo Codes &amp; Discounts 2026 | HeyVino';
+  const title     = esc(displayName) + ' Promo Codes &amp; Discounts ' + new Date().getFullYear() + ' | HeyVino';
   const metaDesc  = buildMetaDescription(displayName, description);
   const canonical = 'https://www.heyvinowine.com/winery.html?slug=' + esc(slug);
   const countText = cards.length > 0 ? cards.length + ' active code' + (cards.length !== 1 ? 's' : '') : '';
@@ -344,7 +344,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   </div>
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;width:100%;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
-    <span class="footer-copy">&copy; 2026 HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> LLC &middot; HeyVinoWine.com &middot; Promotional codes sourced from publicly available winery communications.</span>
+    <span class="footer-copy">&copy; ${new Date().getFullYear()} HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup> LLC &middot; HeyVinoWine.com &middot; Promotional codes sourced from publicly available winery communications.</span>
     <span class="footer-legal-links"><a href="/privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="/terms.html">Terms of Use</a></span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here &rarr;</a>
   </div>

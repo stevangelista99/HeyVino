@@ -228,7 +228,7 @@ function buildPage(wineries) {
   <div class="footer-bottom">
     <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;width:100%;margin:0 0 0.5rem;line-height:1.5;">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
     <span class="footer-legal-links" style="font-size:0.7rem;"><a href="/privacy.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Privacy Policy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Terms of Use</a></span>
-    <span class="footer-copy">\u00a9 2026 HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup> LLC \u00b7 HeyVinoWine.com \u00b7 Promotional codes sourced from publicly available winery communications.</span>
+    <span class="footer-copy">\u00a9 ${new Date().getFullYear()} HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup> LLC \u00b7 HeyVinoWine.com \u00b7 Promotional codes sourced from publicly available winery communications.</span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here \u2192</a>
   </div>
 </footer>
