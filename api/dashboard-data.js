@@ -36,6 +36,19 @@ function summarizeClicks(rows) {
   return { copies, visits, byWinery: [...byWinery.values()].sort((a, b) => (b.copies + b.visits) - (a.copies + a.visits)) };
 }
 
+function summarizeCopiesByCode(rows) {
+  const byCode = new Map();
+  for (const r of rows || []) {
+    if (r.event_type !== 'code_copy') continue;
+    const key = (r.winery || 'Unknown') + '::' + (r.code || '?');
+    if (!byCode.has(key)) byCode.set(key, { winery: r.winery || 'Unknown', code: r.code || '(unknown)', copies: 0, last: null });
+    const e = byCode.get(key);
+    e.copies++;
+    if (!e.last || r.created_at > e.last) e.last = r.created_at;
+  }
+  return [...byCode.values()].sort((a, b) => b.copies - a.copies);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -83,6 +96,7 @@ module.exports = async function handler(req, res) {
     codes_with_downvotes: feedback.filter(f => f.downs > 0),
     feedback_by_code: feedback,
     clicks_by_winery: clickSummary.byWinery,
+    copies_by_code: summarizeCopiesByCode(clicks.data),
     recent_feedback: (fb.data || []).slice(0, 50).map(r => ({
       vote: r.vote,
       created_at: r.created_at,
@@ -92,4 +106,4 @@ module.exports = async function handler(req, res) {
   });
 };
 
-module.exports._internals = { summarizeFeedback, summarizeClicks };
+module.exports._internals = { summarizeFeedback, summarizeClicks, summarizeCopiesByCode };

@@ -61,6 +61,10 @@
     <h2>Feedback by code</h2>
     <div id="fbSection"></div>
 
+    <h2>Copies by code</h2>
+    <p class="hint">Which codes people are actually copying — your most-used offers.</p>
+    <div id="copySection"></div>
+
     <h2>Clicks by winery</h2>
     <p class="hint">Partnership ammo: "we sent your site N clicks last month."</p>
     <div id="clickSection"></div>
@@ -115,6 +119,11 @@ async function load() {
   document.getElementById('fbSection').innerHTML = tableHTML(
     ['Winery','Code','👍','👎','Last vote'],
     data.feedback_by_code.map(f => '<tr><td>'+esc(f.winery)+'</td><td><code>'+esc(f.code)+'</code></td><td class="up">'+f.ups+'</td><td class="down">'+f.downs+'</td><td>'+fmtDate(f.last)+'</td></tr>')
+  );
+
+  document.getElementById('copySection').innerHTML = tableHTML(
+    ['Winery','Code','Copies','Last copied'],
+    (data.copies_by_code || []).map(c => '<tr><td>'+esc(c.winery)+'</td><td><code>'+esc(c.code)+'</code></td><td><strong>'+c.copies+'</strong></td><td>'+fmtDate(c.last)+'</td></tr>')
   );
 
   document.getElementById('clickSection').innerHTML = tableHTML(
