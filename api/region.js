@@ -20,7 +20,7 @@ const REGIONS = {
   'long-island': {
     title: 'Long Island',
     blurb: 'New York\u2019s maritime wine country \u2014 the North Fork and the Hamptons \u2014 is known for Merlot, Cabernet Franc, and crisp coastal ros\u00e9.',
-    dbRegions: ['North Fork, Long Island', 'Hamptons, Long Island'],
+    dbRegions: ['Long Island', 'North Fork, Long Island', 'Hamptons, Long Island'],
   },
   'paso-robles': {
     title: 'Paso Robles',

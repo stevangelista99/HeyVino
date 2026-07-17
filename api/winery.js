@@ -11,7 +11,7 @@ const REGION_PAGE = (() => {
   const groups = {
     'napa-valley': ['Napa Valley','Calistoga','Carneros','Coombsville','Howell Mountain','Mount Veeder','Oakville','Pritchard Hill','Rutherford','Spring Mountain','St. Helena','Stags Leap District','Yountville'],
     'sonoma': ['Sonoma','Alexander Valley','Chalk Hill','Dry Creek Valley','Knights Valley','Russian River Valley','Sonoma Coast','Sonoma County','Sonoma Mountain','Sonoma Valley'],
-    'long-island': ['North Fork, Long Island','Hamptons, Long Island'],
+    'long-island': ['Long Island','North Fork, Long Island','Hamptons, Long Island'],
     'paso-robles': ['Paso Robles'],
     'washington': ['Washington','Walla Walla Valley'],
     'oregon': ['Oregon'],
