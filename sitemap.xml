@@ -2,57 +2,57 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.heyvinowine.com/</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/wineries.html</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/napa-valley</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/sonoma</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/long-island</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/paso-robles</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/washington</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/oregon</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/region/lodi</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/legacy.html</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.heyvinowine.com/partner.html</loc>
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -176,6 +176,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=b-wise-vineyards</loc>
+    <lastmod>2026-07-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=bacio-divino-cellars</loc>
     <lastmod>2026-06-02</lastmod>
     <priority>0.7</priority>
@@ -216,6 +221,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=bedrock-wine-co</loc>
+    <lastmod>2026-07-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=behrens-family-winery</loc>
     <lastmod>2026-06-06</lastmod>
     <priority>0.7</priority>
@@ -232,7 +242,7 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=benessere-vineyards</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -257,7 +267,7 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=blackbird-vineyards</loc>
-    <lastmod>2026-06-03</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -298,6 +308,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=brookman-cellars</loc>
     <lastmod>2026-06-06</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=bucklin-old-hill-ranch</loc>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -406,6 +421,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=chateau-sainte-marguerite</loc>
+    <lastmod>2026-07-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=chateau-smith-haut-lafitte</loc>
     <lastmod>2026-07-04</lastmod>
     <priority>0.7</priority>
@@ -428,6 +448,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=clif-lede-vineyards</loc>
     <lastmod>2026-06-11</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=clos-de-la-tech</loc>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -576,6 +601,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=dunstan-wines</loc>
+    <lastmod>2026-07-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=e-guigal</loc>
     <lastmod>2026-07-04</lastmod>
     <priority>0.7</priority>
@@ -608,6 +638,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=elizabeth-spencer</loc>
     <lastmod>2026-07-17</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=enkidu-wine</loc>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -921,6 +956,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=kivelstadt-cellars</loc>
+    <lastmod>2026-07-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=kokomo-winery</loc>
     <lastmod>2026-06-15</lastmod>
     <priority>0.7</priority>
@@ -987,7 +1027,7 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=lewis-cellars</loc>
-    <lastmod>2026-07-17</lastmod>
+    <lastmod>2026-06-25</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1028,6 +1068,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=macdonald-vineyards</loc>
     <lastmod>2026-06-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=maclaren-wine</loc>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1558,6 +1603,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=sassicaia-tenuta-san-guido</loc>
     <lastmod>2026-07-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=saxon-brown-wines</loc>
+    <lastmod>2026-07-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
