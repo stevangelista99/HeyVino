@@ -71,7 +71,7 @@ function cardHTML(c) {
     `      <button class="copy-btn" data-code="${esc(c.code)}" data-winery="${esc(c.winery)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
     '    </div>',
     `    <div class="trust-row">${addedLabel(c.created_at)}<span class="fb-wrap" data-codeid="${esc(c.id || '')}">Worked? <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button><button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button></span></div>`,
-    `    <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
+    `    <div class="card-footer">${expiryHTML(c.code==='HeyVino'?null:c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
     siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener" data-winery="${esc(c.winery)}" data-code="${esc(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>` : '',
     '  </div>',
     '</div>'
