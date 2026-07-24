@@ -659,6 +659,7 @@ function cardHTML(c) {
   const regionStr=c.region?`${c.region}, ${country}`:country;
   return `<div class="card${c.featured?" featured":""}">
     <div class="card-accent ${accentClass(c.type)}"></div>
+    ${c.winery==='Oleandri Wines'?'<div style="background:var(--wine-deep);color:var(--gold);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;text-align:center;padding:6px 8px;border-radius:6px 6px 0 0;">Exclusive HeyVino Partnership Code</div>':""}
     ${c.featured?'<div class="featured-tag">⭐ Featured</div>':""}
     <div class="card-body">
       <div class="card-head">
