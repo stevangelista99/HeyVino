@@ -667,7 +667,7 @@ function cardHTML(c) {
           <button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button>
         </span>
       </div>
-      <div class="card-footer">${expiryHTML(c.offer_type==='welcome'?null:c.expiry)}<span class="discount">${c.discountLabel}${c.conditionsLabel?`<span class="conditions"> · ${c.conditionsLabel}</span>`:''}</span></div>
+      <div class="card-footer">${expiryHTML((c.offer_type==='welcome'||c.code==='HeyVino')?null:c.expiry)}<span class="discount">${c.discountLabel}${c.conditionsLabel?`<span class="conditions"> · ${c.conditionsLabel}</span>`:''}</span></div>
       ${c.website_url?`<a class="visit-site-link" href="${affiliateUrl(c.website_url)}" target="_blank" rel="noopener" data-winery="${attr(c.winery)}" data-code="${attr(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>`:''}
     </div>
   </div>`;
