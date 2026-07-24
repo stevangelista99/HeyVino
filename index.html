@@ -414,6 +414,7 @@
     <div id="cardGroups"><!-- PRERENDER:START -->
 <section aria-label="Current wine deals">
 <h2 style="font-size:1.1rem;margin:0 0 10px;">Current Wine Promo Codes</h2>
+<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Oleandri Wines</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">2021 Howell Mountain Cabernet Sauvignon $135→$87.50, 2019 Rutherford Cabernet Sauvignon (Georges III) $200→$107.50. Refrigerated overnight shipping $5/bottle (prices above include shipping). Ships to CA, IA, IL, NY, TX, VA, WI only.</p><p style="margin:0;font-size:0.85rem;">Code: <code>HeyVino</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">689 Cellars</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">10% off — 10% off your first order from 689 Cellars — family-owned winery based in San Rafael, California</p><p style="margin:0;font-size:0.85rem;">Code: <code>689WELCOME</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Adobe Road Winery</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Knights Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">15% off — 15% off 2023 Bavarian Lion Vineyard Cabernet Sauvignon and Cabernet Franc</p><p style="margin:0;font-size:0.85rem;">Code: <code>CHEERS15</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Amici Cellars</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off your first online order from Amici Cellars — Calistoga, Napa Valley. Wines sourced from Beckstoffer To Kalon and Sonoma Coast vineyards</p><p style="margin:0;font-size:0.85rem;">Code: <code>WELCOME20</code></p></article>
@@ -437,7 +438,6 @@
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Dry Creek Vineyard</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Dry Creek Valley</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off any wines, any quantity online from Dry Creek Vineyard — Dry Creek Valley, Sonoma</p><p style="margin:0;font-size:0.85rem;">Code: <code>FIRSTSIP</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Duckhorn Vineyards</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">10% off — 10% off your first purchase at Duckhorn Vineyards</p><p style="margin:0;font-size:0.85rem;">Code: <code>WELCOME10</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Elizabeth Spencer</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">10% off — 10% off your next online order at Elizabeth Spencer Winery</p><p style="margin:0;font-size:0.85rem;">Code: <code>WELCOME10</code></p></article>
-<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Elizabeth Spencer</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">Free shipping — Free ground shipping on first purchase of 2+ bottles.</p><p style="margin:0;font-size:0.85rem;">Code: <code>NEWESWSHIP</code></p></article>
 </section>
 <!-- PRERENDER:END --></div>
   </div>
@@ -696,14 +696,14 @@ function render() {
   });
   if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
   filtered=applySort(filtered);
-  const napaCAbs=filtered.filter(c=>(c.varietal||'').includes("Cabernet Sauvignon")&&c.country==="USA");
-  const napaCabIds=new Set(napaCAbs.map(c=>c.id));
-  const remaining=filtered.filter(c=>!napaCabIds.has(c.id));
+  const featuredCards=filtered.filter(c=>c.featured);
+  const featuredIds=new Set(featuredCards.map(c=>c.id));
+  const remaining=filtered.filter(c=>!featuredIds.has(c.id));
   const grouped={};
   remaining.forEach(c=>{if(!grouped[c.country])grouped[c.country]=[];grouped[c.country].push(c);});
   const sorted=Object.keys(grouped).sort((a,b)=>{const ai=COUNTRY_ORDER.indexOf(a),bi=COUNTRY_ORDER.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return -1;return ai-bi;});
-  const napaSection=napaCAbs.length?`<div class="featured-section"><div class="section-header featured-section-header"><h2 class="section-title">🍷 Napa Cabernet — Featured Deals</h2><span class="section-count">${napaCAbs.length} code${napaCAbs.length!==1?"s":""}</span></div><div class="cards-grid">${napaCAbs.map(c=>cardHTML({...c,featured:true})).join("")}</div></div>`:"";
-  document.getElementById("cardGroups").innerHTML=napaSection+sorted.map(country=>`
+  const featuredSection=featuredCards.length?`<div class="featured-section"><div class="section-header featured-section-header"><h2 class="section-title">⭐ Featured Partnerships</h2><span class="section-count">${featuredCards.length} code${featuredCards.length!==1?"s":""}</span></div><div class="cards-grid">${featuredCards.map(c=>cardHTML({...c,featured:true})).join("")}</div></div>`:"";
+  document.getElementById("cardGroups").innerHTML=featuredSection+sorted.map(country=>`
     <div>
       <div class="section-header">
         <h2 class="section-title">${country}</h2>
