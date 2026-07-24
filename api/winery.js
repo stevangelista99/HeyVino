@@ -58,7 +58,7 @@ function cardHTML(c) {
   const siteLink = safeUrl(c.website_url);
   return [
     `<div class="card${c.featured ? ' featured' : ''}">`,
-    `  <div class="card-accent ${accentClass(c.type)}"></div>`,
+    c.code==='HeyVino' ? '' : `  <div class="card-accent ${accentClass(c.type)}"></div>`,
     c.featured ? '  <div class="featured-tag">⭐ Featured</div>' : '',
     '  <div class="card-body">',
     '    <div class="card-head">',
