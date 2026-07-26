@@ -222,7 +222,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .copy-btn:hover { background: var(--wine-light); }
   .copy-btn.copied { background: #2D7A4F; }
   .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
-  .card-description { font-size: 0.85rem; color: #4a4040; line-height: 1.5; margin: 0.5rem 0; }
+  .card-description { font-size: 0.85rem; color: #3D0D14; font-weight: 600; line-height: 1.5; margin: 0.5rem 0; }
   .expiry { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .dot-green { background: #2D7A4F; } .dot-amber { background: #D4831A; } .dot-red { background: #C0392B; }
@@ -442,7 +442,10 @@ module.exports = async function handler(req, res) {
     const cards = promoData.map(row => ({
       winery:      row.winery_name     || '',
       code:        row.code            || '',
-      discount:    row.discount_amount || row.discount   || '',
+      discount:    row.discount_type === 'free_shipping' ? 'Free shipping'
+                 : row.discount_type === 'percentage' && row.discount_amount ? row.discount_amount + '% off'
+                 : row.discount_type === 'fixed'      && row.discount_amount ? '$' + row.discount_amount + ' off'
+                 : row.discount_amount || row.discount || '',
       conditions:  row.conditions      || '',
       type:        row.varietal_type   || row.type       || 'red',
       varietal:    row.varietal        || '',
