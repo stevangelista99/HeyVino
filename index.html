@@ -612,10 +612,12 @@ async function loadCodes() {
     created_at: row.created_at || ''
   }));
 
-  // Remove duplicates — same promo code from the same winery
+  // Remove duplicates — same promo code, same winery, AND same offer text.
+  // (Two rows can legitimately share a winery+code, e.g. one exclusive
+  // partner code covering multiple distinct bottles/offers.)
   const seen = new Set();
   CODES = CODES.filter(c => {
-    const key = c.winery.toLowerCase() + '|' + c.code.toLowerCase();
+    const key = c.winery.toLowerCase() + '|' + c.code.toLowerCase() + '|' + (c.description || '').toLowerCase().slice(0, 40);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
