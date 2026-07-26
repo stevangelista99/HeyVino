@@ -71,6 +71,7 @@ function cardHTML(c) {
     `      <button class="copy-btn" data-code="${esc(c.code)}" data-winery="${esc(c.winery)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
     '    </div>',
     `    <div class="trust-row">${addedLabel(c.created_at)}<span class="fb-wrap" data-codeid="${esc(c.id || '')}">Worked? <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button><button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button></span></div>`,
+    c.description ? `    <p class="card-description">${esc(c.description)}</p>` : '',
     `    <div class="card-footer">${expiryHTML(c.code==='HeyVino'?null:c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
     siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener" data-winery="${esc(c.winery)}" data-code="${esc(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>` : '',
     '  </div>',
@@ -221,6 +222,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .copy-btn:hover { background: var(--wine-light); }
   .copy-btn.copied { background: #2D7A4F; }
   .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
+  .card-description { font-size: 0.85rem; color: #4a4040; line-height: 1.5; margin: 0.5rem 0; }
   .expiry { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .dot-green { background: #2D7A4F; } .dot-amber { background: #D4831A; } .dot-red { background: #C0392B; }
@@ -450,7 +452,8 @@ module.exports = async function handler(req, res) {
       featured:    row.is_featured     || false,
       website_url: row.website_url     || '',
       id:          row.id              || '',
-      created_at:  row.created_at      || ''
+      created_at:  row.created_at      || '',
+      description: row.description     || ''
     }));
 
     const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion });
