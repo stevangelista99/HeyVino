@@ -3,6 +3,37 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5c
 
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
 
+// Strips diacritics via Unicode NFD decomposition + combining-mark removal, so
+// "Chateau" (from "Château") groups under C rather than falling through to "#".
+function groupKey(name) {
+  const stripped = String(name || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const ch = (stripped[0] || '').toUpperCase();
+  return /^[A-Z]$/.test(ch) ? ch : '#';
+}
+function groupAnchorId(key) { return key === '#' ? 'group-hash' : `group-${key.toLowerCase()}`; }
+
+// Natural sort so "001 Vintners" < "26 Generazioni" < "689 Cellars" numerically,
+// rather than as strings (where "26" < "689" only by lucky first-digit compare
+// but "100" would sort before "26" lexicographically).
+function naturalCompare(a, b) {
+  const re = /(\d+)|(\D+)/g;
+  const pa = a.match(re) || [];
+  const pb = b.match(re) || [];
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const x = pa[i] || '', y = pb[i] || '';
+    const nx = /^\d+$/.test(x), ny = /^\d+$/.test(y);
+    if (nx && ny) {
+      const diff = parseInt(x, 10) - parseInt(y, 10);
+      if (diff !== 0) return diff;
+    } else {
+      const cmp = x.localeCompare(y);
+      if (cmp !== 0) return cmp;
+    }
+  }
+  return 0;
+}
+
 const FLAGS = { USA: '\ud83c\uddfa\ud83c\uddf8', France: '\ud83c\uddeb\ud83c\uddf7', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Australia: '\ud83c\udde6\ud83c\uddfa', 'New Zealand': '\ud83c\uddf3\ud83c\uddff', Argentina: '\ud83c\udde6\ud83c\uddf7', Germany: '\ud83c\udde9\ud83c\uddea', Portugal: '\ud83c\uddf5\ud83c\uddf9', 'South Africa': '\ud83c\uddff\ud83c\udde6', Chile: '\ud83c\udde8\ud83c\uddf1' };
 const COUNTRY_CODES = { us: 'USA', usa: 'USA', it: 'Italy', fr: 'France', es: 'Spain', au: 'Australia', nz: 'New Zealand', ar: 'Argentina', de: 'Germany', gb: 'UK', uk: 'UK' };
 function normalizeCountry(c) { return COUNTRY_CODES[(c || '').toLowerCase()] || c || ''; }
@@ -28,12 +59,12 @@ function buildPage(wineries) {
   const metaDesc = `Browse all ${count} wineries and wine retailers with active promo codes on HeyVino. Find discounts from Napa Valley, Sonoma, Long Island, Tuscany and more \u2014 updated daily.`;
 
   let gridHtml = '';
-  let currentLetter = '';
+  let currentGroup = '';
   wineries.forEach((w, i) => {
-    const letter = (w.name[0] || '#').toUpperCase();
-    if (letter !== currentLetter) {
-      currentLetter = letter;
-      gridHtml += `<div class="letter-heading">${esc(letter)}</div>`;
+    const group = w.group || groupKey(w.name);
+    if (group !== currentGroup) {
+      currentGroup = group;
+      gridHtml += `<div class="letter-heading" id="${groupAnchorId(group)}">${esc(group)}</div>`;
     }
     gridHtml += wineryCard(w, i);
   });
@@ -300,8 +331,12 @@ module.exports = async function handler(req, res) {
         country: normalizeCountry(w.country),
         region: w.region || '',
         count: codeCount[w.name.toLowerCase()] || 0,
+        group: groupKey(w.name),
       }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => {
+        if (a.group !== b.group) return a.group === '#' ? -1 : b.group === '#' ? 1 : a.group.localeCompare(b.group);
+        return a.group === '#' ? naturalCompare(a.name, b.name) : a.name.localeCompare(b.name);
+      });
   } catch (err) {
     console.error('wineries SSR error:', err);
     wineries = [];
@@ -313,4 +348,4 @@ module.exports = async function handler(req, res) {
   return res.status(200).send(html);
 };
 
-module.exports._internals = { buildPage, normalizeCountry, wineryCard };
+module.exports._internals = { buildPage, normalizeCountry, wineryCard, groupKey, groupAnchorId, naturalCompare };
