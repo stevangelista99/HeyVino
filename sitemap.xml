@@ -546,11 +546,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=city-hive</loc>
-    <lastmod>2026-07-27</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=clif-family-winery</loc>
     <lastmod>2026-07-04</lastmod>
     <priority>0.7</priority>
@@ -873,6 +868,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=etude-wines</loc>
     <lastmod>2026-06-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=ev-and-em-vineyards</loc>
+    <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -2036,6 +2036,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=sanctuary-vineyards</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=sannino-vineyard</loc>
     <lastmod>2026-07-07</lastmod>
     <priority>0.7</priority>
@@ -2498,11 +2503,6 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=wine-insiders</loc>
     <lastmod>2026-07-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=wine-searcher</loc>
-    <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
