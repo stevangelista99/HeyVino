@@ -107,7 +107,7 @@ function buildMetaDescription(displayName, description) {
   return esc(cut);
 }
 
-function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion }) {
+function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion, related }) {
   const regionPage = REGION_PAGE[wineryRegion || ''];
   const regionLinkHtml = regionPage
     ? `<p style="margin:0.5rem 0 0;font-size:0.82rem;"><a href="/region/${regionPage.slug}" style="color:var(--wine);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.5);">See all ${esc(regionPage.title)} wine promo codes \u2192</a></p>`
@@ -136,6 +136,16 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   }).replace(/</g, '\\u003c');
 
   const noCodesSiteLink = safeUrl(wineryWebsiteUrl);
+  const relatedHtml = (related && related.length > 0) ? `<div class="related-wrap">
+  <h2 class="related-heading">Related Wineries</h2>
+  <div class="related-grid">
+    ${related.map(r => `<a class="related-card" href="/winery.html?slug=${esc(r.slug)}">
+      <div class="winery-name">${esc(r.name)}</div>
+      ${r.region ? `<div class="winery-region">${esc(r.region)}</div>` : ''}
+    </a>`).join('\n')}
+  </div>
+</div>` : '';
+
   const cardsInner = cards.length === 0
     ? `<div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
         <div style="font-size:2.5rem;margin-bottom:1rem">🥾</div>
@@ -232,6 +242,12 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .visit-site-link { display: inline-block; margin-top: 0.55rem; font-size: 0.72rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
   .visit-site-link:hover { color: var(--gold-light); text-decoration: underline; }
 
+  .related-wrap { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
+  .related-heading { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--wine-deep); margin-bottom: 0.85rem; }
+  .related-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .related-card { display: block; background: var(--white); border: 1px solid var(--stone); border-radius: 6px; padding: 0.6rem 0.85rem; text-decoration: none; flex: 1 1 150px; max-width: 240px; min-width: 0; transition: border-color 0.15s, box-shadow 0.15s; }
+  .related-card:hover { border-color: var(--gold); box-shadow: 0 3px 10px rgba(107,30,42,0.08); }
+
   footer { background: var(--wine-deep); padding: 2rem 1rem 1.5rem; margin-top: 2rem; }
   .footer-grid { display: none; }
   .footer-tagline { color: rgba(255,255,255,0.38); font-size: 0.83rem; line-height: 1.7; }
@@ -260,6 +276,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
     .nav-links { display: flex; }
     .page-header { padding: 2.5rem 2rem 0; }
     .cards-wrap { padding: 1.5rem 2rem 3rem; }
+    .related-wrap { padding: 0 2rem 2.5rem; }
     .cards-grid { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
     .card-body { padding: 1.1rem 1.25rem; }
     .code-text { font-size: 0.92rem; letter-spacing: 0.1em; }
@@ -309,7 +326,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
     ${cardsInner}
   </div>
 </div>
-
+${relatedHtml}
 <footer>
   <div class="footer-grid">
     <div>
@@ -417,7 +434,7 @@ module.exports = async function handler(req, res) {
   try {
     const [promoRes, wineryRes] = await Promise.all([
       fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region,related_slugs&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
     ]);
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
@@ -439,6 +456,18 @@ module.exports = async function handler(req, res) {
     const displayName = (wineryData[0] || {}).name
       || (promoData.length > 0 ? promoData[0].winery_name : searchName.replace(/\b\w/g, c => c.toUpperCase()));
 
+    // related_slugs order is editorial (curated by hand), so preserve it —
+    // Supabase's `in.()` filter returns rows in its own order, not input order.
+    let related = [];
+    const relatedSlugs = (wineryData[0] || {}).related_slugs;
+    if (Array.isArray(relatedSlugs) && relatedSlugs.length > 0) {
+      const inList = relatedSlugs.map(s => encodeURIComponent(s)).join(',');
+      const relRes = await fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,slug,region&slug=in.(' + inList + ')&is_active=eq.true', { headers });
+      const relData = relRes.ok ? await relRes.json() : [];
+      const bySlug = new Map(relData.map(r => [r.slug, r]));
+      related = relatedSlugs.map(s => bySlug.get(s)).filter(Boolean);
+    }
+
     const cards = promoData.map(row => ({
       winery:      row.winery_name     || '',
       code:        row.code            || '',
@@ -459,7 +488,7 @@ module.exports = async function handler(req, res) {
       description: row.description     || ''
     }));
 
-    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion });
+    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion, related });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
     return res.status(200).send(html);
