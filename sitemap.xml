@@ -331,6 +331,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=blue-monster</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=bodegas-muga</loc>
     <lastmod>2026-07-04</lastmod>
     <priority>0.7</priority>
@@ -883,6 +888,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=far-niente-winery</loc>
     <lastmod>2026-06-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=fe-wines</loc>
+    <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
