@@ -81,6 +81,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=acre-wines</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=ad-vivum-cellars</loc>
     <lastmod>2026-06-06</lastmod>
     <priority>0.7</priority>
@@ -123,6 +128,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=amici-cellars</loc>
     <lastmod>2026-06-11</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=amizetta-estate-winery</loc>
+    <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -796,6 +806,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=far-mountain</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=far-niente-winery</loc>
     <lastmod>2026-06-03</lastmod>
     <priority>0.7</priority>
@@ -958,6 +973,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=grounded-wine-co</loc>
     <lastmod>2026-06-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=guarachi-family-wines</loc>
+    <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -2006,6 +2026,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=somerston-estate</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=southold-farm-cellar</loc>
     <lastmod>2026-07-17</lastmod>
     <priority>0.7</priority>
@@ -2102,6 +2127,11 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=tamber-bey-vineyards</loc>
+    <lastmod>2026-07-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=taylor-family-vineyards</loc>
     <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
   </url>
