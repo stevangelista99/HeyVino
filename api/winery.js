@@ -490,7 +490,7 @@ module.exports = async function handler(req, res) {
 
     const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion, related });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
     return res.status(200).send(html);
 
   } catch (err) {
