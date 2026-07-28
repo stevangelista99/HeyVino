@@ -446,8 +446,8 @@ module.exports = async function handler(req, res) {
     // combination as "doesn't exist" rather than rendering a near-empty
     // page for a winery that was deliberately removed.
     if (wineryData.length === 0 && promoData.length === 0) {
-      res.writeHead(302, { Location: '/wineries.html' });
-      return res.end();
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.status(404).send('<!DOCTYPE html><html><head><title>Winery not found | HeyVino</title><meta name="robots" content="noindex"></head><body style="font-family:sans-serif;text-align:center;padding:4rem"><h1>Winery not found</h1><p><a href="/wineries.html">Browse all wineries</a></p></body></html>');
     }
 
     const description = (wineryData[0] || {}).description || '';
