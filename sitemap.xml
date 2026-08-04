@@ -76,6 +76,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=aaron-wines</loc>
+    <lastmod>2026-08-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=abbadia-ardenga</loc>
     <lastmod>2026-08-03</lastmod>
     <priority>0.7</priority>
@@ -111,6 +116,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=adelaida-vineyards-winery</loc>
+    <lastmod>2026-08-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=adobe-road-winery</loc>
     <lastmod>2026-06-06</lastmod>
     <priority>0.7</priority>
@@ -133,6 +143,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=almaviva</loc>
     <lastmod>2026-07-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=alta-colina</loc>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -193,6 +208,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=aperture-cellars</loc>
     <lastmod>2026-06-06</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=arbuckle-ridge-winery</loc>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -291,6 +311,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=barton-family-wines</loc>
+    <lastmod>2026-08-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=beau-vigne</loc>
     <lastmod>2026-08-03</lastmod>
     <priority>0.7</priority>
@@ -336,6 +361,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=benom-wines</loc>
+    <lastmod>2026-08-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=benovia-winery</loc>
     <lastmod>2026-07-27</lastmod>
     <priority>0.7</priority>
@@ -348,6 +378,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=beringer-vineyards</loc>
     <lastmod>2026-06-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=bethel-rd-distillery-winery</loc>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -637,7 +672,7 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=clif-lede-vineyards</loc>
-    <lastmod>2026-06-11</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1201,6 +1236,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=grey-wolf-cellars</loc>
+    <lastmod>2026-08-04</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=grgich-hills-estate</loc>
     <lastmod>2026-07-08</lastmod>
     <priority>0.7</priority>
@@ -1272,7 +1312,7 @@
   </url>
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=harrison-wine-vault</loc>
-    <lastmod>2026-07-17</lastmod>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1318,6 +1358,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=honig-vineyard-winery</loc>
     <lastmod>2026-08-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=hope-family-wines</loc>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1588,11 +1633,6 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=laurel-lake-vineyards</loc>
     <lastmod>2026-07-17</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/winery.html?slug=lede-family-wines</loc>
-    <lastmod>2026-08-03</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -2463,6 +2503,11 @@
   <url>
     <loc>https://www.heyvinowine.com/winery.html?slug=sequoia-grove</loc>
     <lastmod>2026-08-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.heyvinowine.com/winery.html?slug=seven-hills-winery</loc>
+    <lastmod>2026-08-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
