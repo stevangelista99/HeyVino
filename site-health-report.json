@@ -1,0 +1,69 @@
+{
+  "runs": [
+    {
+      "timestamp": "2026-08-29T12:24:06.756Z",
+      "checks": {
+        "directory_completeness": {
+          "status": "PASS",
+          "counts": {
+            "orphaned": 0,
+            "missing": 0,
+            "pageSlugTotal": 601,
+            "dbSlugTotal": 601
+          },
+          "issues": []
+        },
+        "winery_page_liveness": {
+          "status": "PASS",
+          "counts": {
+            "non200": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "winery_page_correctness": {
+          "status": "PASS",
+          "counts": {
+            "mismatched": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "homepage_prerender_staleness": {
+          "status": "FAIL",
+          "counts": {
+            "extra": 1,
+            "missing": 1,
+            "currentTotal": 24,
+            "expectedTotal": 24
+          },
+          "issues": [
+            {
+              "key": "prerender-extra:bottleking|||FSH6",
+              "detail": "Prerendered card \"FSH6\" (BottleKing) is baked into index.html but is no longer in the live active-codes selection"
+            },
+            {
+              "key": "prerender-missing:aaron wines|||WELCOME",
+              "detail": "\"WELCOME\" (Aaron Wines) should be in the prerendered grid per current DB state but is not baked into index.html"
+            }
+          ]
+        },
+        "sitemap_vs_live": {
+          "status": "PASS",
+          "counts": {
+            "sitemapOrphans": 0,
+            "missingFromSitemap": 0
+          },
+          "issues": []
+        },
+        "template_parity": {
+          "status": "PASS",
+          "counts": {
+            "specialCases": 0
+          },
+          "issues": []
+        }
+      }
+    }
+  ]
+}
