@@ -64,6 +64,62 @@
           "issues": []
         }
       }
+    },
+    {
+      "timestamp": "2026-08-29T13:04:13.650Z",
+      "checks": {
+        "directory_completeness": {
+          "status": "PASS",
+          "counts": {
+            "orphaned": 0,
+            "missing": 0,
+            "pageSlugTotal": 601,
+            "dbSlugTotal": 601
+          },
+          "issues": []
+        },
+        "winery_page_liveness": {
+          "status": "PASS",
+          "counts": {
+            "non200": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "winery_page_correctness": {
+          "status": "PASS",
+          "counts": {
+            "mismatched": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "homepage_prerender_staleness": {
+          "status": "PASS",
+          "counts": {
+            "extra": 0,
+            "missing": 0,
+            "currentTotal": 24,
+            "expectedTotal": 24
+          },
+          "issues": []
+        },
+        "sitemap_vs_live": {
+          "status": "PASS",
+          "counts": {
+            "sitemapOrphans": 0,
+            "missingFromSitemap": 0
+          },
+          "issues": []
+        },
+        "template_parity": {
+          "status": "PASS",
+          "counts": {
+            "specialCases": 0
+          },
+          "issues": []
+        }
+      }
     }
   ]
 }
