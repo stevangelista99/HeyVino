@@ -120,6 +120,459 @@
           "issues": []
         }
       }
+    },
+    {
+      "timestamp": "2026-08-29T14:16:08.153Z",
+      "checks": {
+        "directory_completeness": {
+          "status": "PASS",
+          "counts": {
+            "orphaned": 0,
+            "missing": 0,
+            "pageSlugTotal": 601,
+            "dbSlugTotal": 601
+          },
+          "issues": []
+        },
+        "winery_page_liveness": {
+          "status": "FAIL",
+          "counts": {
+            "non200": 71,
+            "totalChecked": 601
+          },
+          "issues": [
+            {
+              "key": "livecheck:gramercy-vineyards",
+              "detail": "\"gramercy-vineyards\" (Gramercy Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:bravante-vineyards",
+              "detail": "\"bravante-vineyards\" (Bravante Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:elias-wines",
+              "detail": "\"elias-wines\" (Elias Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:arenness-cellars",
+              "detail": "\"arenness-cellars\" (Arenness Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:reali-family-vineyard",
+              "detail": "\"reali-family-vineyard\" (REALI Family Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:pursued-by-bear",
+              "detail": "\"pursued-by-bear\" (Pursued by Bear) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:mongata-winery",
+              "detail": "\"mongata-winery\" (MONGATA Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:influence-wines",
+              "detail": "\"influence-wines\" (Influence Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:rutherford-wine-company",
+              "detail": "\"rutherford-wine-company\" (Rutherford Wine Company) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:celani-family-vineyards",
+              "detail": "\"celani-family-vineyards\" (Celani Family Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:ryew",
+              "detail": "\"ryew\" (R.Y.E.W.) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:dumol",
+              "detail": "\"dumol\" (DuMOL) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:sullivan-rutherford-estate",
+              "detail": "\"sullivan-rutherford-estate\" (Sullivan Rutherford Estate) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:the-vice-wines",
+              "detail": "\"the-vice-wines\" (The Vice Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:naidu-wines",
+              "detail": "\"naidu-wines\" (Naidu Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:morisoli-vineyard",
+              "detail": "\"morisoli-vineyard\" (Morisoli Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:michael-david-winery",
+              "detail": "\"michael-david-winery\" (Michael David Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:schrader-cellars",
+              "detail": "\"schrader-cellars\" (Schrader Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:rivers-marie",
+              "detail": "\"rivers-marie\" (Rivers-Marie) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:pine-ridge-vineyards",
+              "detail": "\"pine-ridge-vineyards\" (Pine Ridge Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:the-vineyardist",
+              "detail": "\"the-vineyardist\" (The Vineyardist) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:house-of-smith",
+              "detail": "\"house-of-smith\" (House of Smith) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:001-vintners",
+              "detail": "\"001-vintners\" (001 Vintners) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:shannon-family-of-wines",
+              "detail": "\"shannon-family-of-wines\" (Shannon Family of Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:cantina-buccelletti",
+              "detail": "\"cantina-buccelletti\" (Cantina Buccelletti) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:vgs-chateau-potelle",
+              "detail": "\"vgs-chateau-potelle\" (VGS Chateau Potelle) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:amici-cellars",
+              "detail": "\"amici-cellars\" (Amici Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:wiens-cellars",
+              "detail": "\"wiens-cellars\" (Wiens Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:keever-vineyards",
+              "detail": "\"keever-vineyards\" (Keever Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:duckhorn-vineyards",
+              "detail": "\"duckhorn-vineyards\" (Duckhorn Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:jj-prum",
+              "detail": "\"jj-prum\" (JJ Prüm) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:napa-cellars",
+              "detail": "\"napa-cellars\" (Napa Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:alvaro-palacios",
+              "detail": "\"alvaro-palacios\" (Álvaro Palacios) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:st-annes-crossing",
+              "detail": "\"st-annes-crossing\" (St. Anne's Crossing) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:chateau-rayas",
+              "detail": "\"chateau-rayas\" (Château Rayas) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:cloudy-bay",
+              "detail": "\"cloudy-bay\" (Cloudy Bay) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:krug",
+              "detail": "\"krug\" (Krug) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:marques-de-riscal",
+              "detail": "\"marques-de-riscal\" (Marqués de Riscal) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:opus-one-winery",
+              "detail": "\"opus-one-winery\" (Opus One Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:philip-togni-vineyard",
+              "detail": "\"philip-togni-vineyard\" (Philip Togni Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:santa-margherita",
+              "detail": "\"santa-margherita\" (Santa Margherita) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:scarecrow-wine",
+              "detail": "\"scarecrow-wine\" (Scarecrow Wine) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:te-pa-wines",
+              "detail": "\"te-pa-wines\" (te Pā Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:buoncristiani-family-winery",
+              "detail": "\"buoncristiani-family-winery\" (Buoncristiani Family Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:caprio-cellars",
+              "detail": "\"caprio-cellars\" (Caprio Cellars) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:myka-estates",
+              "detail": "\"myka-estates\" (Myka Estates) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:total-wine",
+              "detail": "\"total-wine\" (Total Wine & More) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:echolands-winery",
+              "detail": "\"echolands-winery\" (Echolands Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:time-and-direction",
+              "detail": "\"time-and-direction\" (Time & Direction) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:arns-winery",
+              "detail": "\"arns-winery\" (Arns Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:grace-family-vineyards",
+              "detail": "\"grace-family-vineyards\" (Grace Family Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:continuum-estate",
+              "detail": "\"continuum-estate\" (Continuum Estate) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:staglin-family-vineyard",
+              "detail": "\"staglin-family-vineyard\" (Staglin Family Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:terra-valentine",
+              "detail": "\"terra-valentine\" (Terra Valentine) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:lang-and-reed",
+              "detail": "\"lang-and-reed\" (Lang & Reed) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:caterwaul-wines",
+              "detail": "\"caterwaul-wines\" (Caterwaul Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:t-berkley-wines",
+              "detail": "\"t-berkley-wines\" (T. Berkley Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:benziger-family-winery",
+              "detail": "\"benziger-family-winery\" (Benziger Family Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:brassfield-estate-winery",
+              "detail": "\"brassfield-estate-winery\" (Brassfield Estate Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:fore-family-vineyards",
+              "detail": "\"fore-family-vineyards\" (Fore Family Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:ellman-estate-winery",
+              "detail": "\"ellman-estate-winery\" (Ellman Estate Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:ehrlich-vineyard",
+              "detail": "\"ehrlich-vineyard\" (Ehrlich Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:fe-wines",
+              "detail": "\"fe-wines\" (Fe Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:amizetta-estate-winery",
+              "detail": "\"amizetta-estate-winery\" (Amizetta Estate Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:sannino-vineyard",
+              "detail": "\"sannino-vineyard\" (Sannino Vineyard) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:clark-claudon-vineyards",
+              "detail": "\"clark-claudon-vineyards\" (Clark-Claudon Vineyards) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:wine-access",
+              "detail": "\"wine-access\" (Wine Access) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:wine-enthusiast",
+              "detail": "\"wine-enthusiast\" (Wine Enthusiast) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:seven-hills-winery",
+              "detail": "\"seven-hills-winery\" (Seven Hills Winery) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:barton-family-wines",
+              "detail": "\"barton-family-wines\" (Barton Family Wines) returned HTTP 504"
+            },
+            {
+              "key": "livecheck:bovino-vineyards",
+              "detail": "\"bovino-vineyards\" (Bovino Vineyards) returned HTTP 504"
+            }
+          ]
+        },
+        "winery_page_correctness": {
+          "status": "PASS",
+          "counts": {
+            "mismatched": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "homepage_prerender_staleness": {
+          "status": "PASS",
+          "counts": {
+            "extra": 0,
+            "missing": 0,
+            "currentTotal": 24,
+            "expectedTotal": 24
+          },
+          "issues": []
+        },
+        "sitemap_vs_live": {
+          "status": "PASS",
+          "counts": {
+            "sitemapOrphans": 0,
+            "missingFromSitemap": 0
+          },
+          "issues": []
+        },
+        "template_parity": {
+          "status": "PASS",
+          "counts": {
+            "specialCases": 0
+          },
+          "issues": []
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-29T14:24:36.432Z",
+      "checks": {
+        "directory_completeness": {
+          "status": "PASS",
+          "counts": {
+            "orphaned": 0,
+            "missing": 0,
+            "pageSlugTotal": 601,
+            "dbSlugTotal": 601
+          },
+          "issues": []
+        },
+        "winery_page_liveness": {
+          "status": "PASS",
+          "counts": {
+            "non200": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "winery_page_correctness": {
+          "status": "PASS",
+          "counts": {
+            "mismatched": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "homepage_prerender_staleness": {
+          "status": "PASS",
+          "counts": {
+            "extra": 0,
+            "missing": 0,
+            "currentTotal": 24,
+            "expectedTotal": 24
+          },
+          "issues": []
+        },
+        "sitemap_vs_live": {
+          "status": "PASS",
+          "counts": {
+            "sitemapOrphans": 0,
+            "missingFromSitemap": 0
+          },
+          "issues": []
+        },
+        "template_parity": {
+          "status": "PASS",
+          "counts": {
+            "specialCases": 0
+          },
+          "issues": []
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-29T17:33:32.383Z",
+      "checks": {
+        "directory_completeness": {
+          "status": "PASS",
+          "counts": {
+            "orphaned": 0,
+            "missing": 0,
+            "pageSlugTotal": 601,
+            "dbSlugTotal": 601
+          },
+          "issues": []
+        },
+        "winery_page_liveness": {
+          "status": "PASS",
+          "counts": {
+            "non200": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "winery_page_correctness": {
+          "status": "PASS",
+          "counts": {
+            "mismatched": 0,
+            "totalChecked": 601
+          },
+          "issues": []
+        },
+        "homepage_prerender_staleness": {
+          "status": "PASS",
+          "counts": {
+            "extra": 0,
+            "missing": 0,
+            "currentTotal": 24,
+            "expectedTotal": 24
+          },
+          "issues": []
+        },
+        "sitemap_vs_live": {
+          "status": "PASS",
+          "counts": {
+            "sitemapOrphans": 0,
+            "missingFromSitemap": 0
+          },
+          "issues": []
+        },
+        "template_parity": {
+          "status": "PASS",
+          "counts": {
+            "specialCases": 0
+          },
+          "issues": []
+        }
+      }
     }
   ]
 }
