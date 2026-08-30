@@ -645,7 +645,7 @@ function affiliatePartnerTile(r) {
   // malformed value falls back to the text-only tile rather than an empty <img>.
   const bannerSrc = r.banner_url ? safeAffiliateUrl(r.banner_url) : '';
   if (bannerSrc) {
-    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener" data-label="${attr(r.label)}"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(!this.naturalWidth||!this.naturalHeight)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
+    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener" data-label="${attr(r.label)}"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(this.naturalWidth<10||this.naturalHeight<10)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
   }
   return `<a class="affiliate-partner-card" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`;
 }
