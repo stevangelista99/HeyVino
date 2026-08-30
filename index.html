@@ -626,13 +626,26 @@ async function loadCodes() {
 // links (e.g. Wine.com) gets multiple tiles. Unrelated to wineries.affiliate_url,
 // which still drives the partner badge and card outbound links elsewhere.
 // Zero rows = section (and its heading) stays hidden entirely.
+// Collapses a banner tile to the exact text-only tile in place: the <img>
+// and caption are the anchor's only children, so wiping them via textContent
+// removes the broken-image icon/empty box entirely (no layout gap) and
+// leaves href/rel/target untouched since it's the same <a> element throughout.
+// dataset.label round-trips safely — the browser HTML-decodes it on read,
+// and textContent re-escapes it on write, so this can't introduce markup.
+function affiliateBannerFallback(img) {
+  const a = img.closest('a');
+  if (!a) return;
+  a.classList.remove('affiliate-partner-card--banner');
+  a.textContent = a.dataset.label || '';
+}
+
 function affiliatePartnerTile(r) {
   const href = safeAffiliateUrl(r.url);
   // banner_url only renders as an <img> when it's a valid http(s) URL — a
   // malformed value falls back to the text-only tile rather than an empty <img>.
   const bannerSrc = r.banner_url ? safeAffiliateUrl(r.banner_url) : '';
   if (bannerSrc) {
-    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
+    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener" data-label="${attr(r.label)}"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(!this.naturalWidth||!this.naturalHeight)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
   }
   return `<a class="affiliate-partner-card" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`;
 }
