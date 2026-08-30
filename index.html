@@ -208,6 +208,9 @@
   .affiliate-partners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
   .affiliate-partner-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--white); border: 1px solid var(--stone); border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.85rem; transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; }
   .affiliate-partner-card:hover { box-shadow: 0 6px 20px rgba(107,30,42,0.1); transform: translateY(-2px); border-color: var(--gold); }
+  .affiliate-partner-card--banner { flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 0.75rem; }
+  .affiliate-partner-banner { display: block; width: 100%; max-width: 320px; aspect-ratio: 3 / 2; object-fit: contain; background: var(--white); border-radius: 6px; margin: 0 auto; }
+  .affiliate-partner-caption { text-align: center; }
   .affiliate-partners-note { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
 
   /* ── MISC ── */
@@ -623,21 +626,30 @@ async function loadCodes() {
 // links (e.g. Wine.com) gets multiple tiles. Unrelated to wineries.affiliate_url,
 // which still drives the partner badge and card outbound links elsewhere.
 // Zero rows = section (and its heading) stays hidden entirely.
+function affiliatePartnerTile(r) {
+  const href = safeAffiliateUrl(r.url);
+  // banner_url only renders as an <img> when it's a valid http(s) URL — a
+  // malformed value falls back to the text-only tile rather than an empty <img>.
+  const bannerSrc = r.banner_url ? safeAffiliateUrl(r.banner_url) : '';
+  if (bannerSrc) {
+    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
+  }
+  return `<a class="affiliate-partner-card" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`;
+}
+
 function renderAffiliatePartners(links) {
   const section = document.getElementById('affiliatePartnersSection');
   const grid = document.getElementById('affiliatePartnersGrid');
   if (!section || !grid) return;
   if (!links || links.length === 0) { section.style.display = 'none'; return; }
-  grid.innerHTML = links
-    .map(r => `<a class="affiliate-partner-card" href="${safeAffiliateUrl(r.url)}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`)
-    .join('');
+  grid.innerHTML = links.map(affiliatePartnerTile).join('');
   section.style.display = '';
 }
 
 async function loadAffiliatePartners() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,sort_order&is_active=eq.true&order=sort_order.asc,label.asc`,
+      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,banner_url,sort_order&is_active=eq.true&order=sort_order.asc,label.asc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     if (!res.ok) { renderAffiliatePartners([]); return; }
