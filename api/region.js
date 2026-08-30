@@ -68,10 +68,12 @@ function slugify(name) {
   return String(name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function codeCard(row, wineryslugByName) {
-  const wslug = wineryslugByName[(row.winery_name || '').toLowerCase()] || slugify(row.winery_name);
+function codeCard(row, wineryMetaByName) {
+  const meta = wineryMetaByName[(row.winery_name || '').toLowerCase()] || {};
+  const wslug = meta.slug || slugify(row.winery_name);
+  const partnerBadge = meta.affiliate_url ? ' <span class="partner-badge">Partner</span>' : '';
   return `<div class="rcard">
-    <a class="rcard-winery" href="/winery.html?slug=${esc(wslug)}">${esc(row.winery_name)}</a>
+    <a class="rcard-winery" href="/winery.html?slug=${esc(wslug)}">${esc(row.winery_name)}${partnerBadge}</a>
     <div class="rcard-code"><span class="rcode">${esc(row.code)}</span><button class="rcopy" data-code="${esc(row.code)}" data-winery="${esc(row.winery_name)}" onclick="copyCode(this)">Copy</button></div>
     <div class="rcard-meta">${esc(discountLabel(row))}${row.conditions ? '<span class="rcond"> \u00b7 ' + esc(row.conditions) + '</span>' : ''}</div>
     <div class="rcard-exp">${esc(expiryText(row.expiry_date, row.offer_type))}</div>
@@ -83,8 +85,8 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
   const title = esc(region.title) + ' Wine Promo Codes & Winery Deals | HeyVino';
   const metaDesc = esc(region.title + ' wine promo codes, verified daily. ' + codes.length + ' active code' + (codes.length !== 1 ? 's' : '') + ' from ' + wineries.length + ' ' + region.title + ' wineries \u2014 sourced directly from winery newsletters.');
 
-  const wineryslugByName = {};
-  wineries.forEach(w => { wineryslugByName[(w.name || '').toLowerCase()] = w.slug; });
+  const wineryMetaByName = {};
+  wineries.forEach(w => { wineryMetaByName[(w.name || '').toLowerCase()] = { slug: w.slug, affiliate_url: w.affiliate_url || '' }; });
 
   const ldJson = JSON.stringify({
     '@context': 'https://schema.org',
@@ -98,11 +100,11 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
   }).replace(/</g, '\\u003c');
 
   const codesHtml = codes.length
-    ? `<div class="rgrid">${codes.map(c => codeCard(c, wineryslugByName)).join('\n')}</div>`
+    ? `<div class="rgrid">${codes.map(c => codeCard(c, wineryMetaByName)).join('\n')}</div>`
     : `<p class="rempty">No active codes in ${esc(region.title)} right now \u2014 check back soon, we update daily.</p>`;
 
   const wineriesHtml = wineries.length
-    ? `<ul class="rwineries">${wineries.map(w => `<li><a href="/winery.html?slug=${esc(w.slug)}">${esc(w.name)}</a></li>`).join('')}</ul>`
+    ? `<ul class="rwineries">${wineries.map(w => `<li><a href="/winery.html?slug=${esc(w.slug)}">${esc(w.name)}${w.affiliate_url ? ' <span class="partner-badge">Partner</span>' : ''}</a></li>`).join('')}</ul>`
     : '';
 
   return `<!DOCTYPE html>
@@ -142,6 +144,7 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
   .rcard { background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:10px; padding:0.9rem; }
   .rcard-winery { font-weight:600; color:var(--wine-deep); text-decoration:none; font-size:0.92rem; }
   .rcard-winery:hover { color:var(--wine); }
+  .partner-badge { display:inline-block; padding:2px 7px; margin-left:4px; border-radius:100px; font-size:0.56rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--wine); color:var(--gold); vertical-align:middle; }
   .rcard-code { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0.6rem 0 0.45rem; border:1.5px dashed rgba(201,168,76,0.6); border-radius:7px; padding:6px 9px; background:rgba(201,168,76,0.06); }
   .rcode { font-family:'Courier New',monospace; font-weight:700; font-size:0.85rem; letter-spacing:0.06em; color:var(--wine-deep); overflow-wrap:anywhere; }
   .rcopy { background:var(--wine); color:#fff; border:none; border-radius:5px; padding:5px 12px; font-size:0.72rem; font-weight:600; cursor:pointer; font-family:inherit; }
@@ -197,7 +200,7 @@ module.exports = async function handler(req, res) {
   try {
     const [codesRes, wineriesRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&region=${filter}&order=is_featured.desc,winery_name.asc`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug&is_active=eq.true&region=${filter}&order=name.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,affiliate_url,affiliate_network&is_active=eq.true&region=${filter}&order=name.asc`, { headers }),
     ]);
     const codes = codesRes.ok ? await codesRes.json() : [];
     const wineries = wineriesRes.ok ? await wineriesRes.json() : [];

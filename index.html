@@ -554,9 +554,9 @@ async function loadCodes() {
   // prerendered deal content (scripts/prerender-homepage.js) that crawlers
   // and users should see until live data is ready to replace it.
 
-  let data, wineryAffiliateRows;
+  let data, affResult;
   try {
-    const [res, affRes] = await Promise.all([
+    const [res, aff] = await Promise.all([
       fetch(
         `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc,winery_name.asc`,
         {
@@ -566,15 +566,7 @@ async function loadCodes() {
           }
         }
       ),
-      fetch(
-        `${SUPABASE_URL}/rest/v1/wineries?select=name,affiliate_url&affiliate_url=not.is.null&is_active=eq.true&order=name.asc`,
-        {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        }
-      )
+      fetchWineryAffiliateMap()
     ]);
     console.log('[HeyVino] 2. Response received — status:', res.status, res.ok ? 'OK' : 'ERROR');
     if (!res.ok) {
@@ -583,7 +575,7 @@ async function loadCodes() {
       throw new Error(`HTTP ${res.status}`);
     }
     data = await res.json();
-    wineryAffiliateRows = affRes.ok ? await affRes.json() : [];
+    affResult = aff;
     console.log('[HeyVino] 3. Parsed data — row count:', data.length);
     if (data.length > 0) console.log('[HeyVino] 3a. First row keys:', Object.keys(data[0]), '| First row:', data[0]);
   } catch (err) {
@@ -597,10 +589,8 @@ async function loadCodes() {
     return;
   }
 
-  WINERY_AFFILIATES = {};
-  const affiliatePartners = (Array.isArray(wineryAffiliateRows) ? wineryAffiliateRows : []).filter(r => r.name && r.affiliate_url);
-  affiliatePartners.forEach(r => { WINERY_AFFILIATES[r.name.toLowerCase()] = r.affiliate_url; });
-  renderAffiliatePartners(affiliatePartners);
+  WINERY_AFFILIATES = affResult.map;
+  renderAffiliatePartners(affResult.rows);
 
   CODES = data.map(row => ({
     id:         row.id,
@@ -680,6 +670,22 @@ function outboundLink(affUrl, websiteUrl){
   const site = affiliateUrl(websiteUrl);
   if (site) return { href: site, rel: 'noopener' };
   return null;
+}
+// Self-contained fetch (each caller runs it independently, same pattern as
+// the other widget loaders below) — avoids depending on load order/races
+// against loadCodes(), which populates the same map for the main grid.
+async function fetchWineryAffiliateMap(){
+  try{
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/wineries?select=name,affiliate_url&affiliate_url=not.is.null&is_active=eq.true&order=name.asc`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if(!res.ok) return { rows: [], map: {} };
+    const rows = (await res.json()).filter(r => r.name && r.affiliate_url);
+    const map = {};
+    rows.forEach(r => { map[r.name.toLowerCase()] = r.affiliate_url; });
+    return { rows, map };
+  }catch(e){ return { rows: [], map: {} }; }
 }
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all", activeSort="featured";
@@ -853,10 +859,13 @@ async function loadFeaturedCodes() {
   const el = document.getElementById('featuredCodesWidget');
   if (!el) return;
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,website_url&is_featured=eq.true&is_active=eq.true&order=created_at.desc&limit=5`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
+    const [res, aff] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,website_url&is_featured=eq.true&is_active=eq.true&order=created_at.desc&limit=5`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      ),
+      fetchWineryAffiliateMap()
+    ]);
     if (!res.ok) return;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return;
@@ -868,12 +877,14 @@ async function loadFeaturedCodes() {
                      : r.discount_type === 'fixed' && r.discount_amount ? '$' + r.discount_amount + ' off'
                      : r.discount_type === 'free_shipping' ? 'Free shipping'
                      : r.description || '';
-      const visitLink = r.website_url
-        ? `<a class="featured-visit" href="${affiliateUrl(r.website_url)}" target="_blank" rel="noopener">Visit Site →</a>`
+      const partnerBadge = aff.map[(r.winery_name||'').toLowerCase()] ? ' <span class="partner-badge">Partner</span>' : '';
+      const ob = outboundLink(aff.map[(r.winery_name||'').toLowerCase()], r.website_url);
+      const visitLink = ob
+        ? `<a class="featured-visit" href="${ob.href}" target="_blank" rel="${ob.rel}">Visit Site →</a>`
         : '';
       return `<div class="featured-code-item">
         <span class="featured-badge">Featured</span>
-        <div class="featured-winery">${name}</div>
+        <div class="featured-winery">${name}${partnerBadge}</div>
         ${discount ? `<div class="featured-discount">${discount}</div>` : ''}
         ${visitLink}
       </div>`;
@@ -883,10 +894,13 @@ async function loadFeaturedCodes() {
 
 async function loadTopCodes() {
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,conditions,website_url&is_active=eq.true&discount_type=eq.percentage&order=discount_amount.desc`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
+    const [res, aff] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,discount_amount,discount_type,description,conditions,website_url&is_active=eq.true&discount_type=eq.percentage&order=discount_amount.desc`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      ),
+      fetchWineryAffiliateMap()
+    ]);
     const raw = await res.json();
     const data = (Array.isArray(raw) ? raw : [])
       .filter(r => r.discount_type === 'percentage')
@@ -899,8 +913,11 @@ async function loadTopCodes() {
       const name = r.winery_name || 'Unknown Winery';
       const pct = r.discount_amount ? r.discount_amount + '% off' : '';
       const inner = `<span>${name}</span><span class="region-count">${pct}</span>`;
-      return r.website_url
-        ? `<a href="${affiliateUrl(r.website_url)}" target="_blank" rel="noopener" class="region-item" style="text-decoration:none;color:inherit;">${inner}</a>`
+      // No partner badge here — this row is a cramped single-line flex layout
+      // already carrying a percentage pill; a second badge would crowd it.
+      const ob = outboundLink(aff.map[name.toLowerCase()], r.website_url);
+      return ob
+        ? `<a href="${ob.href}" target="_blank" rel="${ob.rel}" class="region-item" style="text-decoration:none;color:inherit;">${inner}</a>`
         : `<div class="region-item">${inner}</div>`;
     }).join('');
   } catch(e) {
