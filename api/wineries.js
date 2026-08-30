@@ -43,10 +43,11 @@ function wineryCard(w, i) {
   const flag = FLAGS[w.country] || '\ud83c\udf0d';
   const meta = w.region ? `${flag} ${esc(w.region)}, ${esc(w.country)}` : (w.country ? `${flag} ${esc(w.country)}` : '');
   const delay = (i % 12) * 0.04;
+  const partnerBadge = w.affiliate_url ? ' <span class="partner-badge">Partner</span>' : '';
   return `<a class="winery-card" href="/winery.html?slug=${esc(w.slug)}" data-name="${esc(w.name.toLowerCase())}" style="animation-delay:${delay}s">
       <div class="winery-avatar">${initials}</div>
       <div class="winery-info">
-        <div class="winery-card-name">${esc(w.name)}</div>
+        <div class="winery-card-name">${esc(w.name)}${partnerBadge}</div>
         ${meta ? `<div class="winery-card-meta">${meta}</div>` : ''}
       </div>
       <div class="winery-card-count">${w.count > 0 ? w.count + ' code' + (w.count !== 1 ? 's' : '') : 'View \u2192'}</div>
@@ -149,6 +150,7 @@ function buildPage(wineries) {
   .winery-card-name { font-weight: 600; font-size: 0.85rem; color: var(--ink); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .winery-card-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .winery-card-count { flex-shrink: 0; font-size: 0.68rem; font-weight: 700; color: var(--wine); background: rgba(107,30,42,0.08); padding: 3px 8px; border-radius: 100px; white-space: nowrap; }
+  .partner-badge { display: inline-block; padding: 2px 7px; margin-left: 4px; border-radius: 100px; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--wine); color: var(--gold); vertical-align: middle; }
 
   .letter-heading { font-family: 'Playfair Display', serif; color: var(--wine-deep); font-size: 1.1rem; margin: 1.5rem 0 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--stone); grid-column: 1 / -1; }
 
@@ -311,7 +313,7 @@ module.exports = async function handler(req, res) {
   let wineries = [];
   try {
     const [wRes, pRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,region,country&is_active=eq.true`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,region,country,affiliate_url,affiliate_network&is_active=eq.true`, { headers }),
       fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers }),
     ]);
     const rows = wRes.ok ? await wRes.json() : [];
@@ -332,6 +334,7 @@ module.exports = async function handler(req, res) {
         region: w.region || '',
         count: codeCount[w.name.toLowerCase()] || 0,
         group: groupKey(w.name),
+        affiliate_url: w.affiliate_url || '',
       }))
       .sort((a, b) => {
         if (a.group !== b.group) return a.group === '#' ? -1 : b.group === '#' ? 1 : a.group.localeCompare(b.group);

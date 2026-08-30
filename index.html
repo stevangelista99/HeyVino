@@ -138,6 +138,7 @@
   .badge-white { background: rgba(201,168,76,0.15); color: #8B6914; }
   .badge-rose { background: rgba(232,115,154,0.12); color: #B5476F; }
   .badge-sparkling { background: rgba(60,100,160,0.1); color: #3C64A0; }
+  .partner-badge { display: inline-block; padding: 2px 7px; margin-left: 6px; border-radius: 100px; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--wine); color: var(--gold); vertical-align: middle; }
 
   /* ── CODE BLOCK (flex: text shrinks, button never disappears) ── */
   .code-block { background: var(--cream); border: 1.5px dashed var(--stone); border-radius: 5px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 0.7rem; overflow: hidden; }
@@ -200,6 +201,15 @@
   .fb-btn:hover { border-color: var(--gold); }
   .fb-thanks { color: #2D7A4F; font-weight: 600; }
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
+
+  /* ── AFFILIATE PARTNERS ── */
+  .affiliate-partners { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
+  .affiliate-partners-heading { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--wine-deep); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--stone); }
+  .affiliate-partners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+  .affiliate-partner-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--white); border: 1px solid var(--stone); border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.85rem; transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; }
+  .affiliate-partner-card:hover { box-shadow: 0 6px 20px rgba(107,30,42,0.1); transform: translateY(-2px); border-color: var(--gold); }
+  .affiliate-partners-note { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+  @media (min-width: 768px) { .affiliate-partners { padding: 0 2rem 2.5rem; } }
 
   /* ── MISC ── */
   .featured-section { margin-bottom: 2.5rem; }
@@ -476,6 +486,13 @@
   </aside>
 </div>
 
+<!-- AFFILIATE PARTNERS -->
+<section id="affiliatePartnersSection" class="affiliate-partners" style="display:none;" aria-label="Affiliate partners">
+  <h2 class="affiliate-partners-heading">Affiliate Partners</h2>
+  <div class="affiliate-partners-grid" id="affiliatePartnersGrid"></div>
+  <p class="affiliate-partners-note">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-grid">
@@ -537,17 +554,28 @@ async function loadCodes() {
   // prerendered deal content (scripts/prerender-homepage.js) that crawlers
   // and users should see until live data is ready to replace it.
 
-  let data;
+  let data, wineryAffiliateRows;
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc,winery_name.asc`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+    const [res, affRes] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&order=is_featured.desc,winery_name.asc`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
         }
-      }
-    );
+      ),
+      fetch(
+        `${SUPABASE_URL}/rest/v1/wineries?select=name,affiliate_url&affiliate_url=not.is.null&is_active=eq.true&order=name.asc`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        }
+      )
+    ]);
     console.log('[HeyVino] 2. Response received — status:', res.status, res.ok ? 'OK' : 'ERROR');
     if (!res.ok) {
       const body = await res.text();
@@ -555,6 +583,7 @@ async function loadCodes() {
       throw new Error(`HTTP ${res.status}`);
     }
     data = await res.json();
+    wineryAffiliateRows = affRes.ok ? await affRes.json() : [];
     console.log('[HeyVino] 3. Parsed data — row count:', data.length);
     if (data.length > 0) console.log('[HeyVino] 3a. First row keys:', Object.keys(data[0]), '| First row:', data[0]);
   } catch (err) {
@@ -568,10 +597,16 @@ async function loadCodes() {
     return;
   }
 
+  WINERY_AFFILIATES = {};
+  const affiliatePartners = (Array.isArray(wineryAffiliateRows) ? wineryAffiliateRows : []).filter(r => r.name && r.affiliate_url);
+  affiliatePartners.forEach(r => { WINERY_AFFILIATES[r.name.toLowerCase()] = r.affiliate_url; });
+  renderAffiliatePartners(affiliatePartners);
+
   CODES = data.map(row => ({
     id:         row.id,
     winery:     row.winery_name      || row.winery   || '',
     code:       row.code             || '',
+    affiliate_url: WINERY_AFFILIATES[(row.winery_name || row.winery || '').toLowerCase()] || '',
     discountLabel: row.discount_type === 'free_shipping'                         ? 'Free shipping'
                : row.discount_type === 'percentage' && row.discount_amount       ? row.discount_amount + '% off'
                : row.discount_type === 'fixed'      && row.discount_amount       ? '$' + row.discount_amount + ' off'
@@ -611,6 +646,20 @@ async function loadCodes() {
   }
 }
 
+// Renders the homepage "Affiliate Partners" section from wineries whose
+// affiliate_url IS NOT NULL (governing rule). Zero partners = section (and
+// its heading) stays hidden entirely — the default state until URLs exist.
+function renderAffiliatePartners(partners) {
+  const section = document.getElementById('affiliatePartnersSection');
+  const grid = document.getElementById('affiliatePartnersGrid');
+  if (!section || !grid) return;
+  if (!partners || partners.length === 0) { section.style.display = 'none'; return; }
+  grid.innerHTML = partners
+    .map(r => `<a class="affiliate-partner-card" href="${safeAffiliateUrl(r.affiliate_url)}" target="_blank" rel="sponsored nofollow noopener">${attr(r.name)}</a>`)
+    .join('');
+  section.style.display = '';
+}
+
 function toSlug(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 
 const FLAGS = { USA:"🇺🇸", us:"🇺🇸", France:"🇫🇷", france:"🇫🇷", Italy:"🇮🇹", italy:"🇮🇹", Spain:"🇪🇸", spain:"🇪🇸", Australia:"🇦🇺", australia:"🇦🇺", "New Zealand":"🇳🇿", Argentina:"🇦🇷", argentina:"🇦🇷", Germany:"🇩🇪", germany:"🇩🇪" };
@@ -618,6 +667,20 @@ const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain"
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
 const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj', 'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com' };
 function affiliateUrl(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return ''; return attr(AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url); }catch{ return ''; } }
+
+// Governing rule: a winery is an affiliate partner iff affiliate_url (wineries
+// table) IS NOT NULL. affiliate_url is used verbatim — it must NOT go through
+// the AFFILIATE_URLS hostname override above, which exists only to redirect
+// known retailer domains for the website_url fallback.
+let WINERY_AFFILIATES = {}; // lowercase winery name -> affiliate_url
+function safeAffiliateUrl(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return ''; return attr(url); }catch{ return ''; } }
+function outboundLink(affUrl, websiteUrl){
+  const aff = safeAffiliateUrl(affUrl);
+  if (aff) return { href: aff, rel: 'sponsored nofollow noopener' };
+  const site = affiliateUrl(websiteUrl);
+  if (site) return { href: site, rel: 'noopener' };
+  return null;
+}
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all", activeSort="featured";
 
@@ -642,13 +705,14 @@ function cardHTML(c) {
   const country=normalizeCountry(c.country);
   const flag=FLAGS[country]||"🌍";
   const regionStr=c.region?`${c.region}, ${country}`:country;
+  const partnerBadge=c.affiliate_url?' <span class="partner-badge">Partner</span>':'';
   return `<div class="card${c.featured?" featured":""}">
     <div class="card-accent ${accentClass(c.type)}"></div>
     ${c.featured?'<div class="featured-tag">⭐ Featured</div>':""}
     <div class="card-body">
       <div class="card-head">
         <div class="winery-avatar">${initials}</div>
-        <div><div class="winery-name"><a href="winery.html?slug=${toSlug(c.winery)}">${c.winery}</a></div><div class="winery-region">${regionStr}</div></div>
+        <div><div class="winery-name"><a href="winery.html?slug=${toSlug(c.winery)}">${c.winery}</a>${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>
       </div>
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
       <div class="code-block">
@@ -664,7 +728,7 @@ function cardHTML(c) {
       </div>
       ${c.description?`<p class="card-description">${c.description}</p>`:''}
       <div class="card-footer">${expiryHTML(c.offer_type==='welcome'?null:c.expiry)}<span class="discount">${c.discountLabel}${c.conditionsLabel?`<span class="conditions"> · ${c.conditionsLabel}</span>`:''}</span></div>
-      ${c.website_url?`<a class="visit-site-link" href="${affiliateUrl(c.website_url)}" target="_blank" rel="noopener" data-winery="${attr(c.winery)}" data-code="${attr(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>`:''}
+      ${(()=>{const ob=outboundLink(c.affiliate_url,c.website_url);return ob?`<a class="visit-site-link" href="${ob.href}" target="_blank" rel="${ob.rel}" data-winery="${attr(c.winery)}" data-code="${attr(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>`:'';})()}
     </div>
   </div>`;
 }

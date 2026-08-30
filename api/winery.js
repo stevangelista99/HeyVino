@@ -61,11 +61,35 @@ function safeUrl(url) {
   } catch { return ''; }
 }
 
+// A winery's own affiliate_url (from the wineries table) is used verbatim —
+// it must NOT go through the AFFILIATE_URLS hostname override above, which
+// exists only to redirect known retailer domains for the website_url fallback.
+function safeAffiliateUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    return esc(url);
+  } catch { return ''; }
+}
+
+// Governing rule: a winery is an affiliate partner iff affiliate_url IS NOT NULL.
+// Outbound links use affiliate_url when present (rel="sponsored nofollow noopener"),
+// falling back to website_url (existing rel, unchanged) when null.
+function outboundLink(affiliateUrl, websiteUrl) {
+  const aff = safeAffiliateUrl(affiliateUrl);
+  if (aff) return { href: aff, rel: 'sponsored nofollow noopener' };
+  const site = safeUrl(websiteUrl);
+  if (site) return { href: site, rel: 'noopener' };
+  return null;
+}
+
 function cardHTML(c) {
   const initials = (c.winery || '??').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   const country = normalizeCountry(c.country);
   const regionStr = c.region ? esc(c.region) + ', ' + esc(country) : esc(country);
-  const siteLink = safeUrl(c.website_url);
+  const outbound = outboundLink(c.affiliate_url, c.website_url);
+  const siteLink = outbound ? outbound.href : '';
+  const partnerBadge = c.affiliate_url ? ' <span class="partner-badge">Partner</span>' : '';
   return [
     `<div class="card${c.featured ? ' featured' : ''}">`,
     `  <div class="card-accent ${accentClass(c.type)}"></div>`,
@@ -73,7 +97,7 @@ function cardHTML(c) {
     '  <div class="card-body">',
     '    <div class="card-head">',
     `      <div class="winery-avatar">${esc(initials)}</div>`,
-    `      <div><div class="winery-name">${esc(c.winery)}</div><div class="winery-region">${regionStr}</div></div>`,
+    `      <div><div class="winery-name">${esc(c.winery)}${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>`,
     '    </div>',
     `    <span class="badge ${badgeClass(c.type)}">${esc(c.varietal)}</span>`,
     '    <div class="code-block">',
@@ -83,7 +107,7 @@ function cardHTML(c) {
     `    <div class="trust-row">${addedLabel(c.created_at)}<span class="fb-wrap" data-codeid="${esc(c.id || '')}">Worked? <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button><button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button></span></div>`,
     c.description ? `    <p class="card-description">${esc(c.description)}</p>` : '',
     `    <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
-    siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="noopener" data-winery="${esc(c.winery)}" data-code="${esc(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>` : '',
+    siteLink ? `    <a class="visit-site-link" href="${siteLink}" target="_blank" rel="${outbound.rel}" data-winery="${esc(c.winery)}" data-code="${esc(c.code)}" onclick="track('visit_site',this.dataset.winery,this.dataset.code)">Visit Site →</a>` : '',
     '  </div>',
     '</div>'
   ].filter(Boolean).join('\n');
@@ -117,7 +141,7 @@ function buildMetaDescription(displayName, description) {
   return esc(cut);
 }
 
-function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion, related }) {
+function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryAffiliateUrl, wineryRegion, related }) {
   const regionPage = REGION_PAGE[wineryRegion || ''];
   const regionLinkHtml = regionPage
     ? `<p style="margin:0.5rem 0 0;font-size:0.82rem;"><a href="/region/${regionPage.slug}" style="color:var(--wine);text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.5);">See all ${esc(regionPage.title)} wine promo codes \u2192</a></p>`
@@ -145,7 +169,8 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
     ],
   }).replace(/</g, '\\u003c');
 
-  const noCodesSiteLink = safeUrl(wineryWebsiteUrl);
+  const noCodesOutbound = outboundLink(wineryAffiliateUrl, wineryWebsiteUrl);
+  const noCodesSiteLink = noCodesOutbound ? noCodesOutbound.href : '';
   const relatedHtml = (related && related.length > 0) ? `<div class="related-wrap">
   <h2 class="related-heading">Related Wineries</h2>
   <div class="related-grid">
@@ -161,7 +186,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
         <div style="font-size:2.5rem;margin-bottom:1rem">🥾</div>
         <div style="font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:0.5rem">No active codes right now</div>
         <div style="font-size:0.85rem;color:var(--muted)">Check back soon — we update daily.</div>
-        ${noCodesSiteLink ? `<a href="${noCodesSiteLink}" target="_blank" rel="noopener" data-winery="${esc(displayName)}" onclick="track('visit_site',this.dataset.winery,'')" style="display:inline-block;margin-top:1.25rem;font-size:0.85rem;font-weight:600;color:var(--wine);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:2px;">Visit ${esc(displayName)} →</a>` : ''}
+        ${noCodesSiteLink ? `<a href="${noCodesSiteLink}" target="_blank" rel="${noCodesOutbound.rel}" data-winery="${esc(displayName)}" onclick="track('visit_site',this.dataset.winery,'')" style="display:inline-block;margin-top:1.25rem;font-size:0.85rem;font-weight:600;color:var(--wine);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:2px;">Visit ${esc(displayName)} →</a>` : ''}
       </div>`
     : cards.map(cardHTML).join('\n');
 
@@ -236,6 +261,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .badge-white { background: rgba(201,168,76,0.15); color: #8B6914; }
   .badge-rose { background: rgba(232,115,154,0.12); color: #B5476F; }
   .badge-sparkling { background: rgba(60,100,160,0.1); color: #3C64A0; }
+  .partner-badge { display: inline-block; padding: 2px 7px; margin-left: 6px; border-radius: 100px; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--wine); color: var(--gold); vertical-align: middle; }
   .code-block { background: var(--cream); border: 1.5px dashed var(--stone); border-radius: 5px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 0.7rem; overflow: hidden; }
   .code-text { font-family: 'Courier New', monospace; font-size: 0.82rem; font-weight: 700; color: var(--wine); letter-spacing: 0.06em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .copy-btn { flex-shrink: 0; background: var(--wine); color: var(--white); border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.68rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; white-space: nowrap; }
@@ -449,7 +475,7 @@ module.exports = async function handler(req, res) {
   try {
     const [promoRes, wineryRes] = await Promise.all([
       fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region,related_slugs&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
+      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region,related_slugs,affiliate_url,affiliate_network&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
     ]);
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
@@ -467,6 +493,7 @@ module.exports = async function handler(req, res) {
 
     const description = (wineryData[0] || {}).description || '';
     const wineryWebsiteUrl = (wineryData[0] || {}).website_url || '';
+    const wineryAffiliateUrl = (wineryData[0] || {}).affiliate_url || '';
     const wineryRegion = (wineryData[0] || {}).region || (promoData[0] || {}).region || '';
     const displayName = (wineryData[0] || {}).name
       || (promoData.length > 0 ? promoData[0].winery_name : searchName.replace(/\b\w/g, c => c.toUpperCase()));
@@ -477,7 +504,7 @@ module.exports = async function handler(req, res) {
     const relatedSlugs = (wineryData[0] || {}).related_slugs;
     if (Array.isArray(relatedSlugs) && relatedSlugs.length > 0) {
       const inList = relatedSlugs.map(s => encodeURIComponent(s)).join(',');
-      const relRes = await fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,slug,region&slug=in.(' + inList + ')&is_active=eq.true', { headers });
+      const relRes = await fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,slug,region,affiliate_url,affiliate_network&slug=in.(' + inList + ')&is_active=eq.true', { headers });
       const relData = relRes.ok ? await relRes.json() : [];
       const bySlug = new Map(relData.map(r => [r.slug, r]));
       related = relatedSlugs.map(s => bySlug.get(s)).filter(Boolean);
@@ -498,12 +525,13 @@ module.exports = async function handler(req, res) {
       expiry:      row.expiry_date     || row.expiry     || '',
       featured:    row.is_featured     || false,
       website_url: row.website_url     || '',
+      affiliate_url: wineryAffiliateUrl,
       id:          row.id              || '',
       created_at:  row.created_at      || '',
       description: row.description     || ''
     }));
 
-    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryRegion, related });
+    const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryAffiliateUrl, wineryRegion, related });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
     return res.status(200).send(html);

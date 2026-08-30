@@ -106,7 +106,7 @@ async function generate() {
   const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
 
   const [wRes, pRes] = await Promise.all([
-    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country,created_at&is_active=eq.true`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country,created_at,affiliate_url,affiliate_network&is_active=eq.true`, { headers }),
     fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at&is_active=eq.true`, { headers })
   ]);
   if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
