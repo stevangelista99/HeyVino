@@ -588,7 +588,6 @@ async function loadCodes() {
   }
 
   WINERY_AFFILIATES = affResult.map;
-  renderAffiliatePartners(affResult.rows);
 
   CODES = data.map(row => ({
     id:         row.id,
@@ -634,18 +633,32 @@ async function loadCodes() {
   }
 }
 
-// Renders the homepage "Affiliate Partners" section from wineries whose
-// affiliate_url IS NOT NULL (governing rule). Zero partners = section (and
-// its heading) stays hidden entirely — the default state until URLs exist.
-function renderAffiliatePartners(partners) {
+// Renders the homepage "Affiliate Partners" section from affiliate_links
+// rows (is_active = true) — one tile per row, so a winery with multiple
+// links (e.g. Wine.com) gets multiple tiles. Unrelated to wineries.affiliate_url,
+// which still drives the partner badge and card outbound links elsewhere.
+// Zero rows = section (and its heading) stays hidden entirely.
+function renderAffiliatePartners(links) {
   const section = document.getElementById('affiliatePartnersSection');
   const grid = document.getElementById('affiliatePartnersGrid');
   if (!section || !grid) return;
-  if (!partners || partners.length === 0) { section.style.display = 'none'; return; }
-  grid.innerHTML = partners
-    .map(r => `<a class="affiliate-partner-card" href="${safeAffiliateUrl(r.affiliate_url)}" target="_blank" rel="sponsored nofollow noopener">${attr(r.name)}</a>`)
+  if (!links || links.length === 0) { section.style.display = 'none'; return; }
+  grid.innerHTML = links
+    .map(r => `<a class="affiliate-partner-card" href="${safeAffiliateUrl(r.url)}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`)
     .join('');
   section.style.display = '';
+}
+
+async function loadAffiliatePartners() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,sort_order&is_active=eq.true&order=sort_order.asc,label.asc`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!res.ok) { renderAffiliatePartners([]); return; }
+    const rows = await res.json();
+    renderAffiliatePartners((Array.isArray(rows) ? rows : []).filter(r => r.label && r.url));
+  } catch (e) { renderAffiliatePartners([]); }
 }
 
 function toSlug(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
@@ -849,6 +862,7 @@ document.getElementById("offerChips").addEventListener("click",e=>{if(e.target.c
 document.getElementById("copyYear").textContent = new Date().getFullYear();
 loadCodes();
 loadTopCodes();
+loadAffiliatePartners();
 // loadFeaturedCodes() disabled — the Featured widget is now a static Wine.com
 // ad (see #featuredCTA above). Leaving this call active would let a future
 // is_featured=true promo code silently hide or replace that ad. To restore
