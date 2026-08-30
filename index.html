@@ -447,7 +447,7 @@
   </div>
 
   <aside class="sidebar">
-    <div class="widget featured-widget" id="featuredWidget">
+    <div class="widget featured-widget" id="featuredWidget" style="display:none;">
       <div class="widget-head featured-widget-head"><span>⭐</span><span class="widget-title">Featured</span></div>
       <div class="widget-body" id="featuredCodesWidget">
       </div>
@@ -845,6 +845,21 @@ document.getElementById("usRegionChips").addEventListener("click",e=>{if(e.targe
 document.getElementById("offerChips").addEventListener("click",e=>{if(e.target.classList.contains("chip")){document.querySelectorAll("#offerChips .chip").forEach(c=>c.classList.remove("active"));e.target.classList.add("active");activeOfferType=e.target.dataset.offer;render();}});
 
 document.getElementById("copyYear").textContent = new Date().getFullYear();
+
+// Hides #featuredWidget (header + gold border included) whenever
+// #featuredCodesWidget has no content, and shows it the moment something
+// populates that container — without touching loadFeaturedCodes() itself,
+// which stays disabled. Same "hidden until populated" pattern as the
+// Affiliate Partners section.
+(function(){
+  const widget = document.getElementById('featuredWidget');
+  const body = document.getElementById('featuredCodesWidget');
+  if (!widget || !body) return;
+  function syncFeaturedWidgetVisibility(){ widget.style.display = body.textContent.trim() ? '' : 'none'; }
+  syncFeaturedWidgetVisibility();
+  new MutationObserver(syncFeaturedWidgetVisibility).observe(body, { childList: true, subtree: true, characterData: true });
+})();
+
 loadCodes();
 loadTopCodes();
 loadAffiliatePartners();
