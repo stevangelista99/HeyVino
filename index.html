@@ -209,8 +209,13 @@
   .affiliate-partner-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--white); border: 1px solid var(--stone); border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.85rem; transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; }
   .affiliate-partner-card:hover { box-shadow: 0 6px 20px rgba(107,30,42,0.1); transform: translateY(-2px); border-color: var(--gold); }
   .affiliate-partner-card--banner { flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 0.75rem; }
+  .affiliate-partner-card--with-codes { flex-direction: column; align-items: stretch; justify-content: flex-start; }
   .affiliate-partner-banner { display: block; width: 100%; max-width: 320px; aspect-ratio: 3 / 2; object-fit: contain; background: var(--white); border-radius: 6px; margin: 0 auto; }
   .affiliate-partner-caption { text-align: center; }
+  .affiliate-partner-codes { margin-top: 0.5rem; padding-top: 0.4rem; border-top: 1px solid var(--stone); display: flex; flex-direction: column; gap: 3px; }
+  .affiliate-partner-code-row { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; font-size: 0.7rem; font-weight: 400; }
+  .affiliate-partner-code { font-family: 'Courier New', monospace; font-weight: 700; color: var(--wine); letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .affiliate-partner-code-label { color: var(--muted); font-weight: 500; white-space: nowrap; flex-shrink: 0; }
   .affiliate-partners-note { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
 
   /* ── MISC ── */
@@ -626,17 +631,47 @@ async function loadCodes() {
 // links (e.g. Wine.com) gets multiple tiles. Unrelated to wineries.affiliate_url,
 // which still drives the partner badge and card outbound links elsewhere.
 // Zero rows = section (and its heading) stays hidden entirely.
-// Collapses a banner tile to the exact text-only tile in place: the <img>
-// and caption are the anchor's only children, so wiping them via textContent
-// removes the broken-image icon/empty box entirely (no layout gap) and
-// leaves href/rel/target untouched since it's the same <a> element throughout.
-// dataset.label round-trips safely — the browser HTML-decodes it on read,
-// and textContent re-escapes it on write, so this can't introduce markup.
+// Removes just the <img>/caption from a banner tile in place, leaving any
+// .affiliate-partner-codes list untouched — the result matches exactly what
+// the non-banner branch of affiliatePartnerTile() renders for the same row
+// (plain label text node + optional codes list), classes included.
 function affiliateBannerFallback(img) {
   const a = img.closest('a');
   if (!a) return;
   a.classList.remove('affiliate-partner-card--banner');
-  a.textContent = a.dataset.label || '';
+  const caption = a.querySelector('.affiliate-partner-caption');
+  img.remove();
+  if (caption) caption.replaceWith(document.createTextNode(caption.textContent));
+}
+
+// discount_amount is TEXT and may be null/empty — always handled as a string,
+// never parsed as a number. free_shipping never needs an amount; percentage/fixed
+// with no amount (e.g. the live "LONGWKND" code) render the code alone, no label.
+function affiliateCodeLabel(c) {
+  const amt = c.discount_amount == null ? '' : String(c.discount_amount).trim();
+  if (c.discount_type === 'free_shipping') return 'Free shipping';
+  if (c.discount_type === 'percentage' && amt) return amt + '% off';
+  if (c.discount_type === 'fixed' && amt) return '$' + amt + ' off';
+  return '';
+}
+
+function affiliateOfferTypeRank(t) { return t === 'sitewide' ? 0 : t === 'welcome' ? 1 : 2; }
+
+// sitewide before welcome (before anything else); within a group, soonest
+// expiry_date first, NULL expiry sorts last.
+function sortAffiliateCodes(codes) {
+  return [...codes].sort((a, b) => {
+    const rank = affiliateOfferTypeRank(a.offer_type) - affiliateOfferTypeRank(b.offer_type);
+    if (rank !== 0) return rank;
+    const ea = a.expiry_date ? new Date(a.expiry_date).getTime() : Infinity;
+    const eb = b.expiry_date ? new Date(b.expiry_date).getTime() : Infinity;
+    return ea - eb;
+  });
+}
+
+function affiliateCodeRowHTML(c) {
+  const label = affiliateCodeLabel(c);
+  return `<div class="affiliate-partner-code-row"><span class="affiliate-partner-code">${attr(c.code)}</span>${label ? `<span class="affiliate-partner-code-label">${attr(label)}</span>` : ''}</div>`;
 }
 
 function affiliatePartnerTile(r) {
@@ -644,10 +679,17 @@ function affiliatePartnerTile(r) {
   // banner_url only renders as an <img> when it's a valid http(s) URL — a
   // malformed value falls back to the text-only tile rather than an empty <img>.
   const bannerSrc = r.banner_url ? safeAffiliateUrl(r.banner_url) : '';
+  const codes = Array.isArray(r.codes) ? r.codes : [];
+  const codesHtml = codes.length
+    ? `<div class="affiliate-partner-codes">${codes.map(affiliateCodeRowHTML).join('')}</div>`
+    : '';
+  const cardClass = 'affiliate-partner-card'
+    + (bannerSrc ? ' affiliate-partner-card--banner' : '')
+    + (codes.length ? ' affiliate-partner-card--with-codes' : '');
   if (bannerSrc) {
-    return `<a class="affiliate-partner-card affiliate-partner-card--banner" href="${href}" target="_blank" rel="sponsored nofollow noopener" data-label="${attr(r.label)}"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(this.naturalWidth<10||this.naturalHeight<10)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span></a>`;
+    return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(this.naturalWidth<10||this.naturalHeight<10)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span>${codesHtml}</a>`;
   }
-  return `<a class="affiliate-partner-card" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}</a>`;
+  return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}${codesHtml}</a>`;
 }
 
 function renderAffiliatePartners(links) {
@@ -662,12 +704,42 @@ function renderAffiliatePartners(links) {
 async function loadAffiliatePartners() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,banner_url,sort_order&is_active=eq.true&order=sort_order.asc,label.asc`,
+      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,banner_url,sort_order,winery_id&is_active=eq.true&order=sort_order.asc,label.asc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     if (!res.ok) { renderAffiliatePartners([]); return; }
     const rows = await res.json();
-    renderAffiliatePartners((Array.isArray(rows) ? rows : []).filter(r => r.label && r.url));
+    const links = (Array.isArray(rows) ? rows : []).filter(r => r.label && r.url);
+
+    // Codes render only on sort_order = 0 tiles, to avoid duplicating the same
+    // winery's codes under multiple tiles (e.g. "Picked by Wine.com" shares
+    // winery_id with the sort_order 0 Wine.com tile).
+    const codeWineryIds = [...new Set(
+      links.filter(r => r.sort_order === 0 && r.winery_id != null).map(r => r.winery_id)
+    )];
+
+    let codesByWinery = {};
+    if (codeWineryIds.length > 0) {
+      const codesRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/promo_codes?select=winery_id,code,discount_type,discount_amount,offer_type,expiry_date&winery_id=in.(${codeWineryIds.join(',')})&is_active=eq.true`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      if (codesRes.ok) {
+        const codeRows = await codesRes.json();
+        (Array.isArray(codeRows) ? codeRows : []).forEach(c => {
+          if (!c.winery_id || !c.code) return;
+          (codesByWinery[c.winery_id] = codesByWinery[c.winery_id] || []).push(c);
+        });
+        Object.keys(codesByWinery).forEach(id => {
+          codesByWinery[id] = sortAffiliateCodes(codesByWinery[id]).slice(0, 3);
+        });
+      }
+    }
+
+    renderAffiliatePartners(links.map(r => ({
+      ...r,
+      codes: (r.sort_order === 0 && r.winery_id != null) ? (codesByWinery[r.winery_id] || []) : [],
+    })));
   } catch (e) { renderAffiliatePartners([]); }
 }
 
