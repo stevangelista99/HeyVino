@@ -203,13 +203,12 @@
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
 
   /* ── AFFILIATE PARTNERS ── */
-  .affiliate-partners { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
+  .affiliate-partners { margin-bottom: 2rem; }
   .affiliate-partners-heading { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--wine-deep); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--stone); }
   .affiliate-partners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
   .affiliate-partner-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--white); border: 1px solid var(--stone); border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.85rem; transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; }
   .affiliate-partner-card:hover { box-shadow: 0 6px 20px rgba(107,30,42,0.1); transform: translateY(-2px); border-color: var(--gold); }
   .affiliate-partners-note { margin-top: 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
-  @media (min-width: 768px) { .affiliate-partners { padding: 0 2rem 2.5rem; } }
 
   /* ── MISC ── */
   .featured-section { margin-bottom: 2.5rem; }
@@ -410,6 +409,12 @@
 <!-- MAIN -->
 <div class="main">
   <div id="content">
+    <!-- AFFILIATE PARTNERS -->
+    <section id="affiliatePartnersSection" class="affiliate-partners" style="display:none;" aria-label="Affiliate partners">
+      <h2 class="affiliate-partners-heading">Affiliate Partners</h2>
+      <div class="affiliate-partners-grid" id="affiliatePartnersGrid"></div>
+      <p class="affiliate-partners-note">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
+    </section>
     <div id="cardGroups"><!-- PRERENDER:START -->
 <section aria-label="Current wine deals">
 <h2 style="font-size:1.1rem;margin:0 0 10px;">Current Wine Promo Codes</h2>
@@ -485,13 +490,6 @@
     </div>
   </aside>
 </div>
-
-<!-- AFFILIATE PARTNERS -->
-<section id="affiliatePartnersSection" class="affiliate-partners" style="display:none;" aria-label="Affiliate partners">
-  <h2 class="affiliate-partners-heading">Affiliate Partners</h2>
-  <div class="affiliate-partners-grid" id="affiliatePartnersGrid"></div>
-  <p class="affiliate-partners-note">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
-</section>
 
 <!-- FOOTER -->
 <footer>
