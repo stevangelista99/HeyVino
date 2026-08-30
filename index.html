@@ -447,24 +447,9 @@
   </div>
 
   <aside class="sidebar">
-    <div class="ad-placeholder-widget">
-      <div class="ad-placeholder-widget-sign">
-        <span class="ad-placeholder-label">Featured Partner</span>
-        <img src="images/picked-by-wine-logo.png" alt="Picked by Wine.com" style="max-width:130px;height:auto;margin:2px auto 6px;display:block;">
-        <div class="ad-placeholder-heading" style="font-size:0.88rem">$30 Off Your First Box</div>
-        <div class="ad-placeholder-sub">Join Picked by Wine.com — a curated wine subscription. Get $30 off your first box plus free shipping with code <strong>PICK30</strong>.</div>
-        <a class="ad-placeholder-cta" href="https://click.linksynergy.com/fs-bin/click?id=fjvvkCj02UA&offerid=1107965.4&type=3&subid=0" target="_blank" rel="noopener sponsored" onclick="track('visit_site','Picked by Wine.com','PICK30')">Join Now →</a>
-        <img src="https://ad.linksynergy.com/fs-bin/show?id=fjvvkCj02UA&bids=1107965.4&type=3&subid=0" width="1" height="1" style="position:absolute;visibility:hidden;" alt="">
-      </div>
-    </div>
     <div class="widget featured-widget" id="featuredWidget">
       <div class="widget-head featured-widget-head"><span>⭐</span><span class="widget-title">Featured</span></div>
       <div class="widget-body" id="featuredCodesWidget">
-        <div id="featuredCTA" style="text-align:center;">
-          <a href="https://www.wine.com/?s=linkshare&cid=aff_linkshare&ranMID=2025&ranEAID=fjvvkCj02UA&siteID=fjvvkCj02UA-j1%2A5%2FYUb0YYD4GGxSJSjxA&ranSiteID=fjvvkCj02UA-j1%2A5%2FYUb0YYD4GGxSJSjxA" target="_blank" rel="noopener sponsored" onclick="track('visit_site','Wine.com','')" style="display:block;">
-            <img src="images/wine-com-banner.jpg" alt="This is Wine.com country — Shop Now" style="width:100%;height:auto;border-radius:6px;display:block;">
-          </a>
-        </div>
       </div>
     </div>
     <div class="widget">
@@ -863,10 +848,10 @@ document.getElementById("copyYear").textContent = new Date().getFullYear();
 loadCodes();
 loadTopCodes();
 loadAffiliatePartners();
-// loadFeaturedCodes() disabled — the Featured widget is now a static Wine.com
-// ad (see #featuredCTA above). Leaving this call active would let a future
-// is_featured=true promo code silently hide or replace that ad. To restore
-// dynamic featured codes, re-enable the call below AND remove the static ad.
+// loadFeaturedCodes() disabled — #featuredCodesWidget is currently empty (its
+// static Wine.com ad was removed; the widget has no other fallback content).
+// Leaving this call active would let a future is_featured=true promo code
+// populate it unexpectedly. Re-enable below to restore dynamic featured codes.
 // loadFeaturedCodes();
 loadPromoTrends();
 
