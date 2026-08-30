@@ -61,6 +61,18 @@ function safeUrl(url) {
   } catch { return ''; }
 }
 
+// True when website_url's hostname is a key in AFFILIATE_URLS — i.e. safeUrl()
+// rewrote it to a retailer affiliate link, regardless of that entry's destination
+// host (linksynergy, sovrn, or any future addition). Membership-based, not a
+// hardcoded hostname list, so it keeps working as the map grows.
+function isAffiliateMapOverride(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+    return Object.prototype.hasOwnProperty.call(AFFILIATE_URLS, u.hostname.replace(/^www\./, ''));
+  } catch { return false; }
+}
+
 // A winery's own affiliate_url (from the wineries table) is used verbatim —
 // it must NOT go through the AFFILIATE_URLS hostname override above, which
 // exists only to redirect known retailer domains for the website_url fallback.
@@ -79,7 +91,7 @@ function outboundLink(affiliateUrl, websiteUrl) {
   const aff = safeAffiliateUrl(affiliateUrl);
   if (aff) return { href: aff, rel: 'sponsored nofollow noopener' };
   const site = safeUrl(websiteUrl);
-  if (site) return { href: site, rel: 'noopener' };
+  if (site) return { href: site, rel: isAffiliateMapOverride(websiteUrl) ? 'sponsored nofollow noopener' : 'noopener' };
   return null;
 }
 

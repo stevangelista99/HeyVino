@@ -657,6 +657,11 @@ const COUNTRY_CODES = { us:"USA", usa:"USA", it:"Italy", fr:"France", es:"Spain"
 function normalizeCountry(c){ return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
 const AFFILIATE_URLS = { 'wineaccess.com': 'https://sovrn.co/18t2ocj', 'wine.com': 'https://click.linksynergy.com/deeplink?id=fjvvkCj02UA&mid=2025&murl=https%3A%2F%2Fwww.wine.com' };
 function affiliateUrl(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return ''; return attr(AFFILIATE_URLS[u.hostname.replace(/^www\./,'')]||url); }catch{ return ''; } }
+// True when website_url's hostname is a key in AFFILIATE_URLS — i.e. affiliateUrl()
+// rewrote it to a retailer affiliate link, regardless of that entry's destination
+// host (linksynergy, sovrn, or any future addition). Membership-based, not a
+// hardcoded hostname list, so it keeps working as the map grows.
+function isAffiliateMapOverride(url){ try{ const u=new URL(url); if(u.protocol!=='https:'&&u.protocol!=='http:')return false; return Object.prototype.hasOwnProperty.call(AFFILIATE_URLS, u.hostname.replace(/^www\./,'')); }catch{ return false; } }
 
 // Governing rule: a winery is an affiliate partner iff affiliate_url (wineries
 // table) IS NOT NULL. affiliate_url is used verbatim — it must NOT go through
@@ -668,7 +673,7 @@ function outboundLink(affUrl, websiteUrl){
   const aff = safeAffiliateUrl(affUrl);
   if (aff) return { href: aff, rel: 'sponsored nofollow noopener' };
   const site = affiliateUrl(websiteUrl);
-  if (site) return { href: site, rel: 'noopener' };
+  if (site) return { href: site, rel: isAffiliateMapOverride(websiteUrl) ? 'sponsored nofollow noopener' : 'noopener' };
   return null;
 }
 // Self-contained fetch (each caller runs it independently, same pattern as
