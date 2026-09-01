@@ -69,6 +69,13 @@ module.exports = async function handler(req, res) {
     .select('event_type, winery, code, created_at')
     .order('created_at', { ascending: false })
     .limit(5000);
+  // affiliate_click_stats is a view with its own fixed rolling windows
+  // (24h/7d/30d/total) baked into the columns — not subject to the days
+  // toggle that filters the other two queries above.
+  const affiliateQuery = supabase
+    .from('affiliate_click_stats')
+    .select('affiliate_link_id, label, network, winery_id, clicks_total, clicks_24h, clicks_7d, clicks_30d, bot_clicks, last_click_at')
+    .order('clicks_total', { ascending: false });
 
   if (windowDays !== 'all') {
     const since = new Date(Date.now() - parseInt(windowDays, 10) * 24 * 60 * 60 * 1000).toISOString();
@@ -76,10 +83,11 @@ module.exports = async function handler(req, res) {
     clickQuery = clickQuery.gte('created_at', since);
   }
 
-  const [fb, clicks] = await Promise.all([fbQuery, clickQuery]);
+  const [fb, clicks, affiliateStats] = await Promise.all([fbQuery, clickQuery, affiliateQuery]);
 
   if (fb.error) return res.status(500).json({ error: 'feedback query failed: ' + fb.error.message });
   if (clicks.error) return res.status(500).json({ error: 'clicks query failed: ' + clicks.error.message });
+  if (affiliateStats.error) return res.status(500).json({ error: 'affiliate stats query failed: ' + affiliateStats.error.message });
 
   const feedback = summarizeFeedback(fb.data);
   const clickSummary = summarizeClicks(clicks.data);
@@ -97,6 +105,7 @@ module.exports = async function handler(req, res) {
     feedback_by_code: feedback,
     clicks_by_winery: clickSummary.byWinery,
     copies_by_code: summarizeCopiesByCode(clicks.data),
+    affiliate_clicks: affiliateStats.data || [],
     recent_feedback: (fb.data || []).slice(0, 50).map(r => ({
       vote: r.vote,
       created_at: r.created_at,

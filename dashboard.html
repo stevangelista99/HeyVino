@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
 <title>HeyVino — Private Dashboard</title>
 <style>
   :root { --wine:#6B1E2A; --gold:#C9A84C; --cream:#FAF6EF; --ink:#2A2523; --muted:#8a8580; --green:#2D7A4F; --red:#B3261E; }
@@ -69,6 +70,10 @@
     <p class="hint">Partnership ammo: "we sent your site N clicks last month."</p>
     <div id="clickSection"></div>
 
+    <h2>Affiliate Clicks</h2>
+    <p class="hint">Clicks on homepage affiliate partner tiles, by partner. Independent of the date range above — these columns are fixed rolling windows.</p>
+    <div id="affiliateSection"></div>
+
     <h2>Recent votes</h2>
     <div id="recentSection"></div>
 
@@ -129,6 +134,11 @@ async function load() {
   document.getElementById('clickSection').innerHTML = tableHTML(
     ['Winery','Code copies','Visit clicks','Total'],
     data.clicks_by_winery.map(c => '<tr><td>'+esc(c.winery)+'</td><td>'+c.copies+'</td><td>'+c.visits+'</td><td><strong>'+(c.copies+c.visits)+'</strong></td></tr>')
+  );
+
+  document.getElementById('affiliateSection').innerHTML = tableHTML(
+    ['Partner','24h','7d','30d','Total','Last click'],
+    (data.affiliate_clicks || []).map(a => '<tr><td>'+esc(a.label)+'</td><td>'+a.clicks_24h+'</td><td>'+a.clicks_7d+'</td><td>'+a.clicks_30d+'</td><td><strong>'+a.clicks_total+'</strong></td><td>'+fmtDate(a.last_click_at)+'</td></tr>')
   );
 
   document.getElementById('recentSection').innerHTML = tableHTML(

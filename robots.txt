@@ -4,5 +4,6 @@ Allow: /api/region
 Allow: /api/winery
 Allow: /api/wineries
 Disallow: /api/
+Disallow: /dashboard.html
 
 Sitemap: https://www.heyvinowine.com/sitemap.xml
