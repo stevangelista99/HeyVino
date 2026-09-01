@@ -239,6 +239,10 @@ function buildPage(wineries) {
         <li><a href="/region/napa-valley">Napa Valley</a></li>
         <li><a href="/region/sonoma">Sonoma</a></li>
         <li><a href="/region/long-island">Long Island</a></li>
+        <li><a href="/region/paso-robles">Paso Robles</a></li>
+        <li><a href="/region/washington">Washington</a></li>
+        <li><a href="/region/oregon">Oregon</a></li>
+        <li><a href="/region/lodi">Lodi</a></li>
       </ul>
     </div>
     <div>

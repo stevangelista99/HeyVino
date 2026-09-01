@@ -1,48 +1,28 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lzeicurexdpludaltetf.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
 
+const { REGION_GROUPS } = require('../lib/regions');
+
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
 function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
 
-// Canonical region pages. dbRegions lists every region value in the DB that
-// rolls up under this landing page (mirrors the homepage REGION_GROUP_MAP).
-const REGIONS = {
-  'napa-valley': {
-    title: 'Napa Valley',
-    blurb: 'From Rutherford and Oakville to Howell Mountain and Stags Leap District, Napa Valley is home to America\u2019s most celebrated Cabernet producers.',
-    dbRegions: ['Napa Valley', 'Calistoga', 'Carneros', 'Coombsville', 'Howell Mountain', 'Mount Veeder', 'Oakville', 'Pritchard Hill', 'Rutherford', 'Spring Mountain', 'St. Helena', 'Stags Leap District', 'Yountville'],
-  },
-  'sonoma': {
-    title: 'Sonoma',
-    blurb: 'Sonoma\u2019s diverse AVAs \u2014 Russian River Valley, Dry Creek, Alexander Valley and more \u2014 produce everything from cool-climate Pinot Noir to old-vine Zinfandel.',
-    dbRegions: ['Sonoma', 'Alexander Valley', 'Chalk Hill', 'Dry Creek Valley', 'Knights Valley', 'Russian River Valley', 'Sonoma Coast', 'Sonoma County', 'Sonoma Mountain', 'Sonoma Valley'],
-  },
-  'long-island': {
-    title: 'Long Island',
-    blurb: 'New York\u2019s maritime wine country \u2014 the North Fork and the Hamptons \u2014 is known for Merlot, Cabernet Franc, and crisp coastal ros\u00e9.',
-    dbRegions: ['Long Island', 'North Fork, Long Island', 'Hamptons, Long Island'],
-  },
-  'paso-robles': {
-    title: 'Paso Robles',
-    blurb: 'Paso Robles on California\u2019s Central Coast is famed for bold Rh\u00f4ne-style blends, Zinfandel, and Cabernet Sauvignon.',
-    dbRegions: ['Paso Robles'],
-  },
-  'washington': {
-    title: 'Washington',
-    blurb: 'Washington State \u2014 including Walla Walla Valley \u2014 is America\u2019s second-largest wine producer, known for structured reds and vivid Rieslings.',
-    dbRegions: ['Washington', 'Walla Walla Valley'],
-  },
-  'oregon': {
-    title: 'Oregon',
-    blurb: 'Oregon\u2019s Willamette Valley and beyond set the American benchmark for elegant, Burgundian-style Pinot Noir and Chardonnay.',
-    dbRegions: ['Oregon'],
-  },
-  'lodi': {
-    title: 'Lodi',
-    blurb: 'Lodi is California\u2019s old-vine Zinfandel heartland, with family growers farming some of the state\u2019s most historic vineyards.',
-    dbRegions: ['Lodi'],
-  },
+// Descriptive copy per region page. The accepted-value lists themselves
+// (dbRegions below) come from lib/regions.js \u2014 the single shared source also
+// used by api/winery.js \u2014 so the two can't drift apart again.
+const BLURBS = {
+  'napa-valley': 'From Rutherford and Oakville to Howell Mountain and Stags Leap District, Napa Valley is home to America\u2019s most celebrated Cabernet producers.',
+  'sonoma': 'Sonoma\u2019s diverse AVAs \u2014 Russian River Valley, Dry Creek, Alexander Valley and more \u2014 produce everything from cool-climate Pinot Noir to old-vine Zinfandel.',
+  'long-island': 'New York\u2019s maritime wine country \u2014 the North Fork and the Hamptons \u2014 is known for Merlot, Cabernet Franc, and crisp coastal ros\u00e9.',
+  'paso-robles': 'Paso Robles on California\u2019s Central Coast is famed for bold Rh\u00f4ne-style blends, Zinfandel, and Cabernet Sauvignon.',
+  'washington': 'Washington State \u2014 including Walla Walla Valley \u2014 is America\u2019s second-largest wine producer, known for structured reds and vivid Rieslings.',
+  'oregon': 'Oregon\u2019s Willamette Valley and beyond set the American benchmark for elegant, Burgundian-style Pinot Noir and Chardonnay.',
+  'lodi': 'Lodi is California\u2019s old-vine Zinfandel heartland, with family growers farming some of the state\u2019s most historic vineyards.',
 };
+
+const REGIONS = {};
+for (const [slug, group] of Object.entries(REGION_GROUPS)) {
+  REGIONS[slug] = { title: group.title, blurb: BLURBS[slug], dbRegions: group.values };
+}
 
 function inList(values) {
   return 'in.(' + values.map(v => '"' + v + '"').join(',') + ')';
