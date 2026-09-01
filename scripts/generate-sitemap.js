@@ -108,7 +108,7 @@ async function generate() {
 
   const [wRes, pRes] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country,created_at,affiliate_url,affiliate_network&is_active=eq.true`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at&is_active=eq.true`, { headers })
+    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at,region&is_active=eq.true`, { headers })
   ]);
   if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
   const wineries = await wRes.json();
@@ -140,7 +140,13 @@ async function generate() {
     .sort((a, b) => a.slug.localeCompare(b.slug));
   const slugs = indexable.map(w => w.slug);
 
-  const REGION_SLUGS = Object.keys(REGION_GROUPS);
+  // A region page only earns a sitemap entry once it has at least one active
+  // code — same exact-string-equality match against REGION_GROUPS' values as
+  // api/region.js's own query uses, applied here to the region column already
+  // present on the promo_codes rows fetched above (no separate query needed).
+  const activeRegionValues = new Set(codes.map(r => r.region).filter(Boolean));
+  const REGION_SLUGS = Object.keys(REGION_GROUPS)
+    .filter(slug => REGION_GROUPS[slug].values.some(v => activeRegionValues.has(v)));
   const staticEntries = [
     urlEntry(`${BASE_URL}/`, '1.0'),
     urlEntry(`${BASE_URL}/wineries.html`, '0.9'),

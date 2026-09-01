@@ -102,7 +102,7 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="${metaDesc}">
+${codes.length === 0 ? '<meta name="robots" content="noindex, follow">\n' : ''}<meta name="description" content="${metaDesc}">
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${metaDesc}">
 <meta property="og:url" content="${canonical}">

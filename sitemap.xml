@@ -41,11 +41,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.heyvinowine.com/region/lodi</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.heyvinowine.com/region/france</loc>
     <lastmod>2026-09-01</lastmod>
     <priority>0.8</priority>
@@ -61,32 +56,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.heyvinowine.com/region/spain-portugal</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/region/germany</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/region/south-america</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/region/south-africa</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.heyvinowine.com/region/central-coast</loc>
-    <lastmod>2026-09-01</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.heyvinowine.com/region/livermore-valley</loc>
     <lastmod>2026-09-01</lastmod>
     <priority>0.8</priority>
   </url>
