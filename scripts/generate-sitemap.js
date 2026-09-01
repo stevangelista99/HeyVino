@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { REGION_GROUPS } = require('../lib/regions');
 
 const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
@@ -139,7 +140,7 @@ async function generate() {
     .sort((a, b) => a.slug.localeCompare(b.slug));
   const slugs = indexable.map(w => w.slug);
 
-  const REGION_SLUGS = ['napa-valley', 'sonoma', 'long-island', 'paso-robles', 'washington', 'oregon', 'lodi'];
+  const REGION_SLUGS = Object.keys(REGION_GROUPS);
   const staticEntries = [
     urlEntry(`${BASE_URL}/`, '1.0'),
     urlEntry(`${BASE_URL}/wineries.html`, '0.9'),
