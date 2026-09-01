@@ -485,13 +485,26 @@ module.exports = async function handler(req, res) {
   const headers = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
 
   try {
-    const [promoRes, wineryRes] = await Promise.all([
-      fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&winery_name=ilike.' + encodeURIComponent(searchName) + '&order=is_featured.desc', { headers }),
-      fetch(SUPABASE_URL + '/rest/v1/wineries?select=name,description,website_url,region,related_slugs,affiliate_url,affiliate_network&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers })
-    ]);
+    // Sequential, not parallel: the promo_codes lookup needs the winery's id,
+    // which only exists once the wineries row comes back.
+    const wineryRes = await fetch(SUPABASE_URL + '/rest/v1/wineries?select=id,name,description,website_url,region,related_slugs,affiliate_url,affiliate_network&slug=eq.' + encodeURIComponent(slug) + '&is_active=eq.true&limit=1', { headers });
+    const wineryData = wineryRes.ok ? await wineryRes.json() : [];
+    const wineryId = (wineryData[0] || {}).id;
+
+    // Look up by winery_id when the winery row was found — every active
+    // promo_codes row has a correct winery_id, so this needs no name-based
+    // fallback (a fallback would silently reintroduce the diacritic-mismatch
+    // bug this replaces: ILIKE on an accent-stripped slug never matches a
+    // real name like "Château Sainte Marguerite"). If the winery row itself
+    // isn't found by slug, fall back to the old name-based lookup — same
+    // behavior as before for that case (e.g. a deactivated/merged winery
+    // whose codes still exist under the old name).
+    const promoFilter = wineryId != null
+      ? 'winery_id=eq.' + encodeURIComponent(wineryId)
+      : 'winery_name=ilike.' + encodeURIComponent(searchName);
+    const promoRes = await fetch(SUPABASE_URL + '/rest/v1/promo_codes?select=*&is_active=eq.true&' + promoFilter + '&order=is_featured.desc', { headers });
 
     const promoData  = promoRes.ok  ? await promoRes.json()  : [];
-    const wineryData = wineryRes.ok ? await wineryRes.json() : [];
 
     // A deactivated/merged winery (e.g. a de-duped slug like the old
     // "ghost-block") has no active wineries row and, since its codes were
