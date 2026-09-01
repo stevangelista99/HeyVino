@@ -686,10 +686,13 @@ function affiliatePartnerTile(r) {
   const cardClass = 'affiliate-partner-card'
     + (bannerSrc ? ' affiliate-partner-card--banner' : '')
     + (codes.length ? ' affiliate-partner-card--with-codes' : '');
+  // Fire-and-forget: onclick never calls preventDefault or awaits anything,
+  // so the anchor's default navigation is completely unaffected either way.
+  const trackAttr = ` onclick="trackAffiliateClick(${Number(r.id) || 0})"`;
   if (bannerSrc) {
-    return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener"><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(this.naturalWidth<10||this.naturalHeight<10)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span>${codesHtml}</a>`;
+    return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener"${trackAttr}><img class="affiliate-partner-banner" src="${bannerSrc}" alt="${attr(r.label)}" loading="lazy" onerror="affiliateBannerFallback(this)" onload="if(this.naturalWidth<10||this.naturalHeight<10)affiliateBannerFallback(this)"><span class="affiliate-partner-caption">${attr(r.label)}</span>${codesHtml}</a>`;
   }
-  return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener">${attr(r.label)}${codesHtml}</a>`;
+  return `<a class="${cardClass}" href="${href}" target="_blank" rel="sponsored nofollow noopener"${trackAttr}>${attr(r.label)}${codesHtml}</a>`;
 }
 
 function renderAffiliatePartners(links) {
@@ -704,7 +707,7 @@ function renderAffiliatePartners(links) {
 async function loadAffiliatePartners() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/affiliate_links?select=label,url,banner_url,sort_order,winery_id&is_active=eq.true&order=sort_order.asc,label.asc`,
+      `${SUPABASE_URL}/rest/v1/affiliate_links?select=id,label,url,banner_url,sort_order,winery_id&is_active=eq.true&order=sort_order.asc,label.asc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     if (!res.ok) { renderAffiliatePartners([]); return; }
@@ -885,6 +888,33 @@ function track(event,winery,code){
     const payload=JSON.stringify({event,winery:winery||'',code:code||'',page:location.pathname+location.search});
     if(navigator.sendBeacon){navigator.sendBeacon('/api/track',new Blob([payload],{type:'application/json'}));}
     else{fetch('/api/track',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:payload});}
+  }catch(e){}
+}
+// One random id per browsing session, cached in sessionStorage. Wrapped in
+// try/catch — private browsing modes can throw on storage access. On any
+// failure this returns '', and trackAffiliateClick() omits session_id
+// entirely (JSON.stringify drops an undefined property) rather than send ''.
+function getAffiliateSessionId(){
+  try{
+    let sid=sessionStorage.getItem('hv_sid');
+    if(!sid){ sid=Math.random().toString(36).slice(2)+Date.now().toString(36); sessionStorage.setItem('hv_sid',sid); }
+    return sid;
+  }catch(e){ return ''; }
+}
+// Fire-and-forget click tracking for homepage Affiliate Partners tiles. Never
+// calls preventDefault and never awaits the request, so it cannot delay or
+// block the tile's normal navigation — same non-blocking pattern as track().
+function trackAffiliateClick(linkId){
+  try{
+    const sid=getAffiliateSessionId();
+    const payload=JSON.stringify({
+      link_id: linkId,
+      source: 'homepage_tile',
+      session_id: sid || undefined,
+      referrer: document.referrer || '',
+    });
+    if(navigator.sendBeacon){navigator.sendBeacon('/api/track-click',new Blob([payload],{type:'application/json'}));}
+    else{fetch('/api/track-click',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:payload});}
   }catch(e){}
 }
 function sendFeedback(btn,vote){
