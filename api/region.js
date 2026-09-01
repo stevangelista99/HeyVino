@@ -176,7 +176,7 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
 function copyCode(btn){
   navigator.clipboard.writeText(btn.dataset.code).then(function(){btn.textContent='\u2713 Copied';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},2000);});
   try{
-    var payload=JSON.stringify({event_type:'code_copy',winery:btn.dataset.winery||'',code:btn.dataset.code||'',page:location.pathname});
+    var payload=JSON.stringify({event:'code_copy',winery:btn.dataset.winery||'',code:btn.dataset.code||'',page:location.pathname});
     if(navigator.sendBeacon){navigator.sendBeacon('/api/track',payload);}else{fetch('/api/track',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:payload});}
   }catch(e){}
 }
