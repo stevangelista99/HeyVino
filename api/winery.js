@@ -438,7 +438,7 @@ function sendFeedback(btn, vote) {
 function openAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'flex'; }
 function closeAdvertiseModal() { document.getElementById('advertiseModal').style.display = 'none'; }
 function copyAdvertiseEmail() {
-  navigator.clipboard.writeText('HeyVinoMarketing@gmail.com');
+  navigator.clipboard.writeText('Stephen@heyvinowine.com');
   document.getElementById('copyEmailBtn').textContent = 'Copied!';
   setTimeout(function() { document.getElementById('copyEmailBtn').textContent = 'Copy'; }, 2000);
 }
@@ -452,10 +452,10 @@ document.getElementById('advertiseModal').addEventListener('click', function(e) 
     <h2 style="font-family:'Playfair Display',serif;color:var(--wine-deep);margin-bottom:0.75rem;font-size:1.3rem;">Work With HeyVino</h2>
     <p style="color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">Interested in advertising or a promo code partnership? We'd love to hear from you. Reach out directly:</p>
     <div style="background:var(--wine-deep);border-radius:6px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">HeyVinoMarketing@gmail.com</span>
+      <span style="color:var(--gold);font-size:0.88rem;font-weight:600;">Stephen@heyvinowine.com</span>
       <button id="copyEmailBtn" onclick="copyAdvertiseEmail()" style="background:var(--gold);color:var(--ink);border:none;padding:6px 14px;border-radius:3px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">Copy</button>
     </div>
-    <a href="mailto:HeyVinoMarketing@gmail.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App &rarr;</a>
+    <a href="mailto:Stephen@heyvinowine.com?subject=Advertise%20with%20HeyVino" style="display:block;background:var(--wine);color:white;padding:11px;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;">Open in Email App &rarr;</a>
   </div>
 </div>
 
