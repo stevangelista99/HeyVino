@@ -73,6 +73,9 @@
   .footer-links-inline { display: flex; gap: 1.5rem; list-style: none; flex-wrap: wrap; }
   .footer-links-inline a { color: rgba(255,255,255,0.35); font-size: 0.75rem; text-decoration: none; transition: color 0.15s; }
   .footer-links-inline a:hover { color: var(--gold-light); }
+  .footer-social { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--gold); text-decoration: none; font-size: 0.75rem; }
+  .footer-social:hover { color: var(--gold-light); }
+  .footer-social svg { width: 22px; height: 22px; flex-shrink: 0; }
 
   @media (min-width: 768px) {
     nav { padding: 0 2rem; }
@@ -157,6 +160,10 @@
       <li><a href="wineries.html">All Wineries</a></li>
       <li><a href="/privacy.html">Privacy Policy</a></li>
       <li><a href="/terms.html">Terms of Service</a></li>
+      <li><a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+        Instagram
+      </a></li>
     </ul>
   </div>
 </footer>

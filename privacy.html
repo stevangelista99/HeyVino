@@ -27,6 +27,9 @@
   a { color: var(--wine); }
   footer { background: var(--wine-deep); padding: 1.5rem 2rem; text-align: center; }
   footer p { color: rgba(255,255,255,0.35); font-size: 0.75rem; }
+  .footer-social { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--gold); text-decoration: none; vertical-align: middle; }
+  .footer-social:hover { color: #E8D5A0; }
+  .footer-social svg { width: 20px; height: 20px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -95,7 +98,7 @@
 </div>
 
 <footer>
-  <p>© 2026 HeyVino LLC · <a href="/" style="color:rgba(255,255,255,0.4)">HeyVinoWine.com</a></p>
+  <p>© 2026 HeyVino LLC · <a href="/" style="color:rgba(255,255,255,0.4)">HeyVinoWine.com</a> · <a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg> Instagram</a></p>
 </footer>
 
 </body>

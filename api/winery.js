@@ -298,6 +298,9 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
   .footer-links a { color: rgba(255,255,255,0.42); font-size: 0.82rem; text-decoration: none; transition: color 0.15s; }
   .footer-links a:hover { color: var(--gold-light); }
+  .footer-social { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--gold); text-decoration: none; font-size: 0.75rem; }
+  .footer-social:hover { color: var(--gold-light); }
+  .footer-social svg { width: 22px; height: 22px; flex-shrink: 0; }
   .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
   .footer-legal-links { font-size: 0.7rem; } .footer-legal-links a { color: rgba(255,255,255,0.4); text-decoration: none; } .footer-legal-links a:hover { color: var(--gold); }
@@ -378,6 +381,10 @@ ${relatedHtml}
         <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-style:italic;">HeyVino<sup style="font-size:0.5em;vertical-align:super;">&trade;</sup></span>
       </div>
       <p class="footer-tagline">The wine promo code aggregator — updated daily from 250+ winery newsletters worldwide.</p>
+      <a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+        Instagram
+      </a>
     </div>
     <div>
       <div class="footer-heading">Browse</div>
