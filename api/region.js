@@ -164,7 +164,7 @@ ${codes.length === 0 ? '<meta name="robots" content="noindex, follow">\n' : ''}<
   <h2>All ${esc(region.title)} Wineries on HeyVino</h2>
   ${wineriesHtml}
 </main>
-<footer>\u00a9 ${new Date().getFullYear()} HeyVino\u2122 LLC \u00b7 <a href="/">Home</a> \u00b7 <a href="/wineries.html">All Wineries</a> \u00b7 <a href="/privacy.html">Privacy</a> \u00b7 <a href="/terms.html">Terms</a> \u00b7 <a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg> Instagram</a></footer>
+<footer>\u00a9 ${new Date().getFullYear()} HeyVino\u2122 LLC \u00b7 <a href="/">Home</a> \u00b7 <a href="/wineries.html">All Wineries</a> \u00b7 <a href="/privacy.html">Privacy</a> \u00b7 <a href="/terms.html">Terms</a> \u00b7 <a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg> Instagram</a></footer>
 <script>
 function copyCode(btn){
   navigator.clipboard.writeText(btn.dataset.code).then(function(){btn.textContent='\u2713 Copied';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},2000);});

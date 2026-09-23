@@ -166,6 +166,9 @@ function buildPage(wineries) {
   .footer-social { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--gold); text-decoration: none; font-size: 0.75rem; }
   .footer-social:hover { color: var(--gold-light); }
   .footer-social svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .footer-social-mobile { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--gold); text-decoration: none; font-size: 0.75rem; }
+  .footer-social-mobile:hover { color: var(--gold-light); }
+  .footer-social-mobile svg { width: 22px; height: 22px; flex-shrink: 0; }
   .footer-bottom { border-top: 1px solid rgba(201,168,76,0.16); padding-top: 1.25rem; max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.26); }
   .advertise-cta { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; text-decoration: none; }
@@ -182,6 +185,7 @@ function buildPage(wineries) {
     .wineries-wrap { padding: 1rem 2rem 3rem; }
     .wineries-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
+    .footer-social-mobile { display: none; }
     footer { padding: 2.5rem 2rem 1.5rem; }
   }
   @media (min-width: 1100px) { .wineries-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -234,7 +238,7 @@ function buildPage(wineries) {
       </div>
       <p class="footer-tagline">The wine promo code aggregator \u2014 updated daily from ${count}+ winery newsletters worldwide.</p>
       <a class="footer-social" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
         Instagram
       </a>
     </div>
@@ -284,6 +288,10 @@ function buildPage(wineries) {
     <span class="footer-legal-links" style="font-size:0.7rem;"><a href="/privacy.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Privacy Policy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html" style="color:rgba(255,255,255,0.4);text-decoration:none;">Terms of Use</a></span>
     <span class="footer-copy">\u00a9 ${new Date().getFullYear()} HeyVino<sup style="font-size: 0.5em; vertical-align: super;">\u2122</sup> LLC \u00b7 HeyVinoWine.com \u00b7 Promotional codes sourced from publicly available winery communications.</span>
     <a class="advertise-cta" href="#" onclick="openAdvertiseModal();return false;">Advertise Here \u2192</a>
+    <a class="footer-social-mobile" href="https://www.instagram.com/heyvinowine/" target="_blank" rel="noopener" aria-label="HeyVino on Instagram">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+      Instagram
+    </a>
   </div>
 </footer>
 
