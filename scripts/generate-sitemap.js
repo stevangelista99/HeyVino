@@ -6,9 +6,12 @@ const SUPABASE_URL = 'https://lzeicurexdpludaltetf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZWljdXJleGRwbHVkYWx0ZXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTY2NTMsImV4cCI6MjA5MzUzMjY1M30.94s0cX_FcJkUAJLT75MOo48ShZ0KZBRQUHVmdfSzf_8';
 const BASE_URL = 'https://www.heyvinowine.com';
 
-const today = new Date().toISOString().split('T')[0];
+// expiry_date is a plain "YYYY-MM-DD" string with no time/zone component, so
+// "today" must be computed in America/New_York (not UTC) to match how the
+// rest of the site decides whether a code is still active — see ef9e42e.
+const todayET = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
 
-function urlEntry(loc, priority = '0.8', lastmod = today) {
+function urlEntry(loc, priority = '0.8', lastmod = todayET) {
   return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
@@ -100,7 +103,7 @@ function updateHomepageStats(wineries) {
     countryCount, 'hero stat: countries');
 
   fs.writeFileSync(indexPath, html, 'utf8');
-  console.log(`index.html stats updated — ${roundedCount}+ wineries, ${countryCount} countries (${today})`);
+  console.log(`index.html stats updated — ${roundedCount}+ wineries, ${countryCount} countries (${todayET})`);
 }
 
 async function generate() {
@@ -108,11 +111,14 @@ async function generate() {
 
   const [wRes, pRes] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,description,country,created_at,affiliate_url,affiliate_network&is_active=eq.true`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at,region&is_active=eq.true`, { headers })
+    fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,created_at,updated_at,region,expiry_date&is_active=eq.true`, { headers })
   ]);
   if (!wRes.ok) throw new Error(`Supabase error: HTTP ${wRes.status}`);
   const wineries = await wRes.json();
-  const codes = pRes.ok ? await pRes.json() : [];
+  // A code can still be is_active=true but past its expiry_date in
+  // America/New_York for up to ~24h until the next daily cleanup cron run
+  // (api/cleanup.js) — don't count it as active for sitemap purposes.
+  const codes = (pRes.ok ? await pRes.json() : []).filter(r => !r.expiry_date || r.expiry_date >= todayET);
 
   // Which wineries currently have active codes
   const hasCode = new Set(codes.map(r => (r.winery_name || '').toLowerCase()).filter(Boolean));
@@ -135,7 +141,7 @@ async function generate() {
     .filter(w => w.slug && (hasCode.has((w.name || '').toLowerCase()) || (w.description && w.description.trim())))
     .map(w => ({
       slug: w.slug,
-      lastmod: latestCodeDate[(w.name || '').toLowerCase()] || toDay(w.created_at) || today,
+      lastmod: latestCodeDate[(w.name || '').toLowerCase()] || toDay(w.created_at) || todayET,
     }))
     .sort((a, b) => a.slug.localeCompare(b.slug));
   const slugs = indexable.map(w => w.slug);
@@ -166,7 +172,7 @@ ${entries.join('\n')}
 
   const outPath = path.join(__dirname, '..', 'sitemap.xml');
   fs.writeFileSync(outPath, xml, 'utf8');
-  console.log(`sitemap.xml written — ${slugs.length} winery URLs + ${staticEntries.length} static (${today})`);
+  console.log(`sitemap.xml written — ${slugs.length} winery URLs + ${staticEntries.length} static (${todayET})`);
 
   updateHomepageStats(wineries);
 }

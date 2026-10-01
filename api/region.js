@@ -21,6 +21,12 @@ const formatExp = (exp) => {
   const [y,m,d] = exp.split('-').map(Number);
   return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
 };
+// Region cards use the short "Oct 30" form (no year) — same UTC-midnight
+// construction as formatExp above, just a different toLocaleDateString format.
+const formatExpShort = (exp) => {
+  const [y,m,d] = exp.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
+};
 
 // Descriptive copy per region page. The accepted-value lists themselves
 // (dbRegions below) come from lib/regions.js \u2014 the single shared source also
@@ -60,7 +66,7 @@ function expiryText(expiry, offerType) {
   const d = daysLeft(expiry);
   if (d === 0) return 'Ends today';
   if (d <= 21) return '\u26a0\ufe0f ' + d + 'd left';
-  return 'Exp ' + formatExp(expiry);
+  return 'Exp ' + formatExpShort(expiry);
 }
 
 function discountLabel(row) {
