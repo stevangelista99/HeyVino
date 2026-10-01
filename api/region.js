@@ -4,7 +4,23 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5c
 const { REGION_GROUPS } = require('../lib/regions');
 
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
-function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
+
+// expiry_date is a plain "YYYY-MM-DD" string with no time/zone component.
+// Never run it through new Date(...) for comparison — that parses it as
+// midnight UTC, which is 8-9pm the PREVIOUS day in America/New_York, shifting
+// both the expired check and the displayed date back one day. Compare and
+// format it as a string against "today" in America/New_York instead.
+const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
+const isExpired = (exp) => !!exp && exp < todayET();          // string compare, YYYY-MM-DD sorts correctly
+const daysLeft = (exp) => {
+  const [y1,m1,d1] = todayET().split('-').map(Number);
+  const [y2,m2,d2] = exp.split('-').map(Number);
+  return Math.round((Date.UTC(y2,m2-1,d2) - Date.UTC(y1,m1-1,d1)) / 86400000);
+};
+const formatExp = (exp) => {
+  const [y,m,d] = exp.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+};
 
 // Descriptive copy per region page. The accepted-value lists themselves
 // (dbRegions below) come from lib/regions.js \u2014 the single shared source also
@@ -40,11 +56,11 @@ function inList(values) {
 
 function expiryText(expiry, offerType) {
   if (!expiry || offerType === 'welcome') return 'No current expiration';
-  const d = daysUntil(expiry);
-  if (isNaN(d)) return 'No current expiration';
-  if (d < 0) return 'Expired';
+  if (isExpired(expiry)) return 'Expired';
+  const d = daysLeft(expiry);
+  if (d === 0) return 'Ends today';
   if (d <= 21) return '\u26a0\ufe0f ' + d + 'd left';
-  return 'Exp ' + new Date(expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return 'Exp ' + formatExp(expiry);
 }
 
 function discountLabel(row) {
@@ -195,7 +211,10 @@ module.exports = async function handler(req, res) {
       fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=*&is_active=eq.true&region=${filter}&order=is_featured.desc,winery_name.asc`, { headers }),
       fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,affiliate_url,affiliate_network&is_active=eq.true&region=${filter}&order=name.asc`, { headers }),
     ]);
-    const codes = codesRes.ok ? await codesRes.json() : [];
+    // A code can still be is_active=true but past its expiry_date in
+    // America/New_York for up to ~24h until the next daily cleanup cron run
+    // (api/cleanup.js) — don't display it as a card during that gap.
+    const codes = (codesRes.ok ? await codesRes.json() : []).filter(row => !row.expiry_date || row.expiry_date >= todayET());
     const wineries = wineriesRes.ok ? await wineriesRes.json() : [];
 
     const html = buildRegionPage({ regionSlug, region, codes, wineries });

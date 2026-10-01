@@ -22,6 +22,14 @@ function esc(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
+// This template shows no "Expired"/"Exp ..." text or days-left math — the
+// static card snippet is just winery/offer/code — so only todayET() is
+// needed here (not the full isExpired/daysLeft/formatExp set used by the
+// other templates) to keep a code that's is_active=true but already past
+// its expiry_date in America/New_York from being prerendered. See
+// api/winery.js for the full set.
+const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
+
 function offerText(row) {
   const amt = String(row.discount_amount || '').trim();
   switch (row.discount_type) {
@@ -50,13 +58,22 @@ function cardHtml(row) {
 
 async function fetchActiveCodes() {
   const url = `${SUPABASE_URL}/rest/v1/promo_codes` +
-    `?select=winery_name,code,discount_amount,discount_type,description,region,country,is_featured` +
-    `&is_active=eq.true&order=is_featured.desc,winery_name.asc&limit=${MAX_CARDS}`;
+    `?select=winery_name,code,discount_amount,discount_type,description,region,country,is_featured,expiry_date` +
+    // Fetch extra rows beyond MAX_CARDS since the expiry filter below may
+    // drop some (still is_active=true but past their ET expiry, pending the
+    // next daily cleanup cron run) — without the cushion, a prerun short on
+    // valid rows could end up with fewer than MAX_CARDS cards.
+    `&is_active=eq.true&order=is_featured.desc,winery_name.asc&limit=${MAX_CARDS * 2}`;
   const res = await fetch(url, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
   });
   if (!res.ok) throw new Error(`Supabase fetch failed: HTTP ${res.status}`);
-  return res.json();
+  const rows = await res.json();
+  // A code can still be is_active=true but past its expiry_date in
+  // America/New_York for up to ~24h until the next daily cleanup cron run
+  // (api/cleanup.js) — don't prerender it as a card during that gap.
+  const today = todayET();
+  return rows.filter(row => !row.expiry_date || row.expiry_date >= today).slice(0, MAX_CARDS);
 }
 
 async function main() {

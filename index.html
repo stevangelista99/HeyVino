@@ -441,8 +441,8 @@
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Amici Cellars</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off your first online order from Amici Cellars — Calistoga, Napa Valley. Wines sourced from Beckstoffer To Kalon and Sonoma Coast vineyards</p><p style="margin:0;font-size:0.85rem;">Code: <code>WELCOME20</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Ancient Peaks Winery</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Paso Robles, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">15% off — 15% off your wine purchase online or at the Tasting Room from Ancient Peaks Winery — Paso Robles, California. Sauvignon Blanc, Rosé, Sangiovese and more</p><p style="margin:0;font-size:0.85rem;">Code: <code>RENEGADE</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Arenness Cellars</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Walla Walla, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">10% off — 10% off 6-11 bottles at Arenness Cellars. Orders of 12 or more bottles receive an automatic 20% discount with no code needed.</p><p style="margin:0;font-size:0.85rem;">Code: <code>BUY 6</code></p></article>
-<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Argyle Winery</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Willamette Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off 2022 Vintage Brut, plus complimentary shipping on a case of 12</p><p style="margin:0;font-size:0.85rem;">Code: <code>22BRUT</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Argyle Winery</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Willamette Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">25% off — 25% off next online order when you opt in to SMS texts. Oregon&#x27;s original sparkling wine house. Voted Best Oregon Wine 2025.</p><p style="margin:0;font-size:0.85rem;">Code: <code>SMSOPT25</code></p></article>
+<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Argyle Winery</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Willamette Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off 2022 Vintage Brut, plus complimentary shipping on a case of 12</p><p style="margin:0;font-size:0.85rem;">Code: <code>22BRUT</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Bacio Divino Cellars</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off your first online order from Bacio Divino Cellars — Napa Valley. Boutique Italian-inspired Cabernet Sauvignon and Bordeaux blends</p><p style="margin:0;font-size:0.85rem;">Code: <code>SALUTE</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Banfi Wines</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Tuscany, Italy</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off any organic bottle from the Banfi Wine &amp; Spirits Family, including the Natura and Emiliana organic lines, for Organic Wine Month.</p><p style="margin:0;font-size:0.85rem;">Code: <code>ORGANICM2026</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Beringer Vineyards</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Napa Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — 20% off any regularly priced wine.</p><p style="margin:0;font-size:0.85rem;">Code: <code>WELCOME</code></p></article>
@@ -588,6 +588,11 @@ async function loadCodes() {
       throw new Error(`HTTP ${res.status}`);
     }
     data = await res.json();
+    // Hide codes that are still is_active=true but have already passed their
+    // expiry_date in America/New_York — the daily cleanup cron (api/cleanup.js)
+    // only deactivates these once a day, so without this filter a code can sit
+    // visible for up to ~24h after its real ET expiry.
+    data = data.filter(row => !row.expiry_date || row.expiry_date >= todayET());
     affResult = aff;
     console.log('[HeyVino] 3. Parsed data — row count:', data.length);
     if (data.length > 0) console.log('[HeyVino] 3a. First row keys:', Object.keys(data[0]), '| First row:', data[0]);
@@ -685,9 +690,11 @@ function sortAffiliateCodes(codes) {
   return [...codes].sort((a, b) => {
     const rank = affiliateOfferTypeRank(a.offer_type) - affiliateOfferTypeRank(b.offer_type);
     if (rank !== 0) return rank;
-    const ea = a.expiry_date ? new Date(a.expiry_date).getTime() : Infinity;
-    const eb = b.expiry_date ? new Date(b.expiry_date).getTime() : Infinity;
-    return ea - eb;
+    // String compare, not new Date(...) — YYYY-MM-DD sorts correctly as text
+    // and avoids the UTC-midnight shift described above the expiry helpers.
+    const ea = a.expiry_date || '9999-99-99';
+    const eb = b.expiry_date || '9999-99-99';
+    return ea < eb ? -1 : ea > eb ? 1 : 0;
   });
 }
 
@@ -813,17 +820,30 @@ async function fetchWineryAffiliateMap(){
 const COUNTRY_ORDER = ["USA","France","Italy","Spain","Australia","New Zealand","Argentina","Germany"];
 let activeVarietal="all", activeRegion="all", activeOfferType="all", searchQ="", activeUSRegion="all", activeSort="featured";
 
-function daysUntil(d) { return Math.ceil((new Date(d)-new Date())/86400000); }
+// expiry_date is a plain "YYYY-MM-DD" string with no time/zone component.
+// Never run it through new Date(...) for comparison — that parses it as
+// midnight UTC, which is 8-9pm the PREVIOUS day in America/New_York, shifting
+// both the expired check and the displayed date back one day. Compare and
+// format it as a string against "today" in America/New_York instead.
+const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
+const isExpired = (exp) => !!exp && exp < todayET();          // string compare, YYYY-MM-DD sorts correctly
+const daysLeft = (exp) => {
+  const [y1,m1,d1] = todayET().split('-').map(Number);
+  const [y2,m2,d2] = exp.split('-').map(Number);
+  return Math.round((Date.UTC(y2,m2-1,d2) - Date.UTC(y1,m1-1,d1)) / 86400000);
+};
+const formatExp = (exp) => {
+  const [y,m,d] = exp.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+};
 
 function expiryHTML(expiry) {
   if(!expiry) return `<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>`;
-  const date=new Date(expiry);
-  if(isNaN(date.getTime())) return `<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>`;
-  const d=daysUntil(expiry);
-  if(d<0) return `<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>`;
+  if(isExpired(expiry)) return `<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>`;
+  const d=daysLeft(expiry);
+  if(d===0) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">Ends today</span></span>`;
   if(d<=21) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">⚠️ ${d}d left</span></span>`;
-  const fmt=date.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${fmt}</span></span>`;
+  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${formatExp(expiry)}</span></span>`;
 }
 
 function accentClass(t){return{red:"accent-red",white:"accent-white",rose:"accent-rose",sparkling:"accent-sparkling"}[t]||"accent-red";}
@@ -951,7 +971,7 @@ function setSort(v){activeSort=v;render();}
 function applySort(list){
   if(activeSort==="newest") return [...list].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
   if(activeSort==="expiring") return [...list].sort((a,b)=>{
-    const key=c=>{ if(!c.expiry||c.offer_type==='welcome') return 9e9; const d=daysUntil(c.expiry); return d<0?9e9:d; };
+    const key=c=>{ if(!c.expiry||c.offer_type==='welcome') return 9e9; return isExpired(c.expiry)?9e9:daysLeft(c.expiry); };
     return key(a)-key(b);
   });
   if(activeSort==="az") return [...list].sort((a,b)=>(a.winery||'').localeCompare(b.winery||''));

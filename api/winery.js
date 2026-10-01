@@ -24,7 +24,24 @@ const LEGACY_SLUGS = {
 
 const COUNTRY_CODES = { us:'USA', usa:'USA', it:'Italy', fr:'France', es:'Spain', au:'Australia', nz:'New Zealand', ar:'Argentina', de:'Germany', gb:'UK', uk:'UK' };
 function normalizeCountry(c) { return COUNTRY_CODES[(c||'').toLowerCase()] || c || 'USA'; }
-function daysUntil(d) { return Math.ceil((new Date(d) - new Date()) / 86400000); }
+
+// expiry_date is a plain "YYYY-MM-DD" string with no time/zone component.
+// Never run it through new Date(...) for comparison — that parses it as
+// midnight UTC, which is 8-9pm the PREVIOUS day in America/New_York, shifting
+// both the expired check and the displayed date back one day. Compare and
+// format it as a string against "today" in America/New_York instead.
+const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
+const isExpired = (exp) => !!exp && exp < todayET();          // string compare, YYYY-MM-DD sorts correctly
+const daysLeft = (exp) => {
+  const [y1,m1,d1] = todayET().split('-').map(Number);
+  const [y2,m2,d2] = exp.split('-').map(Number);
+  return Math.round((Date.UTC(y2,m2-1,d2) - Date.UTC(y1,m1-1,d1)) / 86400000);
+};
+const formatExp = (exp) => {
+  const [y,m,d] = exp.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
 
 // Maps a winery's DB region to its parent region landing page, when one
@@ -40,13 +57,11 @@ const REGION_PAGE = (() => {
 
 function expiryHTML(expiry) {
   if (!expiry) return '<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>';
-  const date = new Date(expiry);
-  if (isNaN(date.getTime())) return '<span class="expiry"><span class="expiry-text-na">No current expiration</span></span>';
-  const d = daysUntil(expiry);
-  if (d < 0) return '<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>';
+  if (isExpired(expiry)) return '<span class="expiry"><span class="dot dot-red"></span><span class="expiry-text-red">Expired</span></span>';
+  const d = daysLeft(expiry);
+  if (d === 0) return '<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">Ends today</span></span>';
   if (d <= 21) return `<span class="expiry"><span class="dot dot-amber"></span><span class="expiry-text-amber">⚠️ ${d}d left</span></span>`;
-  const fmt = date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${fmt}</span></span>`;
+  return `<span class="expiry"><span class="dot dot-green"></span><span class="expiry-text-green">Exp ${formatExp(expiry)}</span></span>`;
 }
 
 function accentClass(t) { return { red:'accent-red', white:'accent-white', rose:'accent-rose', sparkling:'accent-sparkling' }[t] || 'accent-red'; }
@@ -554,7 +569,12 @@ async function handler(req, res) {
       related = relatedSlugs.map(s => bySlug.get(s)).filter(Boolean);
     }
 
-    const cards = promoData.map(row => ({
+    // A code can still be is_active=true but past its expiry_date in
+    // America/New_York for up to ~24h until the next daily cleanup cron run
+    // (api/cleanup.js) — don't display it as a card during that gap.
+    const visiblePromoData = promoData.filter(row => !row.expiry_date || row.expiry_date >= todayET());
+
+    const cards = visiblePromoData.map(row => ({
       winery:      row.winery_name     || '',
       code:        row.code            || '',
       discount:    row.discount_type === 'free_shipping' ? 'Free shipping'

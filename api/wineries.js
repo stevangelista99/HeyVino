@@ -3,6 +3,13 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5c
 
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
 
+// This template shows no "Expired"/"Exp ..." text or days-left math — it only
+// counts active codes per winery — so only todayET() is needed here (not the
+// full isExpired/daysLeft/formatExp set used by the other templates) to keep
+// that count from including a code that's is_active=true but already past
+// its expiry_date in America/New_York. See api/winery.js for the full set.
+const todayET = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // "YYYY-MM-DD"
+
 // Strips diacritics via Unicode NFD decomposition + combining-mark removal, so
 // "Chateau" (from "Château") groups under C rather than falling through to "#".
 function groupKey(name) {
@@ -343,10 +350,13 @@ module.exports = async function handler(req, res) {
   try {
     const [wRes, pRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/wineries?select=name,slug,region,country,affiliate_url,affiliate_network&is_active=eq.true`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name&is_active=eq.true`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/promo_codes?select=winery_name,expiry_date&is_active=eq.true`, { headers }),
     ]);
     const rows = wRes.ok ? await wRes.json() : [];
-    const codes = pRes.ok ? await pRes.json() : [];
+    // A code can still be is_active=true but past its expiry_date in
+    // America/New_York for up to ~24h until the next daily cleanup cron run
+    // (api/cleanup.js) — don't count it toward a winery's active-code total.
+    const codes = (pRes.ok ? await pRes.json() : []).filter(row => !row.expiry_date || row.expiry_date >= todayET());
 
     const codeCount = {};
     codes.forEach(row => {
