@@ -213,14 +213,34 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   </div>
 </div>` : '';
 
+  // Split into Site-Wide Deals / Welcome Offers — offer_type is exhaustively
+  // either 'sitewide' or 'welcome' in the data, so "not sitewide" safely
+  // covers 'welcome' and guarantees every card lands in exactly one group
+  // (never silently dropped). A group with zero cards renders nothing —
+  // header included.
+  function groupBlockHTML(title, subtext, groupCards) {
+    if (groupCards.length === 0) return '';
+    return `<div class="group-header">
+      <div class="group-header-top">
+        <h2 class="group-header-title">${esc(title)}</h2>
+        <span class="group-header-count">(${groupCards.length})</span>
+      </div>
+      <p class="group-header-sub">${esc(subtext)}</p>
+    </div>
+    <div class="cards-grid">${groupCards.map(cardHTML).join('\n')}</div>`;
+  }
+
   const cardsInner = cards.length === 0
-    ? `<div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
+    ? `<div class="cards-grid" id="cards"><div style="text-align:center;padding:4rem 1rem;grid-column:1/-1">
         <div style="font-size:2.5rem;margin-bottom:1rem">🥾</div>
         <div style="font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:0.5rem">No active codes right now</div>
         <div style="font-size:0.85rem;color:var(--muted)">Check back soon — we update daily.</div>
         ${noCodesSiteLink ? `<a href="${noCodesSiteLink}" target="_blank" rel="${noCodesOutbound.rel}" data-winery="${esc(displayName)}" onclick="track('visit_site',this.dataset.winery,'')" style="display:inline-block;margin-top:1.25rem;font-size:0.85rem;font-weight:600;color:var(--wine);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:2px;">Visit ${esc(displayName)} →</a>` : ''}
-      </div>`
-    : cards.map(cardHTML).join('\n');
+      </div></div>`
+    : [
+        groupBlockHTML('Site-Wide Deals', 'Open to everyone', cards.filter(c => c.offer_type === 'sitewide')),
+        groupBlockHTML('Welcome Offers', 'For first-time customers', cards.filter(c => c.offer_type !== 'sitewide')),
+      ].filter(Boolean).join('\n');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -272,7 +292,16 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; }
 
   .cards-wrap { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
-  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.1rem; }
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.1rem; margin-bottom: 1.75rem; }
+
+  /* Offer-type group headers (Site-Wide Deals / Welcome Offers) — same
+     Playfair Display / wine-deep styling already used by .related-heading
+     below, plus a subtext line. */
+  .group-header { margin-bottom: 1rem; }
+  .group-header-top { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .group-header-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--wine-deep); }
+  .group-header-count { font-size: 0.78rem; color: var(--muted); }
+  .group-header-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
   .card { background: var(--white); border: 1px solid var(--stone); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; animation: fadeUp 0.4s ease both; }
   .card:hover { box-shadow: 0 8px 28px rgba(107,30,42,0.1); transform: translateY(-2px); }
@@ -397,9 +426,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
 </div>
 
 <div class="cards-wrap">
-  <div class="cards-grid" id="cards">
-    ${cardsInner}
-  </div>
+  ${cardsInner}
 </div>
 ${relatedHtml}
 <footer>
@@ -592,7 +619,8 @@ async function handler(req, res) {
       affiliate_url: wineryAffiliateUrl,
       id:          row.id              || '',
       created_at:  row.created_at      || '',
-      description: row.description     || ''
+      description: row.description     || '',
+      offer_type:  row.offer_type      || ''
     }));
 
     const html = buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wineryAffiliateUrl, wineryRegion, related });

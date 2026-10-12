@@ -14,7 +14,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const START = '<!-- PRERENDER:START -->';
 const END = '<!-- PRERENDER:END -->';
-const MAX_CARDS = 24; // enough for crawlers; live JS shows the full set
+// Fetched once, filtered to active+non-expired, then split by offer_type.
+// Site-Wide Deals renders in full (no cap — currently small, ~20-30 rows).
+// Welcome Offers is the larger group (~80+ rows), so its static snapshot is
+// capped for crawler/initial-paint purposes; live JS shows the full set.
+const WELCOME_SNAPSHOT_MAX = 24;
+// Comfortably above the current ~100-150 total active codes — explicit so
+// this doesn't silently depend on PostgREST's own default row cap.
+const FETCH_LIMIT = 1000;
 
 function esc(s) {
   return String(s == null ? '' : s)
@@ -56,14 +63,33 @@ function cardHtml(row) {
   ].filter(Boolean).join('');
 }
 
+// Mirrors the .group-header / .group-header-top / .section-title /
+// .section-count / .group-header-sub markup the live JS render() in
+// index.html produces for the same two groups, so the page doesn't shift
+// when loadCodes() replaces this prerendered block with live data.
+//
+// trueCount is the REAL total for this offer_type (active + non-expired,
+// uncapped) — not renderRows.length, which may be a capped subset (Welcome
+// Offers). Showing the true count up front means the header number doesn't
+// change when live JS later renders the rest; only the card list grows.
+// Hidden entirely (header included) when the true total is zero.
+function groupBlockHtml(title, subtext, renderRows, trueCount) {
+  if (trueCount === 0) return '';
+  return [
+    `<div class="group-header"><div class="group-header-top"><h2 class="section-title">${title}</h2><span class="section-count">(${trueCount})</span></div><p class="group-header-sub">${subtext}</p></div>`,
+    renderRows.map(cardHtml).join('\n'),
+  ].join('\n');
+}
+
+// Returns the full active+non-expired set for each offer_type, unsliced —
+// callers decide how many of each to actually render. offer_type is
+// exhaustively either 'sitewide' or 'welcome' in the data, so "not sitewide"
+// safely covers 'welcome' and guarantees every row lands in exactly one
+// group (never silently dropped from the true counts).
 async function fetchActiveCodes() {
   const url = `${SUPABASE_URL}/rest/v1/promo_codes` +
-    `?select=winery_name,code,discount_amount,discount_type,description,region,country,is_featured,expiry_date` +
-    // Fetch extra rows beyond MAX_CARDS since the expiry filter below may
-    // drop some (still is_active=true but past their ET expiry, pending the
-    // next daily cleanup cron run) — without the cushion, a prerun short on
-    // valid rows could end up with fewer than MAX_CARDS cards.
-    `&is_active=eq.true&order=is_featured.desc,winery_name.asc&limit=${MAX_CARDS * 2}`;
+    `?select=winery_name,code,discount_amount,discount_type,description,region,country,is_featured,expiry_date,offer_type` +
+    `&is_active=eq.true&order=is_featured.desc,winery_name.asc&limit=${FETCH_LIMIT}`;
   const res = await fetch(url, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
   });
@@ -73,7 +99,11 @@ async function fetchActiveCodes() {
   // America/New_York for up to ~24h until the next daily cleanup cron run
   // (api/cleanup.js) — don't prerender it as a card during that gap.
   const today = todayET();
-  return rows.filter(row => !row.expiry_date || row.expiry_date >= today).slice(0, MAX_CARDS);
+  const visible = rows.filter(row => !row.expiry_date || row.expiry_date >= today);
+  return {
+    sitewideAll: visible.filter(row => row.offer_type === 'sitewide'),
+    welcomeAll: visible.filter(row => row.offer_type !== 'sitewide'),
+  };
 }
 
 async function main() {
@@ -86,21 +116,27 @@ async function main() {
     throw new Error('PRERENDER markers not found (or malformed) in index.html — aborting without writing.');
   }
 
-  const rows = await fetchActiveCodes();
-  if (!Array.isArray(rows) || rows.length === 0) {
+  const { sitewideAll, welcomeAll } = await fetchActiveCodes();
+  if (sitewideAll.length + welcomeAll.length === 0) {
     throw new Error('No active promo codes returned — refusing to prerender an empty section.');
   }
 
+  // Cap per group, not globally: Site-Wide Deals renders in full; only
+  // Welcome Offers (the larger group) is capped for the static snapshot.
+  const sitewideRender = sitewideAll;
+  const welcomeRender = welcomeAll.slice(0, WELCOME_SNAPSHOT_MAX);
+
   const block = [
     '<section aria-label="Current wine deals">',
-    `<h2 style="font-size:1.1rem;margin:0 0 10px;">Current Wine Promo Codes</h2>`,
-    rows.map(cardHtml).join('\n'),
+    groupBlockHtml('Site-Wide Deals', 'Open to everyone', sitewideRender, sitewideAll.length),
+    groupBlockHtml('Welcome Offers', 'For first-time customers', welcomeRender, welcomeAll.length),
     '</section>',
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 
   const updated = html.slice(0, startIdx + START.length) + '\n' + block + '\n' + html.slice(endIdx);
   fs.writeFileSync(indexPath, updated);
-  console.log(`Prerendered ${rows.length} deal cards into index.html`);
+  console.log(`Prerendered ${sitewideRender.length + welcomeRender.length} deal cards into index.html ` +
+    `(Site-Wide ${sitewideRender.length}/${sitewideAll.length} true, Welcome ${welcomeRender.length}/${welcomeAll.length} true)`);
 }
 
 main().catch((err) => { console.error(err.message); process.exit(1); });

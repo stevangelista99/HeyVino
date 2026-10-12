@@ -92,6 +92,15 @@ function codeCard(row, wineryMetaByName) {
   </div>`;
 }
 
+// Renders one offer-type group (Site-Wide Deals / Welcome Offers) as its own
+// header + .rgrid, or nothing at all (header included) when the group has
+// no codes.
+function offerGroupHtml(title, subtext, groupCodes, wineryMetaByName) {
+  if (groupCodes.length === 0) return '';
+  return `<div class="rgroup-header"><h2 class="rgroup-title">${esc(title)} <span class="rgroup-count">(${groupCodes.length})</span></h2><p class="rgroup-sub">${esc(subtext)}</p></div>
+  <div class="rgrid">${groupCodes.map(c => codeCard(c, wineryMetaByName)).join('\n')}</div>`;
+}
+
 function buildRegionPage({ regionSlug, region, codes, wineries }) {
   const canonical = 'https://www.heyvinowine.com/region/' + regionSlug;
   const title = esc(region.title) + ' Wine Promo Codes & Winery Deals | HeyVino';
@@ -111,9 +120,17 @@ function buildRegionPage({ regionSlug, region, codes, wineries }) {
     ],
   }).replace(/</g, '\\u003c');
 
+  // Split into Site-Wide Deals / Welcome Offers \u2014 offer_type is exhaustively
+  // either 'sitewide' or 'welcome' in the data, so "not sitewide" safely
+  // covers 'welcome' and guarantees every code lands in exactly one group
+  // (never silently dropped). codes.length > 0 guarantees at least one of
+  // the two groups below is non-empty.
   const codesHtml = codes.length
-    ? `<div class="rgrid">${codes.map(c => codeCard(c, wineryMetaByName)).join('\n')}</div>`
-    : `<p class="rempty">No active codes in ${esc(region.title)} right now \u2014 check back soon, we update daily.</p>`;
+    ? [
+        offerGroupHtml('Site-Wide Deals', 'Open to everyone', codes.filter(c => c.offer_type === 'sitewide'), wineryMetaByName),
+        offerGroupHtml('Welcome Offers', 'For first-time customers', codes.filter(c => c.offer_type !== 'sitewide'), wineryMetaByName),
+      ].filter(Boolean).join('\n')
+    : `<h2>Active Codes</h2><p class="rempty">No active codes in ${esc(region.title)} right now \u2014 check back soon, we update daily.</p>`;
 
   const wineriesHtml = wineries.length
     ? `<ul class="rwineries">${wineries.map(w => `<li><a href="/winery.html?slug=${esc(w.slug)}">${esc(w.name)}${w.affiliate_url ? ' <span class="partner-badge">Partner</span>' : ''}</a></li>`).join('')}</ul>`
@@ -165,6 +182,10 @@ ${codes.length === 0 ? '<meta name="robots" content="noindex, follow">\n' : ''}<
   .rcond { font-weight:400; color:var(--muted); }
   .rcard-exp { font-size:0.7rem; color:var(--muted); margin-top:4px; }
   .rempty { color:var(--muted); font-size:0.9rem; }
+  .rgroup-header { margin:1.8rem 0 0.8rem; }
+  .rgroup-title { font-size:1.02rem; color:var(--wine); margin:0; }
+  .rgroup-count { font-size:0.78rem; color:var(--muted); font-weight:400; }
+  .rgroup-sub { font-size:0.78rem; color:var(--muted); margin:2px 0 0.8rem; }
   .rwineries { list-style:none; display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:5px 18px; }
   .rwineries a { color:var(--ink); text-decoration:none; font-size:0.85rem; border-bottom:1px solid rgba(201,168,76,0.4); }
   .rwineries a:hover { color:var(--wine); }
@@ -181,7 +202,6 @@ ${codes.length === 0 ? '<meta name="robots" content="noindex, follow">\n' : ''}<
 <main>
   <h1>${esc(region.title)} Wine Promo Codes</h1>
   <p class="blurb">${esc(region.blurb)} Every code below was sourced directly from a winery newsletter and is verified before publishing \u2014 ${codes.length} active code${codes.length !== 1 ? 's' : ''} from ${wineries.length} ${esc(region.title)} winer${wineries.length !== 1 ? 'ies' : 'y'} right now.</p>
-  <h2>Active Codes</h2>
   ${codesHtml}
   <h2>All ${esc(region.title)} Wineries on HeyVino</h2>
   ${wineriesHtml}
