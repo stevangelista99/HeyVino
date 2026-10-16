@@ -769,12 +769,15 @@ async function loadAffiliatePartners() {
     const rows = await res.json();
     const links = (Array.isArray(rows) ? rows : []).filter(r => r.label && r.url);
 
-    // Codes render only on sort_order = 0 tiles, to avoid duplicating the same
-    // winery's codes under multiple tiles (e.g. "Picked by Wine.com" shares
-    // winery_id with the sort_order 0 Wine.com tile).
-    const codeWineryIds = [...new Set(
-      links.filter(r => r.sort_order === 0 && r.winery_id != null).map(r => r.winery_id)
-    )];
+    // Codes render only on the first tile per winery (rows arrive ordered by
+    // sort_order, then label), so a winery with several tiles (e.g. Wine.com and
+    // "Picked by Wine.com") shows its codes once. sort_order is free to set the
+    // display order; it no longer needs to be 0 for codes to appear.
+    const firstLinkIdByWinery = {};
+    links.forEach(r => {
+      if (r.winery_id != null && !(r.winery_id in firstLinkIdByWinery)) firstLinkIdByWinery[r.winery_id] = r.id;
+    });
+    const codeWineryIds = Object.keys(firstLinkIdByWinery).map(Number);
 
     let codesByWinery = {};
     if (codeWineryIds.length > 0) {
@@ -796,7 +799,7 @@ async function loadAffiliatePartners() {
 
     renderAffiliatePartners(links.map(r => ({
       ...r,
-      codes: (r.sort_order === 0 && r.winery_id != null) ? (codesByWinery[r.winery_id] || []) : [],
+      codes: (r.winery_id != null && firstLinkIdByWinery[r.winery_id] === r.id) ? (codesByWinery[r.winery_id] || []) : [],
     })));
   } catch (e) { renderAffiliatePartners([]); }
 }
