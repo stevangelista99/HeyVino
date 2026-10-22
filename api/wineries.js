@@ -148,7 +148,7 @@ function buildPage(wineries) {
   .search-wrap input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--ink); width: 100%; background: transparent; }
 
   .wineries-wrap { max-width: 1400px; margin: 0 auto; padding: 1rem 1rem 3rem; }
-  .wineries-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+  .wineries-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.85rem; }
 
   .winery-card { background: var(--white); border: 1px solid var(--stone); border-radius: 8px; padding: 1rem; display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; animation: fadeUp 0.35s ease both; }
   .winery-card:hover { box-shadow: 0 6px 20px rgba(107,30,42,0.1); transform: translateY(-2px); border-color: var(--gold); }
@@ -182,7 +182,7 @@ function buildPage(wineries) {
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  @media (min-width: 480px) { .wineries-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 480px) { .wineries-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 768px) {
     nav { padding: 0 2rem; }
     .nav-logo small { display: inline; }
@@ -190,12 +190,12 @@ function buildPage(wineries) {
     .page-hero { padding: 56px 2rem 64px; }
     .search-bar { padding: 1.5rem 2rem 0.5rem; }
     .wineries-wrap { padding: 1rem 2rem 3rem; }
-    .wineries-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .wineries-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
     .footer-social-mobile { display: none; }
     footer { padding: 2.5rem 2rem 1.5rem; }
   }
-  @media (min-width: 1100px) { .wineries-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1100px) { .wineries-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 </style>
 </head>
 <body>
