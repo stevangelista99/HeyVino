@@ -80,13 +80,18 @@ function slugify(name) {
   return String(name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+// Promos that apply automatically are stored with code 'No code necessary';
+// those cards show the label with no Copy button.
+function isNoCode(code) { return String(code || '').trim().toLowerCase() === 'no code necessary'; }
 function codeCard(row, wineryMetaByName) {
   const meta = wineryMetaByName[(row.winery_name || '').toLowerCase()] || {};
   const wslug = meta.slug || slugify(row.winery_name);
   const partnerBadge = meta.affiliate_url ? ' <span class="partner-badge">Partner</span>' : '';
   return `<div class="rcard">
     <a class="rcard-winery" href="/winery.html?slug=${esc(wslug)}">${esc(row.winery_name)}${partnerBadge}</a>
-    <div class="rcard-code"><span class="rcode">${esc(row.code)}</span><button class="rcopy" data-code="${esc(row.code)}" data-winery="${esc(row.winery_name)}" onclick="copyCode(this)">Copy</button></div>
+    ${isNoCode(row.code)
+      ? '<div class="rcard-code"><span class="rcode rcode--none">No code necessary</span></div>'
+      : `<div class="rcard-code"><span class="rcode">${esc(row.code)}</span><button class="rcopy" data-code="${esc(row.code)}" data-winery="${esc(row.winery_name)}" onclick="copyCode(this)">Copy</button></div>`}
     <div class="rcard-meta">${esc(discountLabel(row))}${row.conditions ? '<span class="rcond"> \u00b7 ' + esc(row.conditions) + '</span>' : ''}</div>
     <div class="rcard-exp">${esc(expiryText(row.expiry_date, row.offer_type))}</div>
   </div>`;
@@ -178,6 +183,7 @@ ${codes.length === 0 ? '<meta name="robots" content="noindex, follow">\n' : ''}<
   .rcode { font-family:'Courier New',monospace; font-weight:700; font-size:0.85rem; letter-spacing:0.06em; color:var(--wine-deep); overflow-wrap:anywhere; }
   .rcopy { background:var(--wine); color:#fff; border:none; border-radius:5px; padding:5px 12px; font-size:0.72rem; font-weight:600; cursor:pointer; font-family:inherit; }
   .rcopy.copied { background:#2D7A4F; }
+  .rcode--none { font-family:inherit; letter-spacing:0.02em; font-weight:600; }
   .rcard-meta { font-size:0.8rem; font-weight:600; color:var(--wine); }
   .rcond { font-weight:400; color:var(--muted); }
   .rcard-exp { font-size:0.7rem; color:var(--muted); margin-top:4px; }
