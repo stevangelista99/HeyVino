@@ -151,6 +151,7 @@
   .copy-btn { flex-shrink: 0; background: var(--wine); color: var(--white); border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.68rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; white-space: nowrap; }
   .copy-btn:hover { background: var(--wine-light); }
   .copy-btn.copied { background: #2D7A4F; }
+  .code-text--none { font-family: inherit; letter-spacing: 0.02em; font-weight: 600; color: var(--muted); }
 
   /* ── CARD FOOTER ── */
   .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
@@ -892,10 +893,12 @@ function cardHTML(c) {
         <div><div class="winery-name"><a href="winery.html?slug=${toSlug(c.winery)}">${c.winery}</a>${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>
       </div>
       <span class="badge ${badgeClass(c.type)}">${c.varietal}</span>
-      <div class="code-block">
+      ${isNoCode(c.code)
+        ? `<div class="code-block code-block--none"><span class="code-text code-text--none">No code necessary</span></div>`
+        : `<div class="code-block">
         <span class="code-text">${c.code}</span>
         <button class="copy-btn" data-code="${attr(c.code)}" data-winery="${attr(c.winery)}" onclick="copyCode(this)">Copy</button>
-      </div>
+      </div>`}
       <div class="trust-row">
         ${addedLabel(c.created_at)}
         <span class="fb-wrap" data-codeid="${attr(c.id)}">Worked?
@@ -943,6 +946,9 @@ function copyCode(btn,code){
   navigator.clipboard.writeText(code).then(()=>{btn.textContent="✓ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("copied");},2000);});
   track('code_copy', btn.dataset.winery || '', code);
 }
+// Promos that apply automatically are stored with code 'No code necessary';
+// those cards show the label with no Copy button.
+function isNoCode(code){return String(code||'').trim().toLowerCase()==='no code necessary';}
 function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function addedLabel(iso){
   if(!iso) return '<span class="added-date"></span>';

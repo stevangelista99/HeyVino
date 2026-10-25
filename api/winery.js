@@ -42,6 +42,9 @@ const formatExp = (exp) => {
   return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+// Promos that apply automatically are stored with code 'No code necessary';
+// those cards show the label with no Copy button.
+function isNoCode(code) { return String(code || '').trim().toLowerCase() === 'no code necessary'; }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
 
 // Maps a winery's DB region to its parent region landing page, when one
@@ -132,10 +135,14 @@ function cardHTML(c) {
     `      <div><div class="winery-name">${esc(c.winery)}${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>`,
     '    </div>',
     `    <span class="badge ${badgeClass(c.type)}">${esc(c.varietal)}</span>`,
-    '    <div class="code-block">',
-    `      <span class="code-text">${esc(c.code)}</span>`,
-    `      <button class="copy-btn" data-code="${esc(c.code)}" data-winery="${esc(c.winery)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
-    '    </div>',
+    isNoCode(c.code)
+      ? '    <div class="code-block code-block--none"><span class="code-text code-text--none">No code necessary</span></div>'
+      : [
+          '    <div class="code-block">',
+          `      <span class="code-text">${esc(c.code)}</span>`,
+          `      <button class="copy-btn" data-code="${esc(c.code)}" data-winery="${esc(c.winery)}" onclick="copyCode(this,this.dataset.code)">Copy</button>`,
+          '    </div>',
+        ].join('\n'),
     `    <div class="trust-row">${addedLabel(c.created_at)}<span class="fb-wrap" data-codeid="${esc(c.id || '')}">Worked? <button class="fb-btn" onclick="sendFeedback(this,'up')" aria-label="Code worked">👍</button><button class="fb-btn" onclick="sendFeedback(this,'down')" aria-label="Code did not work">👎</button></span></div>`,
     c.description ? `    <p class="card-description">${esc(c.description)}</p>` : '',
     `    <div class="card-footer">${expiryHTML(c.expiry)}<span class="discount">${esc(c.discount)}${c.conditions ? '<span class="conditions"> · ' + esc(c.conditions) + '</span>' : ''}</span></div>`,
@@ -328,6 +335,7 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   .copy-btn { flex-shrink: 0; background: var(--wine); color: var(--white); border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.68rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; white-space: nowrap; }
   .copy-btn:hover { background: var(--wine-light); }
   .copy-btn.copied { background: #2D7A4F; }
+  .code-text--none { font-family: inherit; letter-spacing: 0.02em; font-weight: 600; color: var(--muted); }
   .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
   .card-description { font-size: 0.85rem; color: #3D0D14; font-weight: 600; line-height: 1.5; margin: 0.5rem 0; }
   .expiry { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }

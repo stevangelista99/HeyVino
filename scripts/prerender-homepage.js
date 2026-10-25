@@ -58,7 +58,9 @@ function cardHtml(row) {
     `<h3 style="margin:0 0 2px;font-size:1rem;">${winery}</h3>`,
     region ? `<div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">${region}</div>` : '',
     `<p style="margin:0 0 6px;font-size:0.88rem;">${[offer, desc].filter(Boolean).join(' — ')}</p>`,
-    `<p style="margin:0;font-size:0.85rem;">Code: <code>${code}</code></p>`,
+    String(row.code || '').trim().toLowerCase() === 'no code necessary'
+      ? '<p style="margin:0;font-size:0.85rem;">No code necessary</p>'
+      : `<p style="margin:0;font-size:0.85rem;">Code: <code>${code}</code></p>`,
     '</article>',
   ].filter(Boolean).join('');
 }
