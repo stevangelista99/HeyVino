@@ -103,6 +103,15 @@ function updateHomepageStats(wineries) {
     countryCount, 'hero stat: countries');
 
   fs.writeFileSync(indexPath, html, 'utf8');
+
+  // Newsletter popup fallback count — the popup reads the hero stat on the
+  // homepage, and falls back to this value anywhere else it is included.
+  const popupPath = path.join(__dirname, '..', 'js', 'newsletter-popup.js');
+  let popupJs = fs.readFileSync(popupPath, 'utf8');
+  popupJs = replaceRecurringNumber(popupJs,
+    "var WINERY_COUNT_FALLBACK = '__NUM__+';",
+    roundedCount, 'newsletter popup fallback count');
+  fs.writeFileSync(popupPath, popupJs, 'utf8');
   console.log(`index.html stats updated — ${roundedCount}+ wineries, ${countryCount} countries (${todayET})`);
 }
 

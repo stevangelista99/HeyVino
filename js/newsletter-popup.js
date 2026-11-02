@@ -18,6 +18,21 @@
   var SUBSCRIBED_KEY = 'hv_nl_subscribed';
   var DELAY_MS = 9000;
   var SCROLL_TRIGGER = 0.4;
+  // Winery count shown in the popup copy. On the homepage it is read from
+  // the hero "Wineries" stat, which scripts/generate-sitemap.js rewrites
+  // from the live wineries table on every deploy. The fallback below is
+  // rewritten by the same script, so pages without that stat stay in sync.
+  var WINERY_COUNT_FALLBACK = '700+';
+  function wineryCount() {
+    var labels = document.querySelectorAll('.stat-label');
+    for (var i = 0; i < labels.length; i++) {
+      if (labels[i].textContent.trim().toLowerCase() !== 'wineries') continue;
+      var num = labels[i].previousElementSibling;
+      var text = num ? num.textContent.trim() : '';
+      if (/^\d+\+$/.test(text)) return text;
+    }
+    return WINERY_COUNT_FALLBACK;
+  }
   var ENDPOINT = '/api/subscribe';
 
   var CSS = [
@@ -83,7 +98,7 @@
         '<h2 class="hv-nl-title" id="hvNlTitle">Get the codes <em>before</em> they expire</h2>' +
       '</div>' +
       '<div class="hv-nl-body">' +
-        '<p class="hv-nl-copy" id="hvNlCopy">One short email every Sunday with the week\'s best promo codes from <strong>600+ wineries</strong>. Free, and easy to leave.</p>' +
+        '<p class="hv-nl-copy" id="hvNlCopy">One short email every Sunday with the week\'s best promo codes from <strong><span id="hvNlCount">' + WINERY_COUNT_FALLBACK + '</span> wineries</strong>. Free, and easy to leave.</p>' +
         '<div class="hv-nl-field">' +
           '<label class="hv-nl-sr" for="hvNlEmail">Email address</label>' +
           '<input class="hv-nl-input" id="hvNlEmail" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>' +
@@ -127,6 +142,7 @@
     overlay.hidden = true;
     overlay.innerHTML = HTML;
     document.body.appendChild(overlay);
+    document.getElementById('hvNlCount').textContent = wineryCount();
 
     card = document.getElementById('hvNlCard');
     emailEl = document.getElementById('hvNlEmail');
