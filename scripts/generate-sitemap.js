@@ -28,7 +28,7 @@ function replaceRecurringNumber(content, template, newNumber, label) {
   const pattern = new RegExp(escapeRegex(template).replace('__NUM__', '\\d+'), 'g');
   const matches = content.match(pattern);
   if (!matches || matches.length !== 1) {
-    throw new Error(`updateHomepageStats: expected exactly 1 match for "${label}", found ${matches ? matches.length : 0}. Aborting — index.html markup may have changed.`);
+    throw new Error(`updateHomepageStats: expected exactly 1 match for "${label}", found ${matches ? matches.length : 0}. Aborting — the file containing "${label}" may have changed.`);
   }
   return content.replace(pattern, template.replace('__NUM__', newNumber));
 }
