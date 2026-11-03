@@ -219,6 +219,7 @@
     })
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed');
+        try { if (typeof window.fbq === 'function') window.fbq('track', 'Lead'); } catch (e) {}
         writeFlag('localStorage', SUBSCRIBED_KEY);
         card.classList.add('hv-nl-subscribed');
         setTimeout(close, 2600);

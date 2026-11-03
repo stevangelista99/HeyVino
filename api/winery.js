@@ -268,6 +268,23 @@ function buildPage({ slug, displayName, description, cards, wineryWebsiteUrl, wi
   gtag('js', new Date());
   gtag('config', 'G-7KDQWZYYV5');
 </script>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1011473105358234');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 <title>${title}</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -501,6 +518,12 @@ function track(event, winery, code) {
     var payload = JSON.stringify({ event: event, winery: winery || '', code: code || '', page: location.pathname + location.search });
     if (navigator.sendBeacon) { navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' })); }
     else { fetch('/api/track', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: payload }); }
+  } catch (e) {}
+  try {
+    if (typeof fbq === 'function') {
+      if (event === 'visit_site') fbq('trackCustom', 'OutboundClick', { winery: winery || '' });
+      else if (event === 'code_copy') fbq('trackCustom', 'CodeCopy', { winery: winery || '', code: code || '' });
+    }
   } catch (e) {}
 }
 function sendFeedback(btn, vote) {
