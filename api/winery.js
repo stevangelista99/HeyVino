@@ -20,6 +20,9 @@ const LEGACY_SLUGS = {
   'lede-family-wines': 'clif-lede-vineyards',
   'grieve-winery': 'grieve-family-winery',
   'robert-mondavi': 'robert-mondavi-winery',
+  'hall-family-wines': 'hall-wines',
+  'alta-colina-vineyard-winery': 'alta-colina',
+  'verite-wine': 'verite-wines',
 };
 
 const COUNTRY_CODES = { us:'USA', usa:'USA', it:'Italy', fr:'France', es:'Spain', au:'Australia', nz:'New Zealand', ar:'Argentina', de:'Germany', gb:'UK', uk:'UK' };
