@@ -22,7 +22,7 @@
   // the hero "Wineries" stat, which scripts/generate-sitemap.js rewrites
   // from the live wineries table on every deploy. The fallback below is
   // rewritten by the same script, so pages without that stat stay in sync.
-  var WINERY_COUNT_FALLBACK = '700+';
+  var WINERY_COUNT_FALLBACK = '710+';
   function wineryCount() {
     var labels = document.querySelectorAll('.stat-label');
     for (var i = 0; i < labels.length; i++) {
