@@ -448,6 +448,8 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
 <!-- MAIN -->
 <div class="main">
   <div id="content">
+    <!-- FEATURED PARTNERSHIPS (filled by render(), sits above Affiliate Partners) -->
+    <div id="featuredGroup"></div>
     <!-- AFFILIATE PARTNERS -->
     <section id="affiliatePartnersSection" class="affiliate-partners" style="display:none;" aria-label="Affiliate partners">
       <h2 class="affiliate-partners-heading">Affiliate Partners</h2>
@@ -1022,7 +1024,7 @@ function render() {
     const mQ=!q||(c.winery||'').toLowerCase().includes(q)||(c.code||'').toLowerCase().includes(q)||(c.varietal||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q);
     return mV&&mR&&mUS&&mO&&mQ;
   });
-  if(filtered.length===0){document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
+  if(filtered.length===0){document.getElementById("featuredGroup").innerHTML="";document.getElementById("cardGroups").innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🍾</div><div style="font-size:1rem;font-weight:600">No codes found</div></div>`;return;}
   filtered=applySort(filtered);
   const featuredCards=filtered.filter(c=>c.featured);
   const featuredIds=new Set(featuredCards.map(c=>c.id));
@@ -1036,7 +1038,8 @@ function render() {
   const featuredSection=featuredCards.length?`<div class="featured-section"><div class="section-header featured-section-header"><h2 class="section-title">⭐ Featured Partnerships</h2><span class="section-count">${featuredCards.length} code${featuredCards.length!==1?"s":""}</span></div><div class="cards-grid">${featuredCards.map(c=>cardHTML({...c,featured:true})).join("")}</div></div>`:"";
   const sitewideSection=sitewideCards.length?`<div class="group-header"><div class="group-header-top"><h2 class="section-title">Site-Wide Deals</h2><span class="section-count">(${sitewideCards.length})</span></div><p class="group-header-sub">Open to everyone</p></div><div class="cards-grid">${sitewideCards.map(cardHTML).join("")}</div>`:"";
   const welcomeSection=welcomeCards.length?`<div class="group-header"><div class="group-header-top"><h2 class="section-title">Welcome Offers</h2><span class="section-count">(${welcomeCards.length})</span></div><p class="group-header-sub">For first-time customers</p></div><div class="cards-grid">${welcomeCards.map(cardHTML).join("")}</div>`:"";
-  document.getElementById("cardGroups").innerHTML=featuredSection+sitewideSection+welcomeSection;
+  document.getElementById("featuredGroup").innerHTML=featuredSection;
+  document.getElementById("cardGroups").innerHTML=sitewideSection+welcomeSection;
 }
 
 
