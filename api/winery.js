@@ -364,8 +364,8 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; } .expiry-text-na { color: #9e9e9e; }
   .discount { font-weight: 700; color: var(--wine); font-size: 0.85rem; }
   .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
-  .visit-site-link { display: inline-block; margin-top: 0.55rem; font-size: 0.72rem; font-weight: 600; color: var(--gold); text-decoration: none; letter-spacing: 0.03em; }
-  .visit-site-link:hover { color: var(--gold-light); text-decoration: underline; }
+  .visit-site-link { display: block; margin-top: 0.75rem; padding: 0.6rem 1rem; background: var(--gold); color: var(--wine-deep); border-radius: 4px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; transition: background 0.15s, color 0.15s; }
+  .visit-site-link:hover { background: var(--wine); color: var(--white); text-decoration: none; }
 
   .related-wrap { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
   .related-heading { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--wine-deep); margin-bottom: 0.85rem; }
