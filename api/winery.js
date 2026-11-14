@@ -330,9 +330,9 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .group-header-count { font-size: 0.78rem; color: var(--muted); }
   .group-header-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
-  .card { background: var(--white); border: 1px solid var(--stone); border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; animation: fadeUp 0.4s ease both; }
+  .card { background: var(--white); border: 3px solid var(--wine); border-radius: 18px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; animation: fadeUp 0.4s ease both; }
   .card:hover { box-shadow: 0 8px 28px rgba(107,30,42,0.1); transform: translateY(-2px); }
-  .card.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .card.featured { border-color: var(--wine); box-shadow: 0 0 0 2px var(--gold); }
   .card-accent { height: 3px; }
   .accent-red { background: linear-gradient(90deg, var(--wine), var(--wine-light)); }
   .accent-white { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
@@ -364,7 +364,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; } .expiry-text-na { color: #9e9e9e; }
   .discount { font-weight: 700; color: var(--wine); font-size: 0.85rem; }
   .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
-  .visit-site-link { display: block; margin-top: 0.75rem; padding: 0.6rem 1rem; background: var(--gold); color: var(--wine-deep); border-radius: 4px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; transition: background 0.15s, color 0.15s; }
+  .visit-site-link { display: block; margin-top: 0.75rem; padding: 0.6rem 1rem; background: var(--gold); color: var(--wine-deep); border-radius: 10px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; transition: background 0.15s, color 0.15s; }
   .visit-site-link:hover { background: var(--wine); color: var(--white); text-decoration: none; }
 
   .related-wrap { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
