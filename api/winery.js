@@ -289,7 +289,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
 <title>${title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -351,7 +351,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .badge-sparkling { background: rgba(60,100,160,0.1); color: #3C64A0; }
   .partner-badge { display: inline-block; padding: 2px 7px; margin-left: 6px; border-radius: 100px; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--wine); color: var(--gold); vertical-align: middle; }
   .code-block { background: var(--cream); border: 1.5px dashed var(--stone); border-radius: 5px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 0.7rem; overflow: hidden; }
-  .code-text { font-family: 'Courier New', monospace; font-size: 0.82rem; font-weight: 700; color: var(--wine); letter-spacing: 0.06em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .code-text { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.9rem; font-weight: 800; color: var(--wine-deep); letter-spacing: 0.08em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .copy-btn { flex-shrink: 0; background: var(--wine); color: var(--white); border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.68rem; cursor: pointer; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: background 0.15s; white-space: nowrap; }
   .copy-btn:hover { background: var(--wine-light); }
   .copy-btn.copied { background: #2D7A4F; }
@@ -364,8 +364,8 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .expiry-text-green { color: var(--muted); } .expiry-text-amber { color: #D4831A; font-weight: 600; } .expiry-text-red { color: #C0392B; font-weight: 600; } .expiry-text-na { color: #9e9e9e; }
   .discount { font-weight: 700; color: var(--wine); font-size: 0.85rem; }
   .conditions { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
-  .visit-site-link { display: block; margin-top: 0.75rem; padding: 0.6rem 1rem; background: var(--gold); color: var(--wine-deep); border-radius: 10px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; transition: background 0.15s, color 0.15s; }
-  .visit-site-link:hover { background: var(--wine); color: var(--white); text-decoration: none; }
+  .visit-site-link { display: block; margin-top: 0.75rem; padding: 0.6rem 1rem; background: linear-gradient(180deg, #F3D27A 0%, #E0A82E 50%, #B07A1A 100%); border: 1px solid #9A6A16; box-shadow: inset 0 1px 0 rgba(255,255,255,0.5); color: var(--wine-deep); border-radius: 10px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+  .visit-site-link:hover { background: var(--wine); border-color: var(--wine); color: var(--white); text-decoration: none; }
 
   .related-wrap { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2.5rem; }
   .related-heading { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--wine-deep); margin-bottom: 0.85rem; }
@@ -410,7 +410,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     .related-wrap { padding: 0 2rem 2.5rem; }
     .cards-grid { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
     .card-body { padding: 1.1rem 1.25rem; }
-    .code-text { font-size: 0.92rem; letter-spacing: 0.1em; }
+    .code-text { font-size: 1rem; letter-spacing: 0.08em; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
     .footer-social-mobile { display: none; }
     footer { padding: 2.5rem 2rem 1.5rem; }
