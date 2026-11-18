@@ -440,6 +440,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
       <option value="featured">Featured</option>
       <option value="newest">Newest first</option>
       <option value="expiring">Expiring soon</option>
+      <option value="discount">Biggest discount</option>
       <option value="az">Winery A–Z</option>
     </select>
   </div>
@@ -768,7 +769,9 @@ async function loadCodes() {
     website_url: row.website_url || row.website || '',
     description: row.description || '',
     offer_type: row.offer_type || '',
-    created_at: row.created_at || ''
+    created_at: row.created_at || '',
+    discount_type: row.discount_type || '',
+    discount_amount: row.discount_amount == null ? '' : String(row.discount_amount).trim()
   }));
 
   // Remove duplicates — same promo code, same winery, AND same offer text.
@@ -1131,7 +1134,25 @@ function applySort(list){
     return key(a)-key(b);
   });
   if(activeSort==="az") return [...list].sort((a,b)=>(a.winery||'').localeCompare(b.winery||''));
+  if(activeSort==="discount") return [...list].sort((a,b)=>{
+    const ka=discountSortKey(a), kb=discountSortKey(b);
+    return ka[0]-kb[0] || ka[1]-kb[1];
+  });
   return list;
+}
+// "Biggest discount" sort. Percent and dollar amounts can't be compared
+// directly (no order size), so codes sort in tiers: percentage off (highest
+// first), then dollars off (highest first), then shipping deals (free first,
+// then lowest flat fee), then everything else (BOGO, "Varies", etc.).
+// discount_amount is TEXT, so it is parsed defensively ("1,200" -> 1200).
+// Array.prototype.sort is stable, so ties keep the default featured/A-Z order.
+function discountSortKey(c){
+  const n=parseFloat(String(c.discount_amount||'').replace(/[^0-9.]/g,''));
+  const has=!isNaN(n);
+  if(c.discount_type==='percentage'&&has) return [0,-n];
+  if(c.discount_type==='fixed'&&has) return [1,-n];
+  if(c.discount_type==='free_shipping') return [2,has?n:0];
+  return [3,0];
 }
 function footerFilter(filter,scrollTo){
   const chip=document.querySelector(`#varietalChips .chip[data-filter="${filter}"]`);
