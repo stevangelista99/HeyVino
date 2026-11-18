@@ -113,6 +113,8 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
 
   /* ── FILTERS (mobile-first: wrapping rows, full-width search) ── */
   .filter-bar { padding: 1rem; background: var(--cream); border-bottom: 1px solid var(--stone); }
+  /* Filters sit inside #content, below Featured Partnerships and Affiliate Partners */
+  #content > .filter-bar { border: 1px solid var(--stone); border-radius: 12px; margin-bottom: 2rem; }
   .filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
   .sort-select { font-family: inherit; font-size: 0.8rem; padding: 6px 10px; border: 1.5px solid rgba(107,30,42,0.25); border-radius: 999px; background: #fff; color: var(--ink); cursor: pointer; }
   .filter-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); font-weight: 600; white-space: nowrap; }
@@ -267,6 +269,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     .hero { padding: 64px 2rem 72px; }
     .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
     .filter-bar { padding: 1.5rem 2rem 1rem; }
+    #content > .filter-bar { padding: 1.25rem 1.5rem 0.75rem; }
     .filter-row { gap: 1rem; }
     .search-wrap { width: 270px; margin-left: auto; }
     .search-wrap input { width: 100%; }
@@ -392,60 +395,6 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   </div>
 </div>
 
-<!-- FILTERS -->
-<div class="filter-bar">
-  <div class="filter-row">
-    <span class="filter-label">Varietal:</span>
-    <div class="chips" id="varietalChips">
-      <button class="chip active" data-filter="all">All</button>
-      <button class="chip" data-filter="featured">⭐ Featured</button>
-      <button class="chip" data-filter="red">🍷 Red</button>
-      <button class="chip" data-filter="white">🥂 White</button>
-      <button class="chip" data-filter="rose">🌹 Rosé</button>
-      <button class="chip" data-filter="sparkling">✨ Sparkling</button>
-    </div>
-    <div class="search-wrap">
-      <span>🔍</span>
-      <input type="text" id="searchInput" placeholder="Search vineyard, code, region…" oninput="filterCards()">
-    </div>
-  </div>
-  <div class="filter-row">
-    <span class="filter-label">Region:</span>
-    <div class="chips" id="regionChips">
-      <button class="chip active" data-region="all">🌍 All</button>
-      <button class="chip" data-region="USA">🇺🇸 USA</button>
-      <button class="chip" data-region="France">🇫🇷 France</button>
-      <button class="chip" data-region="Italy">🇮🇹 Italy</button>
-      <button class="chip" data-region="Australia">🇦🇺 Australia</button>
-      <button class="chip" data-region="New Zealand">🇳🇿 NZ</button>
-      <button class="chip" data-region="Germany">🇩🇪 Germany</button>
-      <button class="chip" data-region="Argentina">🇦🇷 Argentina</button>
-    </div>
-  </div>
-  <div class="filter-row" id="usRegionRow" style="display:none">
-    <span class="filter-label">US Region:</span>
-    <div class="chips" id="usRegionChips"></div>
-  </div>
-  <div class="filter-row">
-    <span class="filter-label">Offer Type:</span>
-    <div class="chips" id="offerChips">
-      <button class="chip active" data-offer="all">All Offers</button>
-      <button class="chip" data-offer="welcome">🎁 Welcome / First Order</button>
-      <button class="chip" data-offer="sitewide">🏷️ Sitewide Deals</button>
-    </div>
-  </div>
-  <div class="filter-row">
-    <span class="filter-label">Sort:</span>
-    <select id="sortSelect" class="sort-select" onchange="setSort(this.value)">
-      <option value="featured">Featured</option>
-      <option value="newest">Newest first</option>
-      <option value="expiring">Expiring soon</option>
-      <option value="discount">Biggest discount</option>
-      <option value="az">Winery A–Z</option>
-    </select>
-  </div>
-</div>
-
 <!-- MAIN -->
 <div class="main">
   <div id="content">
@@ -457,6 +406,59 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
       <div class="affiliate-partners-grid" id="affiliatePartnersGrid"></div>
       <p class="affiliate-partners-note">HeyVino may earn a commission when you purchase through links on this site. This does not affect the codes or wineries we feature.</p>
     </section>
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <span class="filter-label">Varietal:</span>
+        <div class="chips" id="varietalChips">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="featured">⭐ Featured</button>
+          <button class="chip" data-filter="red">🍷 Red</button>
+          <button class="chip" data-filter="white">🥂 White</button>
+          <button class="chip" data-filter="rose">🌹 Rosé</button>
+          <button class="chip" data-filter="sparkling">✨ Sparkling</button>
+        </div>
+        <div class="search-wrap">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Search vineyard, code, region…" oninput="filterCards()">
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Region:</span>
+        <div class="chips" id="regionChips">
+          <button class="chip active" data-region="all">🌍 All</button>
+          <button class="chip" data-region="USA">🇺🇸 USA</button>
+          <button class="chip" data-region="France">🇫🇷 France</button>
+          <button class="chip" data-region="Italy">🇮🇹 Italy</button>
+          <button class="chip" data-region="Australia">🇦🇺 Australia</button>
+          <button class="chip" data-region="New Zealand">🇳🇿 NZ</button>
+          <button class="chip" data-region="Germany">🇩🇪 Germany</button>
+          <button class="chip" data-region="Argentina">🇦🇷 Argentina</button>
+        </div>
+      </div>
+      <div class="filter-row" id="usRegionRow" style="display:none">
+        <span class="filter-label">US Region:</span>
+        <div class="chips" id="usRegionChips"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Offer Type:</span>
+        <div class="chips" id="offerChips">
+          <button class="chip active" data-offer="all">All Offers</button>
+          <button class="chip" data-offer="welcome">🎁 Welcome / First Order</button>
+          <button class="chip" data-offer="sitewide">🏷️ Sitewide Deals</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Sort:</span>
+        <select id="sortSelect" class="sort-select" onchange="setSort(this.value)">
+          <option value="featured">Featured</option>
+          <option value="newest">Newest first</option>
+          <option value="expiring">Expiring soon</option>
+          <option value="discount">Biggest discount</option>
+          <option value="az">Winery A–Z</option>
+        </select>
+      </div>
+    </div>
     <div id="cardGroups"><!-- PRERENDER:START -->
 <section aria-label="Current wine deals">
 <div class="group-header"><div class="group-header-top"><h2 class="section-title">Site-Wide Deals</h2><span class="section-count">(114)</span></div><p class="group-header-sub">Open to everyone</p></div>
