@@ -121,8 +121,11 @@ function outboundLink(affiliateUrl, websiteUrl) {
   return null;
 }
 
+// Partner logos (promo_codes.logo_url) may be a site path under /images/
+// or an https URL; anything else is ignored so the card falls back to initials.
+function safeLogoUrl(u){u=String(u||'').trim();return /^https:\/\/[^\s"'<>]+$/i.test(u)||/^\/images\/[\w.\/-]+$/.test(u)?u:'';}
 function cardHTML(c) {
-  const initials = (c.winery || '??').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const initials =(c.winery || '??').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   const country = normalizeCountry(c.country);
   const regionStr = c.region ? esc(c.region) + ', ' + esc(country) : esc(country);
   const outbound = outboundLink(c.affiliate_url, c.website_url);
@@ -133,8 +136,9 @@ function cardHTML(c) {
     `  <div class="card-accent ${accentClass(c.type)}"></div>`,
     c.featured ? '  <div class="featured-tag">⭐ Featured</div>' : '',
     '  <div class="card-body">',
+    c.logo_url ? `    <div class="card-logo"><img src="${esc(c.logo_url)}" alt="${esc(c.winery)} logo" loading="lazy" onerror="this.parentNode.remove()"></div>` : '',
     '    <div class="card-head">',
-    `      <div class="winery-avatar">${esc(initials)}</div>`,
+    c.logo_url ? '' : `      <div class="winery-avatar">${esc(initials)}</div>`,
     `      <div><div class="winery-name">${esc(c.winery)}${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>`,
     '    </div>',
     `    <span class="badge ${badgeClass(c.type)}">${esc(c.varietal)}</span>`,
@@ -342,6 +346,9 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .card-body { padding: 0.75rem; }
   .card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0.7rem; }
   .winery-avatar { width: 44px; height: 44px; border-radius: 5px; border: 1px solid var(--stone); background: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--wine); font-weight: 700; flex-shrink: 0; }
+  /* Partner logo band on featured partnership tiles (promo_codes.logo_url) */
+  .card-logo { display: flex; align-items: center; justify-content: center; height: 92px; margin: -0.75rem -0.75rem 0.75rem; padding: 26px 14px 8px; background: var(--white); border-bottom: 1px solid var(--stone); }
+  .card-logo img { max-height: 56px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block; }
   .winery-name { font-weight: 600; font-size: 0.88rem; color: var(--ink); line-height: 1.3; }
   .winery-region { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.7rem; }
@@ -410,6 +417,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     .related-wrap { padding: 0 2rem 2.5rem; }
     .cards-grid { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
     .card-body { padding: 1.1rem 1.25rem; }
+    .card-logo { margin: -1.1rem -1.25rem 0.9rem; }
     .code-text { font-size: 1rem; letter-spacing: 0.08em; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; max-width: 1400px; margin: 0 auto 2rem; }
     .footer-social-mobile { display: none; }
@@ -649,6 +657,7 @@ async function handler(req, res) {
       country:     row.country         || '',
       expiry:      row.expiry_date     || row.expiry     || '',
       featured:    row.is_featured     || false,
+      logo_url: safeLogoUrl(row.logo_url),
       website_url: row.website_url     || '',
       affiliate_url: wineryAffiliateUrl,
       id:          row.id              || '',
