@@ -88,15 +88,23 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   .mobile-drawer a:hover { color: var(--gold); }
 
   /* ── HERO (mobile-first: tighter padding, 2×2 stats grid) ── */
-  .hero { background: linear-gradient(135deg, var(--wine-deep) 0%, var(--wine) 55%, #8B2535 100%); padding: 40px 1rem 48px; text-align: center; position: relative; overflow: hidden; }
-  .hero::before { content:''; position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .hero { background: var(--wine-deep); padding: 40px 1rem 150px; min-height: 560px; text-align: center; position: relative; overflow: hidden; }
   .hero-eyebrow { font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.85rem; position: relative; }
-  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem,5vw,3.8rem); color: #fff; line-height: 1.1; margin-bottom: 1.1rem; position: relative; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem,5vw,3.8rem); color: #fff; line-height: 1.1; margin-bottom: 1.1rem; position: relative; text-shadow: 0 2px 18px rgba(40,12,14,.7); }
   .hero h1 em { color: var(--gold-light); }
-  .hero p { color: rgba(255,255,255,0.68); font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; line-height: 1.7; position: relative; }
-  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; justify-items: center; position: relative; }
+  .hero p { color: #fff; font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; line-height: 1.7; position: relative; text-shadow: 0 1px 10px rgba(40,12,14,.8); }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; justify-items: center; position: relative; background: rgba(40,12,14,.6); border: 1px solid rgba(232,213,160,.3); border-radius: 12px; padding: 14px 22px; max-width: max-content; margin: 0 auto; }
   .stat-num { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--gold); display: block; }
-  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.1em; }
+  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: 0.1em; }
+  .hero-scene{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .hero > *:not(.hero-scene){position:relative;z-index:1}
+  .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:50% 30%;animation:hero-zoom 35s ease-in-out infinite alternate}
+  .hero-glow{position:absolute;left:50%;top:14%;width:760px;max-width:120%;height:420px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 50%,rgba(255,226,150,.55) 0%,rgba(255,190,100,.2) 40%,rgba(255,190,100,0) 70%);animation:hero-glow 7s ease-in-out infinite}
+  .hero-scrim{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,rgba(40,12,14,.45) 0%,rgba(40,12,14,0) 62%),linear-gradient(180deg,rgba(40,12,14,.62) 0%,rgba(40,12,14,.45) 38%,rgba(40,12,14,.12) 62%,rgba(40,12,14,0) 75%)}
+  .hero-curve{position:absolute;left:-10%;width:120%;bottom:-46px;height:92px;border-radius:50% 50% 0 0/100% 100% 0 0;background:var(--cream)}
+  @keyframes hero-zoom{from{transform:scale(1)}to{transform:scale(1.08)}}
+  @keyframes hero-glow{0%,100%{opacity:.45}50%{opacity:.85}}
+  @media (prefers-reduced-motion: reduce){.hero-photo,.hero-glow{animation:none}}
 
   /* ── AD PLACEHOLDERS ── */
   .ad-placeholder-banner { position: relative; overflow: hidden; min-height: 100px; padding: 1.25rem 1rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #b8d8ea 0%, #e8c97a 40%, #5a8a3a 40%, #2d5a3d 100%); }
@@ -271,7 +279,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     .nav-links { display: flex; }
     .nav-hamburger { display: none; }
     .mobile-drawer { display: none !important; }
-    .hero { padding: 64px 2rem 72px; }
+    .hero { padding: 64px 2rem 260px; min-height: 720px; }
     .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
     .filter-bar { padding: 1.5rem 2rem 1rem; }
     #content > .filter-bar { padding: 1.25rem 1.5rem 0.75rem; }
@@ -361,6 +369,12 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
 
 <!-- HERO -->
 <div class="hero">
+  <div class="hero-scene" aria-hidden="true">
+    <img class="hero-photo" src="images/hero/vineyard-sunset-1920.webp" srcset="images/hero/vineyard-sunset-960.webp 960w, images/hero/vineyard-sunset-1920.webp 1920w" sizes="100vw" alt="" fetchpriority="high">
+    <div class="hero-glow"></div>
+    <div class="hero-scrim"></div>
+    <div class="hero-curve"></div>
+  </div>
   <div style="font-family:'Playfair Display',serif;font-size:clamp(1.6rem,4vw,2.6rem);color:var(--gold-light);font-style:italic;font-weight:700;margin-bottom:0.5rem;position:relative;">HeyVino<sup style="font-size: 0.5em; vertical-align: super;">™</sup></div>
   <div class="hero-eyebrow">🍷 Codes from 710+ wineries worldwide</div>
   <h1>Wine Promo Codes, <em>Curated Daily</em></h1>
@@ -371,7 +385,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     <div><span class="stat-num">11</span><span class="stat-label">Countries</span></div>
     <div><span class="stat-num">Free</span><span class="stat-label">To Use</span></div>
   </div>
-  <p style="margin-top:4px;font-size:0.65rem;font-weight:400;color:rgba(255,255,255,0.42);">HeyVino is for adults 21+. Please enjoy responsibly.</p>
+  <p style="margin-top:4px;font-size:0.65rem;font-weight:400;color:rgba(255,255,255,.85);text-shadow:0 1px 6px rgba(40,12,14,.9);">HeyVino is for adults 21+. Please enjoy responsibly.</p>
 </div>
 
 <!-- FOUNDER'S MESSAGE -->
@@ -469,7 +483,7 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
 <section aria-label="Current wine deals">
 <div class="group-header"><div class="group-header-top"><h2 class="section-title">Site-Wide Deals</h2><span class="section-count">(153)</span></div><p class="group-header-sub">Open to everyone</p></div>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Benessere Vineyards</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">St. Helena, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">25% off — HeyVino exclusive: 25% off the 2023 Black Glass Primitivo, 2022 and 2023 Sangiovese, 2025 Vermentino and 2025 Montepulciano Rosato, plus $20 flat-rate shipping on 6-11 bottles and $1 shipping on 12+ bottles.</p><p style="margin:0;font-size:0.85rem;">Code: <code>HeyVino26</code></p></article>
-<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Emmitt-Scorsone Wines</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Healdsburg, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">25% off — HeyVino exclusive: 25% off every Domenica Amato wine, including the 2022 Grenache Estate (95 pts, Wine Enthusiast Editor&#x27;s Choice), 2022 Sangiovese (94 pts), 2023 Che Fico (93 pts), 2022 Barbera (93 pts), 2023 Falanghina and 2023 Cortese (92 pts each), plus free shipping on 6+ bottles. Through 12/31.</p><p style="margin:0;font-size:0.85rem;">Code: <code>HEYVINO26</code></p></article>
+<article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Emmitt-Scorsone Wines</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Healdsburg, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">25% off — HeyVino exclusive: 25% off every Domenica Amato wine, including the 2022 Grenache Estate (95 pts, Wine Enthusiast Editor&#x27;s Choice), 2022 Sangiovese (94 pts), 2023 Che Fico (93 pts), 2022 Barbera (93 pts), 2023 Falanghina and 2023 Cortese (92 pts each), plus free shipping on 6+ bottles. Through 12/31.</p><p style="margin:0;font-size:0.85rem;">Code: <code>HeyVino26</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Ghost Block</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Oakville, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">20% off — HeyVino exclusive: 20% off the HeyVino Black Friday collection, including the 2022 Ghost Block Vineyard Cabernet Sauvignon, 2022 Oakville Winery Zinfandel and &quot;DDR&quot; red, 2025 Oakville Winery Albariño, and Elizabeth Rose 2023 Flora, Grenache &quot;LDR&quot;, Syrah and 2024 Pinot Grigio. Through 12/31.</p><p style="margin:0;font-size:0.85rem;">Code: <code>HeyVino26</code></p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Alexander Valley Vineyards</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Alexander Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">50% off — Early Black Friday: 2019 Salvation Late Harvest Zinfandel (375ml), 20% off one 3-bottle package ($108) or 50% off two or more packages ($135 each). Holiday shipping is $1 per bottle plus $1 processing on 2+ bottles. Through 11/29.</p><p style="margin:0;font-size:0.85rem;">No code necessary</p></article>
 <article class="prerender-card" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:14px 16px;margin:0 0 10px;background:#fff;"><h3 style="margin:0 0 2px;font-size:1rem;">Alexander Valley Vineyards</h3><div style="font-size:0.75rem;color:#8a8580;margin-bottom:6px;">Alexander Valley, USA</div><p style="margin:0 0 6px;font-size:0.88rem;">Free shipping — $1 per bottle UPS Ground shipping on 2 or more bottles, plus a $1 order processing fee</p><p style="margin:0;font-size:0.85rem;">No code necessary</p></article>
