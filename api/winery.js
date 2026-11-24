@@ -23,6 +23,7 @@ const LEGACY_SLUGS = {
   'hall-family-wines': 'hall-wines',
   'alta-colina-vineyard-winery': 'alta-colina',
   'verite-wine': 'verite-wines',
+  'ghost-block-estate-wines': 'ghost-block',
 };
 
 const COUNTRY_CODES = { us:'USA', usa:'USA', it:'Italy', fr:'France', es:'Spain', au:'Australia', nz:'New Zealand', ar:'Argentina', de:'Germany', gb:'UK', uk:'UK' };
