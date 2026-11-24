@@ -498,7 +498,6 @@ ${relatedHtml}
     <div>
       <div class="footer-heading">Company</div>
       <ul class="footer-links">
-        <li><a href="/#about">About</a></li>
         <li><a href="/privacy.html">Privacy Policy</a></li>
         <li><a href="/terms.html">Terms of Service</a></li>
         <li><a href="#" onclick="openAdvertiseModal();return false;">Contact</a></li>

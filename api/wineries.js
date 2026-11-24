@@ -300,7 +300,6 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
     <div>
       <div class="footer-heading">Company</div>
       <ul class="footer-links">
-        <li><a href="/#about">About</a></li>
         <li><a href="/privacy.html">Privacy Policy</a></li>
         <li><a href="/terms.html">Terms of Service</a></li>
         <li><a href="#" onclick="openAdvertiseModal();return false;">Contact</a></li>
