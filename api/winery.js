@@ -136,7 +136,7 @@ function cardHTML(c) {
     `  <div class="card-accent ${accentClass(c.type)}"></div>`,
     c.featured ? '  <div class="featured-tag">⭐ Featured</div>' : '',
     '  <div class="card-body">',
-    c.logo_url ? `    <div class="card-logo"><img src="${esc(c.logo_url)}" alt="${esc(c.winery)} logo" loading="lazy" onerror="this.parentNode.remove()"></div>` : '',
+    c.logo_url ? `    <div class="card-logo"><img src="${esc(c.logo_url)}" alt="${esc(c.winery)} logo" loading="lazy" onload="if(this.naturalWidth/this.naturalHeight<1.5)this.classList.add('sq')" onerror="this.parentNode.remove()"></div>` : '',
     '    <div class="card-head">',
     c.logo_url ? '' : `      <div class="winery-avatar">${esc(initials)}</div>`,
     `      <div><div class="winery-name">${esc(c.winery)}${partnerBadge}</div><div class="winery-region">${regionStr}</div></div>`,
@@ -349,6 +349,8 @@ src="https://www.facebook.com/tr?id=1011473105358234&ev=PageView&noscript=1"
   /* Partner logo band on featured partnership tiles (promo_codes.logo_url) */
   .card-logo { display: flex; align-items: center; justify-content: center; height: 92px; margin: -0.75rem -0.75rem 0.75rem; padding: 26px 14px 8px; background: var(--white); border-bottom: 1px solid var(--stone); }
   .card-logo img { max-height: 56px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+  .card-logo img.sq { max-height: 84px; }
+  .card-logo:has(img.sq) { height: 118px; }
   .winery-name { font-weight: 600; font-size: 0.88rem; color: var(--ink); line-height: 1.3; }
   .winery-region { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.7rem; }
